@@ -1,0 +1,21 @@
+{
+  "name": "StudyFlow",
+  "short_name": "StudyFlow",
+  "description": "AI-powered learning platform",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#121212",
+  "theme_color": "#1DB954",
+  "icons": [
+    {
+      "src": "https://picsum.photos/seed/studyflow/192/192",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "https://picsum.photos/seed/studyflow/512/512",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

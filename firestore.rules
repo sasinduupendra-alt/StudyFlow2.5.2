@@ -1,0 +1,177 @@
+// ===============================================================
+// Assumed Data Model
+// ===============================================================
+//
+// Collection: /users/{userId}
+// Document ID: userId
+// Fields:
+//   - points: number (required)
+//   - streak: number (required)
+//   - lastStudyDate: string (optional, ISO date)
+//   - totalSessions: number (required)
+//   - totalStudyTime: number (required)
+//   - badges: list of objects {id: string, unlockedAt: string}
+//
+// Collection: /users/{userId}/study_logs/{logId}
+// Fields:
+//   - subjectId: string (required)
+//   - topicId: string (required)
+//   - duration: number (required)
+//   - focusLevel: number (required, 1-5)
+//   - notes: string (optional)
+//   - timestamp: string (required, ISO date-time)
+//   - resources: list of strings
+//
+// Collection: /users/{userId}/exams/{examId}
+// Fields:
+//   - title: string (required)
+//   - date: string (required, ISO date)
+//   - marks: list of objects {subjectId: string, score: number}
+//   - totalScore: number (required)
+//   - averageScore: number (required)
+//   - rank: number (optional)
+//   - notes: string (optional)
+//
+// Collection: /users/{userId}/subjects/{subjectId}
+// Fields:
+//   - name: string (required)
+//   - topics: list of objects {id: string, title: string, mastery: number, image: string, resources: list}
+//   - (other metadata fields like score, focus, status, etc.)
+//
+// Collection: /users/{userId}/config/schedule
+// Fields:
+//   - Monday, Tuesday, ... Sunday: list of objects {id, time, description, type}
+//
+// ===============================================================
+
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ===============================================================
+    // Helper Functions
+    // ===============================================================
+
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    function isAdmin() {
+      return isAuthenticated() &&
+        (get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin' ||
+          (request.auth.token.email == "sasinduupendra@gmail.com" && request.auth.token.email_verified == true));
+    }
+
+    function isValidEmail(email) {
+      return email is string && email.matches("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$");
+    }
+
+    function isValidDateString(dateStr) {
+      return dateStr is string && dateStr.matches("^\\d{4}-\\d{2}-\\d{2}.*");
+    }
+
+    function hasOnlyAllowedFields(fields) {
+      return request.resource.data.keys().hasOnly(fields);
+    }
+
+    function hasRequiredFields(fields) {
+      return request.resource.data.keys().hasAll(fields);
+    }
+
+    // ===============================================================
+    // Domain Validators
+    // ===============================================================
+
+    function isValidUserProfile(data) {
+      return hasRequiredFields(['points', 'streak', 'totalSessions', 'totalStudyTime']) &&
+             data.points is number && data.points >= 0 &&
+             data.streak is number && data.streak >= 0 &&
+             data.totalSessions is number && data.totalSessions >= 0 &&
+             data.totalStudyTime is number && data.totalStudyTime >= 0 &&
+             (!('lastStudyDate' in data) || isValidDateString(data.lastStudyDate));
+    }
+
+    function isValidStudyLog(data) {
+      return hasRequiredFields(['subjectId', 'topicId', 'duration', 'focusLevel', 'timestamp']) &&
+             data.subjectId is string && data.subjectId.size() > 0 &&
+             data.topicId is string && data.topicId.size() > 0 &&
+             data.duration is number && data.duration >= 0 &&
+             data.focusLevel is number && data.focusLevel >= 1 && data.focusLevel <= 5 &&
+             isValidDateString(data.timestamp);
+    }
+
+    function isValidExamRecord(data) {
+      return hasRequiredFields(['title', 'date', 'marks', 'totalScore', 'averageScore']) &&
+             data.title is string && data.title.size() > 0 && data.title.size() < 100 &&
+             isValidDateString(data.date) &&
+             data.marks is list &&
+             data.totalScore is number &&
+             data.averageScore is number;
+    }
+
+    function isValidSubject(data) {
+      return hasRequiredFields(['name', 'topics']) &&
+             data.name is string && data.name.size() > 0 && data.name.size() < 50 &&
+             data.topics is list;
+    }
+
+    function isValidSchedule(data) {
+      return data.keys().hasAny(['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']);
+    }
+
+    // ===============================================================
+    // Rules
+    // ===============================================================
+
+    // Default deny
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // User Profile
+    match /users/{userId} {
+      allow read: if isOwner(userId) || isAdmin();
+      allow create: if isOwner(userId) && isValidUserProfile(request.resource.data);
+      allow update: if (isOwner(userId) && isValidUserProfile(request.resource.data)) || isAdmin();
+      
+      // Study Logs
+      match /study_logs/{logId} {
+        allow read: if isOwner(userId) || isAdmin();
+        allow create: if isOwner(userId) && isValidStudyLog(request.resource.data);
+        allow update: if isOwner(userId) && isValidStudyLog(request.resource.data);
+        allow delete: if isOwner(userId) || isAdmin();
+      }
+
+      // Exams
+      match /exams/{examId} {
+        allow read: if isOwner(userId) || isAdmin();
+        allow create: if isOwner(userId) && isValidExamRecord(request.resource.data);
+        allow update: if isOwner(userId) && isValidExamRecord(request.resource.data);
+        allow delete: if isOwner(userId) || isAdmin();
+      }
+
+      // Subjects
+      match /subjects/{subjectId} {
+        allow read: if isOwner(userId) || isAdmin();
+        allow create: if isOwner(userId) && isValidSubject(request.resource.data);
+        allow update: if isOwner(userId) && isValidSubject(request.resource.data);
+        allow delete: if isOwner(userId) || isAdmin();
+      }
+
+      // Schedule Config
+      match /config/schedule {
+        allow read: if isOwner(userId) || isAdmin();
+        allow write: if isOwner(userId) && isValidSchedule(request.resource.data);
+      }
+    }
+
+    // Public test connection doc (as requested in system instructions)
+    match /test/connection {
+      allow read: if true;
+    }
+  }
+}

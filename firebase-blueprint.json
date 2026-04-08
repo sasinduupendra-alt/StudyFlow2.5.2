@@ -1,0 +1,155 @@
+{
+  "entities": {
+    "UserProfile": {
+      "title": "UserProfile",
+      "description": "User's gamification stats and profile info",
+      "type": "object",
+      "properties": {
+        "points": { "type": "number", "description": "Total experience points" },
+        "streak": { "type": "number", "description": "Current daily study streak" },
+        "lastStudyDate": { "type": "string", "format": "date", "description": "Last date the user studied" },
+        "totalSessions": { "type": "number", "description": "Total number of study sessions completed" },
+        "totalStudyTime": { "type": "number", "description": "Total study time in minutes" },
+        "badges": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": { "type": "string" },
+              "unlockedAt": { "type": "string", "format": "date-time" }
+            }
+          }
+        }
+      },
+      "required": ["points", "streak", "totalSessions", "totalStudyTime"]
+    },
+    "StudyLog": {
+      "title": "StudyLog",
+      "description": "A record of a single study session",
+      "type": "object",
+      "properties": {
+        "subjectId": { "type": "string" },
+        "topicId": { "type": "string" },
+        "duration": { "type": "number", "description": "Duration in minutes" },
+        "focusLevel": { "type": "number", "description": "Self-reported focus level 1-5" },
+        "notes": { "type": "string" },
+        "timestamp": { "type": "string", "format": "date-time" },
+        "resources": { "type": "array", "items": { "type": "string" } }
+      },
+      "required": ["subjectId", "topicId", "duration", "focusLevel", "timestamp"]
+    },
+    "ExamRecord": {
+      "title": "ExamRecord",
+      "description": "A record of an exam result",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string" },
+        "date": { "type": "string", "format": "date" },
+        "marks": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "subjectId": { "type": "string" },
+              "score": { "type": "number" }
+            }
+          }
+        },
+        "totalScore": { "type": "number" },
+        "averageScore": { "type": "number" },
+        "rank": { "type": "number" },
+        "notes": { "type": "string" }
+      },
+      "required": ["title", "date", "marks", "totalScore", "averageScore"]
+    },
+    "Subject": {
+      "title": "Subject",
+      "description": "A subject in the user's syllabus",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "score": { "type": "number" },
+        "focus": { "type": "number" },
+        "weakCount": { "type": "number" },
+        "status": { "type": "string", "enum": ["Critical", "Weak", "Strong"] },
+        "priorityScore": { "type": "number" },
+        "readiness": { "type": "number" },
+        "gradient": { "type": "string" },
+        "image": { "type": "string" },
+        "topics": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": { "type": "string" },
+              "title": { "type": "string" },
+              "mastery": { "type": "number" },
+              "image": { "type": "string" },
+              "resources": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": { "type": "string" },
+                    "title": { "type": "string" },
+                    "url": { "type": "string" },
+                    "type": { "type": "string", "enum": ["link", "video", "pdf", "other"] }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "required": ["name", "topics"]
+    },
+    "WeeklySchedule": {
+      "title": "WeeklySchedule",
+      "description": "User's weekly study schedule",
+      "type": "object",
+      "properties": {
+        "Monday": { "$ref": "ActivityList" },
+        "Tuesday": { "$ref": "ActivityList" },
+        "Wednesday": { "$ref": "ActivityList" },
+        "Thursday": { "$ref": "ActivityList" },
+        "Friday": { "$ref": "ActivityList" },
+        "Saturday": { "$ref": "ActivityList" },
+        "Sunday": { "$ref": "ActivityList" }
+      }
+    },
+    "ActivityList": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "time": { "type": "string" },
+          "description": { "type": "string" },
+          "type": { "type": "string", "enum": ["study", "tuition", "break", "rest"] }
+        }
+      }
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "UserProfile",
+      "description": "User profile and gamification data"
+    },
+    "/users/{userId}/study_logs/{logId}": {
+      "schema": "StudyLog",
+      "description": "History of study sessions"
+    },
+    "/users/{userId}/exams/{examId}": {
+      "schema": "ExamRecord",
+      "description": "History of exam results"
+    },
+    "/users/{userId}/subjects/{subjectId}": {
+      "schema": "Subject",
+      "description": "User's custom syllabus subjects"
+    },
+    "/users/{userId}/config/schedule": {
+      "schema": "WeeklySchedule",
+      "description": "User's weekly study schedule"
+    }
+  }
+}
