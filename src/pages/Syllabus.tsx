@@ -7,18 +7,17 @@ import { db } from '../firebase';
 import { doc, writeBatch } from 'firebase/firestore';
 
 export default function Syllabus() {
-  const { subjects, user, userProfile, highlightedSubjectId } = useAppStore();
+  const { subjects, user, userProfile, highlightedSubjectId, setSubjects, setUserProfile } = useAppStore();
 
   const handleUpdateMastery = useCallback(async (subjectId: string, topicId: string, mastery: number) => {
-    if (!user) return;
     const subject = subjects.find(s => s.id === subjectId);
     if (!subject) return;
 
     const updatedTopics = subject.topics.map(t => t.id === topicId ? { ...t, mastery } : t);
     const updatedSubjects = subjects.map(s => s.id === subjectId ? { ...s, topics: updatedTopics } : s);
 
-    const batch = writeBatch(db);
-    batch.update(doc(db, 'users', user.uid, 'subjects', subjectId), { topics: updatedTopics });
+    // Update local store immediately
+    setSubjects(updatedSubjects);
 
     // Check badges
     const updatedBadges = userProfile.badges.map(badge => {
@@ -41,14 +40,21 @@ export default function Syllabus() {
       return badge;
     });
 
-    batch.update(doc(db, 'users', user.uid), { badges: updatedBadges });
+    setUserProfile({ ...userProfile, badges: updatedBadges });
 
-    try {
-      await batch.commit();
-    } catch (e) {
-      console.error("Failed to update mastery", e);
+    // Update Firestore if logged in (and not anonymous)
+    if (user) {
+      const batch = writeBatch(db);
+      batch.update(doc(db, 'users', user.uid, 'subjects', subjectId), { topics: updatedTopics });
+      batch.update(doc(db, 'users', user.uid), { badges: updatedBadges });
+
+      try {
+        await batch.commit();
+      } catch (e) {
+        console.error("Failed to update mastery in cloud", e);
+      }
     }
-  }, [user, subjects, userProfile.badges]);
+  }, [user, subjects, userProfile, setSubjects, setUserProfile]);
 
   return (
     <motion.div

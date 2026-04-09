@@ -26,10 +26,15 @@ export function useFirestoreSync() {
     setSchedule, 
     setStudyLogs, 
     setExams,
-    addToast
+    subjects,
+    schedule,
+    userProfile,
+    studyLogs,
+    exams
   } = useAppStore();
 
   useEffect(() => {
+    // Skip sync for anonymous users to keep it "Local Only" as promised
     if (!user) return;
 
     const userId = user.uid;
@@ -46,19 +51,8 @@ export function useFirestoreSync() {
           xpToNextLevel: data.xpToNextLevel || 1000,
         } as UserProfile);
       } else {
-        // Initialize new user profile
-        const newProfile: UserProfile = {
-          points: 0,
-          streak: 0,
-          level: 1,
-          xp: 0,
-          xpToNextLevel: 1000,
-          badges: INITIAL_BADGES,
-          totalSessions: 0,
-          totalStudyTime: 0
-        };
-        await setDoc(profileRef, newProfile);
-        setUserProfile(newProfile);
+        // Initialize cloud with current local profile
+        await setDoc(profileRef, userProfile);
       }
     });
 
@@ -69,11 +63,10 @@ export function useFirestoreSync() {
         const subjectsData = querySnap.docs.map(doc => ({ id: doc.id, ...doc.data() } as Subject));
         setSubjects(subjectsData);
       } else {
-        // Initialize with default subjects if none exist
-        for (const subject of INITIAL_SUBJECTS) {
+        // Initialize cloud with current local subjects
+        for (const subject of subjects) {
           await setDoc(doc(db, 'users', userId, 'subjects', subject.id), subject);
         }
-        setSubjects(INITIAL_SUBJECTS);
       }
     });
 
@@ -83,26 +76,39 @@ export function useFirestoreSync() {
       if (docSnap.exists()) {
         setSchedule(docSnap.data() as WeeklySchedule);
       } else {
-        // Initialize with default schedule
-        await setDoc(scheduleRef, WEEKLY_BASE_SCHEDULE);
-        setSchedule(WEEKLY_BASE_SCHEDULE);
+        // Initialize cloud with current local schedule
+        await setDoc(scheduleRef, schedule);
       }
     });
 
-    // 4. Sync Study Logs (limit to recent 50 for performance)
+    // 4. Sync Study Logs
     const logsRef = collection(db, 'users', userId, 'study_logs');
     const logsQuery = query(logsRef, orderBy('timestamp', 'desc'), limit(50));
-    const unsubscribeLogs = onSnapshot(logsQuery, (querySnap) => {
-      const logsData = querySnap.docs.map(doc => ({ id: doc.id, ...doc.data() } as StudyLog));
-      setStudyLogs(logsData);
+    const unsubscribeLogs = onSnapshot(logsQuery, async (querySnap) => {
+      if (!querySnap.empty) {
+        const logsData = querySnap.docs.map(doc => ({ id: doc.id, ...doc.data() } as StudyLog));
+        setStudyLogs(logsData);
+      } else {
+        // Initialize cloud with current local logs
+        for (const log of studyLogs) {
+          await setDoc(doc(db, 'users', userId, 'study_logs', log.id), log);
+        }
+      }
     });
 
     // 5. Sync Exams
     const examsRef = collection(db, 'users', userId, 'exams');
     const examsQuery = query(examsRef, orderBy('date', 'desc'));
-    const unsubscribeExams = onSnapshot(examsQuery, (querySnap) => {
-      const examsData = querySnap.docs.map(doc => ({ id: doc.id, ...doc.data() } as ExamRecord));
-      setExams(examsData);
+    const unsubscribeExams = onSnapshot(examsQuery, async (querySnap) => {
+      if (!querySnap.empty) {
+        const examsData = querySnap.docs.map(doc => ({ id: doc.id, ...doc.data() } as ExamRecord));
+        setExams(examsData);
+      } else {
+        // Initialize cloud with current local exams
+        for (const exam of exams) {
+          await setDoc(doc(db, 'users', userId, 'exams', exam.id), exam);
+        }
+      }
     });
 
     return () => {
@@ -112,5 +118,5 @@ export function useFirestoreSync() {
       unsubscribeLogs();
       unsubscribeExams();
     };
-  }, [user, setUserProfile, setSubjects, setSchedule, setStudyLogs, setExams]);
+  }, [user, setUserProfile, setSubjects, setSchedule, setStudyLogs, setExams, subjects, schedule, userProfile, studyLogs, exams]);
 }

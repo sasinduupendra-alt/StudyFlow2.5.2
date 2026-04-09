@@ -15,6 +15,12 @@ export interface Topic {
   resources?: Resource[];
 }
 
+export interface WeeklyTask {
+  id: string;
+  title: string;
+  completed: boolean;
+}
+
 export interface Subject {
   id: string;
   name: string;
@@ -29,6 +35,7 @@ export interface Subject {
   topics: Topic[];
   examDate?: string;
   notes?: string;
+  weeklyTasks?: WeeklyTask[];
 }
 
 export interface AIPlanTask {

@@ -16,85 +16,124 @@ export default function Manage() {
     user, 
     userProfile, 
     addToast,
-    addRecentlyStudied
+    addRecentlyStudied,
+    setSchedule,
+    setStudyLogs,
+    setExams,
+    setSubjects,
+    setUserProfile,
+    resetToDefault
   } = useAppStore();
 
   const handleUpdateSchedule = async (day: keyof WeeklySchedule, activities: Activity[]) => {
-    if (!user) return;
-    try {
-      const scheduleRef = doc(db, 'users', user.uid, 'config', 'schedule');
-      await setDoc(scheduleRef, { ...schedule, [day]: activities });
+    const newSchedule = { ...schedule, [day]: activities };
+    setSchedule(newSchedule);
+
+    if (user) {
+      try {
+        const scheduleRef = doc(db, 'users', user.uid, 'config', 'schedule');
+        await setDoc(scheduleRef, newSchedule);
+        addToast(`Updated schedule for ${day}`, 'success');
+      } catch (e) {
+        console.error("Failed to update schedule in cloud", e);
+      }
+    } else {
       addToast(`Updated schedule for ${day}`, 'success');
-    } catch (e) {
-      console.error("Failed to update schedule", e);
     }
   };
 
   const handleDeleteLog = async (id: string) => {
-    if (!user) return;
-    try {
-      await deleteDoc(doc(db, 'users', user.uid, 'study_logs', id));
+    const newLogs = studyLogs.filter(log => log.id !== id);
+    setStudyLogs(newLogs);
+
+    if (user) {
+      try {
+        await deleteDoc(doc(db, 'users', user.uid, 'study_logs', id));
+        addToast("Log deleted", "info");
+      } catch (e) {
+        console.error("Failed to delete log in cloud", e);
+      }
+    } else {
       addToast("Log deleted", "info");
-    } catch (e) {
-      console.error("Failed to delete log", e);
     }
   };
 
   const handleClearLogs = async () => {
-    if (!user) return;
-    try {
-      const batch = writeBatch(db);
-      studyLogs.forEach(log => {
-        batch.delete(doc(db, 'users', user.uid, 'study_logs', log.id));
-      });
-      await batch.commit();
+    setStudyLogs([]);
+
+    if (user) {
+      try {
+        const batch = writeBatch(db);
+        studyLogs.forEach(log => {
+          batch.delete(doc(db, 'users', user.uid, 'study_logs', log.id));
+        });
+        await batch.commit();
+        addToast("All logs cleared", "info");
+      } catch (e) {
+        console.error("Failed to clear logs in cloud", e);
+      }
+    } else {
       addToast("All logs cleared", "info");
-    } catch (e) {
-      console.error("Failed to clear logs", e);
     }
   };
 
   const handleAddExam = async (exam: Omit<ExamRecord, 'id'>) => {
-    if (!user) return;
     const id = Math.random().toString(36).substr(2, 9);
-    try {
-      const examData = { ...exam, id };
-      if (examData.rank === undefined) delete examData.rank;
-      if (examData.notes === undefined) delete examData.notes;
-      
-      await setDoc(doc(db, 'users', user.uid, 'exams', id), examData);
+    const examData = { ...exam, id } as ExamRecord;
+    if (examData.rank === undefined) delete examData.rank;
+    if (examData.notes === undefined) delete examData.notes;
+
+    setExams([...exams, examData]);
+
+    if (user) {
+      try {
+        await setDoc(doc(db, 'users', user.uid, 'exams', id), examData);
+        addToast("Exam added", "success");
+      } catch (e) {
+        console.error("Failed to add exam in cloud", e);
+      }
+    } else {
       addToast("Exam added", "success");
-    } catch (e) {
-      console.error("Failed to add exam", e);
     }
   };
 
   const handleEditExam = async (id: string, updatedExam: Partial<ExamRecord>) => {
-    if (!user) return;
-    try {
-      const examData = { ...updatedExam };
-      if (examData.rank === undefined) delete examData.rank;
-      if (examData.notes === undefined) delete examData.notes;
-      
-      await updateDoc(doc(db, 'users', user.uid, 'exams', id), examData);
+    const newExams = exams.map(e => e.id === id ? { ...e, ...updatedExam } : e);
+    setExams(newExams);
+
+    if (user) {
+      try {
+        const examData = { ...updatedExam };
+        if (examData.rank === undefined) delete examData.rank;
+        if (examData.notes === undefined) delete examData.notes;
+        
+        await updateDoc(doc(db, 'users', user.uid, 'exams', id), examData);
+        addToast("Exam updated", "success");
+      } catch (e) {
+        console.error("Failed to edit exam in cloud", e);
+      }
+    } else {
       addToast("Exam updated", "success");
-    } catch (e) {
-      console.error("Failed to edit exam", e);
     }
   };
 
   const handleDeleteExam = async (id: string) => {
-    if (!user) return;
-    try {
-      await deleteDoc(doc(db, 'users', user.uid, 'exams', id));
+    const newExams = exams.filter(e => e.id !== id);
+    setExams(newExams);
+
+    if (user) {
+      try {
+        await deleteDoc(doc(db, 'users', user.uid, 'exams', id));
+        addToast("Exam deleted", "info");
+      } catch (e) {
+        console.error("Failed to delete exam in cloud", e);
+      }
+    } else {
       addToast("Exam deleted", "info");
-    } catch (e) {
-      console.error("Failed to delete exam", e);
     }
   };
 
   const handleAddSubject = async (name: string, image?: string, examDate?: string, notes?: string) => {
-    if (!user) return;
     const id = Math.random().toString(36).substr(2, 9);
     const newSubject: Subject = {
       id,
@@ -111,41 +150,65 @@ export default function Manage() {
       ...(notes !== undefined && { notes }),
       topics: []
     };
-    try {
-      await setDoc(doc(db, 'users', user.uid, 'subjects', id), newSubject);
+
+    setSubjects([...subjects, newSubject]);
+
+    if (user) {
+      try {
+        await setDoc(doc(db, 'users', user.uid, 'subjects', id), newSubject);
+        addToast(`Subject ${name} added`, "success");
+      } catch (e) {
+        console.error("Failed to add subject in cloud", e);
+      }
+    } else {
       addToast(`Subject ${name} added`, "success");
-    } catch (e) {
-      console.error("Failed to add subject", e);
     }
   };
 
   const handleEditSubject = async (id: string, name: string, image?: string, examDate?: string, notes?: string) => {
-    if (!user) return;
-    try {
-      await updateDoc(doc(db, 'users', user.uid, 'subjects', id), { 
-        name, 
-        ...(image !== undefined && { image }),
-        ...(examDate !== undefined && { examDate }),
-        ...(notes !== undefined && { notes })
-      });
+    const newSubjects = subjects.map(s => s.id === id ? { 
+      ...s, 
+      name, 
+      ...(image !== undefined && { image }),
+      ...(examDate !== undefined && { examDate }),
+      ...(notes !== undefined && { notes })
+    } : s);
+    setSubjects(newSubjects);
+
+    if (user) {
+      try {
+        await updateDoc(doc(db, 'users', user.uid, 'subjects', id), { 
+          name, 
+          ...(image !== undefined && { image }),
+          ...(examDate !== undefined && { examDate }),
+          ...(notes !== undefined && { notes })
+        });
+        addToast("Subject updated", "success");
+      } catch (e) {
+        console.error("Failed to edit subject in cloud", e);
+      }
+    } else {
       addToast("Subject updated", "success");
-    } catch (e) {
-      console.error("Failed to edit subject", e);
     }
   };
 
   const handleDeleteSubject = async (id: string) => {
-    if (!user) return;
-    try {
-      await deleteDoc(doc(db, 'users', user.uid, 'subjects', id));
+    const newSubjects = subjects.filter(s => s.id !== id);
+    setSubjects(newSubjects);
+
+    if (user) {
+      try {
+        await deleteDoc(doc(db, 'users', user.uid, 'subjects', id));
+        addToast("Subject deleted", "info");
+      } catch (e) {
+        console.error("Failed to delete subject in cloud", e);
+      }
+    } else {
       addToast("Subject deleted", "info");
-    } catch (e) {
-      console.error("Failed to delete subject", e);
     }
   };
 
   const handleAddTopic = async (subjectId: string, title: string, image?: string) => {
-    if (!user) return;
     const subject = subjects.find(s => s.id === subjectId);
     if (!subject) return;
 
@@ -156,18 +219,25 @@ export default function Manage() {
       ...(image !== undefined && { image })
     };
 
-    try {
-      await updateDoc(doc(db, 'users', user.uid, 'subjects', subjectId), {
-        topics: [...subject.topics, newTopic]
-      });
+    const updatedTopics = [...subject.topics, newTopic];
+    const newSubjects = subjects.map(s => s.id === subjectId ? { ...s, topics: updatedTopics } : s);
+    setSubjects(newSubjects);
+
+    if (user) {
+      try {
+        await updateDoc(doc(db, 'users', user.uid, 'subjects', subjectId), {
+          topics: updatedTopics
+        });
+        addToast(`Topic ${title} added to ${subject.name}`, "success");
+      } catch (e) {
+        console.error("Failed to add topic in cloud", e);
+      }
+    } else {
       addToast(`Topic ${title} added to ${subject.name}`, "success");
-    } catch (e) {
-      console.error("Failed to add topic", e);
     }
   };
 
   const handleEditTopic = async (subjectId: string, topicId: string, title: string, mastery: number, image?: string, resources?: Resource[]) => {
-    if (!user) return;
     const subject = subjects.find(s => s.id === subjectId);
     if (!subject) return;
 
@@ -184,104 +254,144 @@ export default function Manage() {
       return t;
     });
 
-    try {
-      await updateDoc(doc(db, 'users', user.uid, 'subjects', subjectId), {
-        topics: updatedTopics
-      });
+    const newSubjects = subjects.map(s => s.id === subjectId ? { ...s, topics: updatedTopics } : s);
+    setSubjects(newSubjects);
+
+    if (user) {
+      try {
+        await updateDoc(doc(db, 'users', user.uid, 'subjects', subjectId), {
+          topics: updatedTopics
+        });
+        addToast("Topic updated", "success");
+      } catch (e) {
+        console.error("Failed to edit topic in cloud", e);
+      }
+    } else {
       addToast("Topic updated", "success");
-    } catch (e) {
-      console.error("Failed to edit topic", e);
     }
   };
 
   const handleUpdateResources = async (subjectId: string, topicId: string, resources: Resource[]) => {
-    if (!user) return;
     const subject = subjects.find(s => s.id === subjectId);
     if (!subject) return;
 
     const updatedTopics = subject.topics.map(t => t.id === topicId ? { ...t, resources } : t);
+    const newSubjects = subjects.map(s => s.id === subjectId ? { ...s, topics: updatedTopics } : s);
+    setSubjects(newSubjects);
 
-    try {
-      await updateDoc(doc(db, 'users', user.uid, 'subjects', subjectId), {
-        topics: updatedTopics
-      });
+    if (user) {
+      try {
+        await updateDoc(doc(db, 'users', user.uid, 'subjects', subjectId), {
+          topics: updatedTopics
+        });
+        addToast("Resources updated", "success");
+      } catch (e) {
+        console.error("Failed to update resources in cloud", e);
+      }
+    } else {
       addToast("Resources updated", "success");
-    } catch (e) {
-      console.error("Failed to update resources", e);
     }
   };
 
   const handleDeleteTopic = async (subjectId: string, topicId: string) => {
-    if (!user) return;
     const subject = subjects.find(s => s.id === subjectId);
     if (!subject) return;
 
     const updatedTopics = subject.topics.filter(t => t.id !== topicId);
+    const newSubjects = subjects.map(s => s.id === subjectId ? { ...s, topics: updatedTopics } : s);
+    setSubjects(newSubjects);
 
-    try {
-      await updateDoc(doc(db, 'users', user.uid, 'subjects', subjectId), {
-        topics: updatedTopics
-      });
+    if (user) {
+      try {
+        await updateDoc(doc(db, 'users', user.uid, 'subjects', subjectId), {
+          topics: updatedTopics
+        });
+        addToast("Topic deleted", "info");
+      } catch (e) {
+        console.error("Failed to delete topic in cloud", e);
+      }
+    } else {
       addToast("Topic deleted", "info");
-    } catch (e) {
-      console.error("Failed to delete topic", e);
     }
   };
 
   const handleReorderTopics = async (subjectId: string, topics: Topic[]) => {
-    if (!user) return;
-    try {
-      await updateDoc(doc(db, 'users', user.uid, 'subjects', subjectId), {
-        topics
-      });
-    } catch (e) {
-      console.error("Failed to reorder topics", e);
+    const newSubjects = subjects.map(s => s.id === subjectId ? { ...s, topics } : s);
+    setSubjects(newSubjects);
+
+    if (user) {
+      try {
+        await updateDoc(doc(db, 'users', user.uid, 'subjects', subjectId), {
+          topics
+        });
+      } catch (e) {
+        console.error("Failed to reorder topics in cloud", e);
+      }
     }
   };
 
   const handleResetSyllabus = async () => {
-    if (!user) return;
-    try {
-      const batch = writeBatch(db);
-      // Delete existing
-      subjects.forEach(s => {
-        batch.delete(doc(db, 'users', user.uid, 'subjects', s.id));
-      });
-      // Add initial
-      INITIAL_SUBJECTS.forEach(s => {
-        batch.set(doc(db, 'users', user.uid, 'subjects', s.id), s);
-      });
-      await batch.commit();
+    setSubjects(INITIAL_SUBJECTS);
+
+    if (user) {
+      try {
+        const batch = writeBatch(db);
+        // Delete existing
+        subjects.forEach(s => {
+          batch.delete(doc(db, 'users', user.uid, 'subjects', s.id));
+        });
+        // Add initial
+        INITIAL_SUBJECTS.forEach(s => {
+          batch.set(doc(db, 'users', user.uid, 'subjects', s.id), s);
+        });
+        await batch.commit();
+        addToast("Syllabus reset to default", "success");
+      } catch (e) {
+        console.error("Failed to reset syllabus in cloud", e);
+      }
+    } else {
       addToast("Syllabus reset to default", "success");
-    } catch (e) {
-      console.error("Failed to reset syllabus", e);
     }
   };
 
   const handleResetProfile = async () => {
-    if (!user) return;
-    try {
-      await setDoc(doc(db, 'users', user.uid), {
-        points: 0,
-        streak: 0,
-        badges: INITIAL_BADGES,
-        totalSessions: 0,
-        totalStudyTime: 0
-      });
+    const initialProfile = {
+      points: 0,
+      streak: 0,
+      badges: INITIAL_BADGES,
+      totalSessions: 0,
+      totalStudyTime: 0,
+      level: 1,
+      xp: 0,
+      xpToNextLevel: 100
+    };
+    setUserProfile(initialProfile);
+
+    if (user) {
+      try {
+        await setDoc(doc(db, 'users', user.uid), initialProfile);
+        addToast("Profile reset to default", "success");
+      } catch (e) {
+        console.error("Failed to reset profile in cloud", e);
+      }
+    } else {
       addToast("Profile reset to default", "success");
-    } catch (e) {
-      console.error("Failed to reset profile", e);
     }
   };
 
   const handleResetScheduleAction = async () => {
-    if (!user) return;
-    try {
-      const scheduleRef = doc(db, 'users', user.uid, 'config', 'schedule');
-      await setDoc(scheduleRef, WEEKLY_BASE_SCHEDULE);
+    setSchedule(WEEKLY_BASE_SCHEDULE);
+
+    if (user) {
+      try {
+        const scheduleRef = doc(db, 'users', user.uid, 'config', 'schedule');
+        await setDoc(scheduleRef, WEEKLY_BASE_SCHEDULE);
+        addToast("Schedule reset to default", "success");
+      } catch (e) {
+        console.error("Failed to reset schedule in cloud", e);
+      }
+    } else {
       addToast("Schedule reset to default", "success");
-    } catch (e) {
-      console.error("Failed to reset schedule", e);
     }
   };
 

@@ -9,20 +9,78 @@ import { AIStudyPlan, AIPlanTask } from '../types';
 export default function AIStudyPlanner() {
   const { subjects, aiPlan, setAIPlan, updateAIPlanTask, addToast, startFocusSession } = useAppStore();
   const [isGenerating, setIsGenerating] = useState(false);
+  const [isImproving, setIsImproving] = useState<string | null>(null);
   const [editingTask, setEditingTask] = useState<string | null>(null);
   const [editDuration, setEditDuration] = useState<number>(0);
   const [editStartTime, setEditStartTime] = useState<string>('');
+  const [editTitle, setEditTitle] = useState<string>('');
+  const [editReason, setEditReason] = useState<string>('');
+  const [editPriority, setEditPriority] = useState<'High' | 'Medium' | 'Low'>('Medium');
 
   const handleEditClick = (task: AIPlanTask) => {
     setEditingTask(task.id);
     setEditDuration(task.duration);
     setEditStartTime(task.startTime || '');
+    setEditTitle(task.title);
+    setEditReason(task.reason);
+    setEditPriority(task.priority);
   };
 
   const handleSaveEdit = (taskId: string) => {
-    updateAIPlanTask(taskId, { duration: editDuration, startTime: editStartTime });
+    updateAIPlanTask(taskId, { 
+      duration: editDuration, 
+      startTime: editStartTime,
+      title: editTitle,
+      reason: editReason,
+      priority: editPriority
+    });
     setEditingTask(null);
-    addToast('Schedule updated successfully', 'success');
+    addToast('Task updated successfully', 'success');
+  };
+
+  const improveTask = async (task: AIPlanTask) => {
+    setIsImproving(task.id);
+    try {
+      const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+      
+      const prompt = `
+        You are an expert academic study planner.
+        I have a study task that needs to be improved, made more specific, actionable, and motivating.
+        
+        Current Task Title: ${task.title}
+        Current Task Reason/Description: ${task.reason}
+        Duration: ${task.duration} minutes
+        Priority: ${task.priority}
+        
+        Please rewrite the title to be more engaging and actionable.
+        Rewrite the reason/description to provide a clear, step-by-step approach on how to tackle this task effectively within the given duration.
+      `;
+
+      const response = await ai.models.generateContent({
+        model: "gemini-3-flash-preview",
+        contents: prompt,
+        config: {
+          responseMimeType: "application/json",
+          responseSchema: {
+            type: Type.OBJECT,
+            properties: {
+              title: { type: Type.STRING },
+              reason: { type: Type.STRING }
+            },
+            required: ['title', 'reason']
+          }
+        }
+      });
+
+      const result = JSON.parse(response.text);
+      updateAIPlanTask(task.id, { title: result.title, reason: result.reason });
+      addToast('Task improved successfully!', 'success');
+    } catch (error) {
+      console.error('Failed to improve task:', error);
+      addToast('Failed to improve task', 'error');
+    } finally {
+      setIsImproving(null);
+    }
   };
 
   const generatePlan = async () => {
@@ -194,14 +252,26 @@ export default function AIStudyPlanner() {
                 >
                   <div className="flex items-start justify-between mb-3">
                     <div className="flex items-center gap-2">
-                      <span className={cn(
-                        "px-2 py-0.5 rounded text-[10px] font-black uppercase tracking-widest",
-                        task.priority === 'High' ? "bg-red-500/20 text-red-500" :
-                        task.priority === 'Medium' ? "bg-yellow-500/20 text-yellow-500" :
-                        "bg-blue-500/20 text-blue-500"
-                      )}>
-                        {task.priority} Priority
-                      </span>
+                      {editingTask === task.id ? (
+                        <select
+                          value={editPriority}
+                          onChange={(e) => setEditPriority(e.target.value as any)}
+                          className="bg-white/10 text-xs px-2 py-1 rounded outline-none"
+                        >
+                          <option value="High">High Priority</option>
+                          <option value="Medium">Medium Priority</option>
+                          <option value="Low">Low Priority</option>
+                        </select>
+                      ) : (
+                        <span className={cn(
+                          "px-2 py-0.5 rounded text-[10px] font-black uppercase tracking-widest",
+                          task.priority === 'High' ? "bg-red-500/20 text-red-500" :
+                          task.priority === 'Medium' ? "bg-yellow-500/20 text-yellow-500" :
+                          "bg-blue-500/20 text-blue-500"
+                        )}>
+                          {task.priority} Priority
+                        </span>
+                      )}
                       {editingTask === task.id ? (
                         <div className="flex items-center gap-2">
                           <input 
@@ -239,16 +309,52 @@ export default function AIStudyPlanner() {
                     )}
                   </div>
                   
-                  <h4 className="font-bold text-lg mb-2 group-hover:text-[#1DB954] transition-colors">{task.title}</h4>
-                  <p className="text-sm text-gray-400 leading-relaxed mb-4">{task.reason}</p>
+                  {editingTask === task.id ? (
+                    <div className="space-y-3 mb-4">
+                      <input
+                        type="text"
+                        value={editTitle}
+                        onChange={(e) => setEditTitle(e.target.value)}
+                        className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm font-bold focus:border-[#1DB954] outline-none transition-colors"
+                        placeholder="Task Title"
+                      />
+                      <textarea
+                        value={editReason}
+                        onChange={(e) => setEditReason(e.target.value)}
+                        className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-gray-300 focus:border-[#1DB954] outline-none transition-colors min-h-[80px] resize-none"
+                        placeholder="Task Description/Reason"
+                      />
+                    </div>
+                  ) : (
+                    <>
+                      <h4 className="font-bold text-lg mb-2 group-hover:text-[#1DB954] transition-colors">{task.title}</h4>
+                      <p className="text-sm text-gray-400 leading-relaxed mb-4">{task.reason}</p>
+                    </>
+                  )}
                   
-                  <button 
-                    onClick={() => startFocusSession(task.subjectId, task.topicId, task.duration)}
-                    className="w-full py-2 bg-white/5 hover:bg-[#1DB954] hover:text-black rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-2"
-                  >
-                    Start This Task
-                    <ArrowRight className="w-3 h-3" />
-                  </button>
+                  <div className="flex items-center gap-2">
+                    <button 
+                      onClick={() => startFocusSession(task.subjectId, task.topicId, task.duration)}
+                      className="flex-1 py-2 bg-white/5 hover:bg-[#1DB954] hover:text-black rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-2"
+                    >
+                      Start This Task
+                      <ArrowRight className="w-3 h-3" />
+                    </button>
+                    {!editingTask && (
+                      <button
+                        onClick={() => improveTask(task)}
+                        disabled={isImproving === task.id}
+                        className="py-2 px-3 bg-white/5 hover:bg-purple-500/20 hover:text-purple-400 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                        title="Improve task with AI"
+                      >
+                        {isImproving === task.id ? (
+                          <RefreshCw className="w-4 h-4 animate-spin" />
+                        ) : (
+                          <Sparkles className="w-4 h-4" />
+                        )}
+                      </button>
+                    )}
+                  </div>
                 </motion.div>
               ))}
             </div>

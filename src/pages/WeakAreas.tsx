@@ -8,32 +8,36 @@ import { useMutation } from '@tanstack/react-query';
 import { genAI } from '../services/gemini';
 
 export default function WeakAreas() {
-  const { recommendations, subjects, user, addToast } = useAppStore();
+  const { recommendations, subjects, user, addToast, setRecommendations } = useAppStore();
 
   const handleLikeRecommendation = async (id: string) => {
-    if (!user) return;
-    const rec = recommendations.find(r => r.id === id);
-    if (!rec) return;
-    try {
-      await updateDoc(doc(db, 'users', user.uid, 'recommendations', id), { liked: !rec.liked });
-    } catch (e) {
-      console.error("Failed to like recommendation", e);
+    const newRecs = recommendations.map(r => r.id === id ? { ...r, liked: !r.liked } : r);
+    setRecommendations(newRecs);
+
+    if (user) {
+      try {
+        await updateDoc(doc(db, 'users', user.uid, 'recommendations', id), { liked: !recommendations.find(r => r.id === id)?.liked });
+      } catch (e) {
+        console.error("Failed to like recommendation in cloud", e);
+      }
     }
   };
 
   const handleDismissRecommendation = async (id: string) => {
-    if (!user) return;
-    try {
-      await updateDoc(doc(db, 'users', user.uid, 'recommendations', id), { dismissed: true });
-    } catch (e) {
-      console.error("Failed to dismiss recommendation", e);
+    const newRecs = recommendations.map(r => r.id === id ? { ...r, dismissed: true } : r);
+    setRecommendations(newRecs);
+
+    if (user) {
+      try {
+        await updateDoc(doc(db, 'users', user.uid, 'recommendations', id), { dismissed: true });
+      } catch (e) {
+        console.error("Failed to dismiss recommendation in cloud", e);
+      }
     }
   };
 
   const analysisMutation = useMutation({
     mutationFn: async () => {
-      if (!user) throw new Error("User not authenticated");
-      
       const prompt = `Analyze this A/L student's study data and provide 2-3 actionable recommendations. 
       Subjects: ${JSON.stringify(subjects.map(s => ({ name: s.name, readiness: s.readiness, weakCount: s.weakCount })))}
       Return a JSON array of objects with fields: id, title, description, priority (High/Medium/Low), reason.`;
@@ -44,15 +48,24 @@ export default function WeakAreas() {
         config: { responseMimeType: "application/json" }
       });
 
-      const newRecs = JSON.parse(result.text || "[]");
+      const newRecsFromAI = JSON.parse(result.text || "[]");
+      const newRecs = newRecsFromAI.map((rec: any) => ({
+        ...rec,
+        id: Math.random().toString(36).substr(2, 9),
+        liked: false,
+        dismissed: false
+      }));
+
+      setRecommendations([...recommendations, ...newRecs]);
       
-      const batch = writeBatch(db);
-      newRecs.forEach((rec: any) => {
-        const id = Math.random().toString(36).substr(2, 9);
-        const recRef = doc(db, 'users', user.uid, 'recommendations', id);
-        batch.set(recRef, { ...rec, id, liked: false, dismissed: false });
-      });
-      await batch.commit();
+      if (user) {
+        const batch = writeBatch(db);
+        newRecs.forEach((rec: any) => {
+          const recRef = doc(db, 'users', user.uid, 'recommendations', rec.id);
+          batch.set(recRef, rec);
+        });
+        await batch.commit();
+      }
       return newRecs;
     },
     onSuccess: () => {

@@ -8,14 +8,32 @@ export function useStudySession(sessionId: string | undefined) {
   const [session, setSession] = useState<StudyLog | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
-  const { user } = useAppStore();
+  const { user, studyLogs } = useAppStore();
 
   useEffect(() => {
-    if (!user || !sessionId) {
+    if (!sessionId) {
       setLoading(false);
       return;
     }
 
+    // First check local store (works for guests and recently synced logs)
+    const localSession = studyLogs.find(log => log.id === sessionId);
+    if (localSession) {
+      setSession(localSession);
+      setLoading(false);
+      // If we found it locally, we still might want to listen for updates if logged in
+      if (!user) return;
+    }
+
+    if (!user) {
+      if (!localSession) {
+        setSession(null);
+        setLoading(false);
+      }
+      return;
+    }
+
+    // If logged in and not found locally (or to get real-time updates), use Firestore
     const sessionRef = doc(db, 'users', user.uid, 'study_logs', sessionId);
 
     const unsubscribe = onSnapshot(

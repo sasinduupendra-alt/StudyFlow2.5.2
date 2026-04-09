@@ -9,7 +9,7 @@ import { db } from '../firebase';
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 
 export default function AIPracticeMode() {
-  const { subjects, user, addToast } = useAppStore();
+  const { subjects, user, addToast, setSubjects } = useAppStore();
   const [selectedSubjectId, setSelectedSubjectId] = useState(subjects[0]?.id || '');
   const [selectedTopicId, setSelectedTopicId] = useState(subjects[0]?.topics[0]?.id || '');
   
@@ -47,7 +47,7 @@ export default function AIPracticeMode() {
   };
 
   const gradeAnswer = async () => {
-    if (!question || !answer || !selectedSubject || !selectedTopic || !user) return;
+    if (!question || !answer || !selectedSubject || !selectedTopic) return;
     setIsGrading(true);
 
     try {
@@ -75,15 +75,25 @@ Return ONLY valid JSON.`;
       const result = JSON.parse(response.text || '{}');
       setFeedback(result);
 
-      // Update mastery in Firestore
+      // Update mastery locally
       const newMastery = Math.round((selectedTopic.mastery * 0.7) + (result.score * 0.3));
       const updatedTopics = selectedSubject.topics.map(t => 
         t.id === selectedTopic.id ? { ...t, mastery: newMastery } : t
       );
 
-      await updateDoc(doc(db, 'users', user.uid, 'subjects', selectedSubject.id), {
-        topics: updatedTopics
-      });
+      const newSubjects = subjects.map(s => s.id === selectedSubject.id ? { ...s, topics: updatedTopics } : s);
+      setSubjects(newSubjects);
+
+      // Update Firestore if logged in
+      if (user) {
+        try {
+          await updateDoc(doc(db, 'users', user.uid, 'subjects', selectedSubject.id), {
+            topics: updatedTopics
+          });
+        } catch (e) {
+          console.error("Failed to sync mastery to cloud", e);
+        }
+      }
 
       addToast(`Answer graded! Mastery updated to ${newMastery}%`, 'success');
 

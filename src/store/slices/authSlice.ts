@@ -10,6 +10,7 @@ export interface AuthSlice {
   setUserProfile: (profile: UserProfile) => void;
   isAuthReady: boolean;
   setIsAuthReady: (ready: boolean) => void;
+  setAuth: (user: User | null, isAuthReady: boolean) => void;
 }
 
 export const createAuthSlice: StateCreator<AuthSlice> = (set) => ({
@@ -28,4 +29,5 @@ export const createAuthSlice: StateCreator<AuthSlice> = (set) => ({
   setUserProfile: (profile) => set({ userProfile: profile }),
   isAuthReady: false,
   setIsAuthReady: (isAuthReady) => set({ isAuthReady }),
+  setAuth: (user, isAuthReady) => set({ user, isAuthReady }),
 });

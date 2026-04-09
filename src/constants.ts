@@ -16,6 +16,12 @@ export const INITIAL_SUBJECTS: Subject[] = [
     image: 'https://images.unsplash.com/photo-1635070041078-e363dbe005cb?auto=format&fit=crop&q=80&w=800',
     examDate: '2026-07-15',
     notes: 'Weekly: Homework, Paper Review, Past Lesson Review, Missed Lesson Learning.',
+    weeklyTasks: [
+      { id: 'm1', title: 'Homework', completed: false },
+      { id: 'm2', title: 'Paper Review (with past papers)', completed: false },
+      { id: 'm3', title: 'Past Lesson Review', completed: false },
+      { id: 'm4', title: 'Missed Lesson Learning & Practice', completed: false },
+    ],
     topics: [
       { id: 'm1', title: '01. Real Number System', mastery: 60, image: 'https://images.unsplash.com/photo-1509228468518-180dd4864904?auto=format&fit=crop&q=80&w=400' },
       { id: 'm2', title: '02. Functions & Polynomials', mastery: 55, image: 'https://images.unsplash.com/photo-1635070041078-e363dbe005cb?auto=format&fit=crop&q=80&w=400' },
@@ -46,6 +52,13 @@ export const INITIAL_SUBJECTS: Subject[] = [
     image: 'https://images.unsplash.com/photo-1581093458791-9f3c3900df4b?auto=format&fit=crop&q=80&w=800',
     examDate: '2026-07-22',
     notes: 'Weekly: Homework, Paper Review, Past Lesson Review, Missed Lesson Learning, Practical Lesson.',
+    weeklyTasks: [
+      { id: 'p1', title: 'Homework', completed: false },
+      { id: 'p2', title: 'Paper Review (with past papers)', completed: false },
+      { id: 'p3', title: 'Past Lesson Review', completed: false },
+      { id: 'p4', title: 'Missed Lesson Learning & Practice', completed: false },
+      { id: 'p5', title: 'Practical Lesson Learning & Practice', completed: false },
+    ],
     topics: [
       { id: 'p1', title: '01. Units & Measurements', mastery: 85, image: 'https://images.unsplash.com/photo-1581093458791-9f3c3900df4b?auto=format&fit=crop&q=80&w=400' },
       { id: 'p2', title: '02. Mechanics', mastery: 55, image: 'https://images.unsplash.com/photo-1535813543269-7328ec13954e?auto=format&fit=crop&q=80&w=400' },
@@ -73,6 +86,12 @@ export const INITIAL_SUBJECTS: Subject[] = [
     image: 'https://images.unsplash.com/photo-1532187875605-2fe358711e24?auto=format&fit=crop&q=80&w=800',
     examDate: '2026-08-01',
     notes: 'Weekly: Homework, Paper Review, Past Lesson Review, Missed Lesson Learning.',
+    weeklyTasks: [
+      { id: 'c1', title: 'Homework', completed: false },
+      { id: 'c2', title: 'Paper Review (with past papers)', completed: false },
+      { id: 'c3', title: 'Past Lesson Review', completed: false },
+      { id: 'c4', title: 'Missed Lesson Learning & Practice', completed: false },
+    ],
     topics: [
       { id: 'c1', title: '01. Atomic Structure', mastery: 90, image: 'https://images.unsplash.com/photo-1532187875605-2fe358711e24?auto=format&fit=crop&q=80&w=400' },
       { id: 'c2', title: '02. Structure & Bonding', mastery: 80, image: 'https://images.unsplash.com/photo-1532187875605-2fe358711e24?auto=format&fit=crop&q=80&w=400' },

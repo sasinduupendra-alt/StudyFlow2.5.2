@@ -61,18 +61,6 @@ export default function Home() {
     );
   }
 
-  if (!user) {
-    return (
-      <div className="h-[80vh] flex flex-col items-center justify-center text-center p-8 space-y-6">
-        <div className="w-32 h-32 bg-white/5 rounded-full flex items-center justify-center mb-4">
-          <Zap className="w-16 h-16 text-[#1DB954]" />
-        </div>
-        <h2 className="text-3xl font-black tracking-tight">Welcome to StudyFlow</h2>
-        <p className="text-gray-400 max-w-md mx-auto">Please sign in to track your progress, get AI insights, and manage your syllabus.</p>
-      </div>
-    );
-  }
-
   if (subjects.length === 0 && !searchQuery) {
     return (
       <div className="h-[80vh] flex flex-col items-center justify-center text-center p-8 space-y-6">

@@ -19,10 +19,7 @@ export default function ProtectedRoute({ children }: ProtectedRouteProps) {
     );
   }
 
-  if (!user) {
-    // Redirect to home if not logged in, but save the intended location
-    return <Navigate to="/" state={{ from: location }} replace />;
-  }
-
+  // Allow access as long as auth is ready. 
+  // Layout.tsx ensures we have at least an anonymous user.
   return <>{children}</>;
 }

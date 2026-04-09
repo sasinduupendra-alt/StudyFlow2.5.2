@@ -39,7 +39,9 @@ export default function Layout() {
     setIsPaused,
     isPaused,
     subjects,
+    isAuthReady,
     setIsAuthReady,
+    setAuth,
     searchQuery,
     setSearchQuery,
     toasts,
@@ -47,7 +49,10 @@ export default function Layout() {
     tickActiveSession,
     setActiveSession,
     addToast,
-    userProfile
+    userProfile,
+    setUserProfile,
+    studyLogs,
+    setStudyLogs
   } = useAppStore();
 
   // Timer logic
@@ -72,71 +77,75 @@ export default function Layout() {
   }, [activeSession?.elapsedSeconds, activeSession?.totalSeconds, setIsPaused, setIsFocusMode, setIsNowPlayingOpen, addToast]);
 
   const handleSaveLog = async (log: { subjectId: string, topicId: string, duration: number, focusLevel: number, notes: string }) => {
-    if (!user) return;
     const id = Math.random().toString(36).substr(2, 9);
-    try {
-      await setDoc(doc(collection(db, 'users', user.uid, 'study_logs'), id), {
-        ...log,
-        id,
-        timestamp: new Date().toISOString()
-      });
+    const newLog = {
+      ...log,
+      id,
+      timestamp: new Date().toISOString()
+    };
 
-      // Calculate XP and update profile
-      const xpEarned = log.duration * log.focusLevel * 10;
-      const profileRef = doc(db, 'users', user.uid);
-      const profileSnap = await getDoc(profileRef);
-      
-      if (profileSnap.exists()) {
-        const profileData = profileSnap.data();
-        let currentXp = (profileData.xp || 0) + xpEarned;
-        let currentLevel = profileData.level || 1;
-        let xpToNextLevel = profileData.xpToNextLevel || 1000;
+    // Update local logs
+    setStudyLogs([...studyLogs, newLog]);
 
-        while (currentXp >= xpToNextLevel) {
-          currentXp -= xpToNextLevel;
-          currentLevel += 1;
-          xpToNextLevel = currentLevel * 1000;
-          addToast(`Level Up! You are now Level ${currentLevel}!`, 'success');
+    // Calculate XP and update profile
+    const xpEarned = log.duration * log.focusLevel * 10;
+    let currentXp = (userProfile.xp || 0) + xpEarned;
+    let currentLevel = userProfile.level || 1;
+    let xpToNextLevel = userProfile.xpToNextLevel || 1000;
+
+    while (currentXp >= xpToNextLevel) {
+      currentXp -= xpToNextLevel;
+      currentLevel += 1;
+      xpToNextLevel = currentLevel * 1000;
+      addToast(`Level Up! You are now Level ${currentLevel}!`, 'success');
+    }
+
+    // Streak Calculation
+    const today = new Date().toISOString().split('T')[0];
+    let newStreak = userProfile.streak || 0;
+    let lastStudyDate = (userProfile as any).lastStudyDate;
+
+    if (lastStudyDate !== today) {
+      const yesterday = new Date();
+      yesterday.setDate(yesterday.getDate() - 1);
+      const yesterdayStr = yesterday.toISOString().split('T')[0];
+
+      if (lastStudyDate === yesterdayStr) {
+        newStreak += 1; // Studied yesterday, increment streak
+        addToast(`Streak increased to ${newStreak} days! 🔥`, 'success');
+      } else {
+        newStreak = 1; // Missed a day, reset streak
+        if (lastStudyDate) {
+           addToast(`Streak reset to 1. Keep it going!`, 'info');
         }
-
-        // Streak Calculation
-        const today = new Date().toISOString().split('T')[0];
-        let newStreak = profileData.streak || 0;
-        let lastStudyDate = profileData.lastStudyDate;
-
-        if (lastStudyDate !== today) {
-          const yesterday = new Date();
-          yesterday.setDate(yesterday.getDate() - 1);
-          const yesterdayStr = yesterday.toISOString().split('T')[0];
-
-          if (lastStudyDate === yesterdayStr) {
-            newStreak += 1; // Studied yesterday, increment streak
-            addToast(`Streak increased to ${newStreak} days! 🔥`, 'success');
-          } else {
-            newStreak = 1; // Missed a day, reset streak
-            if (lastStudyDate) {
-               addToast(`Streak reset to 1. Keep it going!`, 'info');
-            }
-          }
-          lastStudyDate = today;
-        }
-
-        await updateDoc(profileRef, {
-          xp: currentXp,
-          level: currentLevel,
-          xpToNextLevel,
-          streak: newStreak,
-          lastStudyDate: lastStudyDate,
-          totalSessions: (profileData.totalSessions || 0) + 1,
-          totalStudyTime: (profileData.totalStudyTime || 0) + log.duration
-        });
       }
+      lastStudyDate = today;
+    }
 
-      addToast(`Study session logged! +${xpEarned} XP`, 'success');
-      setActiveSession(null);
-    } catch (error) {
-      console.error('Failed to save log:', error);
-      addToast('Failed to save study log.', 'error');
+    const updatedProfile = {
+      ...userProfile,
+      xp: currentXp,
+      level: currentLevel,
+      xpToNextLevel,
+      streak: newStreak,
+      lastStudyDate: lastStudyDate,
+      totalSessions: (userProfile.totalSessions || 0) + 1,
+      totalStudyTime: (userProfile.totalStudyTime || 0) + log.duration
+    };
+
+    setUserProfile(updatedProfile);
+    addToast(`Study session logged! +${xpEarned} XP`, 'success');
+    setActiveSession(null);
+
+    // Update Firestore if logged in
+    if (user) {
+      try {
+        await setDoc(doc(collection(db, 'users', user.uid, 'study_logs'), id), newLog);
+        await updateDoc(doc(db, 'users', user.uid), updatedProfile as any);
+      } catch (error) {
+        console.error('Failed to save log to cloud:', error);
+        addToast('Failed to sync study log to cloud.', 'error');
+      }
     }
   };
 
@@ -150,13 +159,18 @@ export default function Layout() {
     setIsFocusMode(false);
   };
 
+  const signInInProgress = React.useRef(false);
+
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-      setUser(currentUser);
-      setIsAuthReady(true);
+    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
+      if (!currentUser) {
+        setAuth(null, true);
+      } else {
+        setAuth(currentUser, true);
+      }
     });
     return () => unsubscribe();
-  }, [setUser, setIsAuthReady]);
+  }, [setAuth]);
 
   const handleLogin = async () => {
     try {
@@ -183,6 +197,7 @@ export default function Layout() {
     { icon: Brain, label: 'Practice', path: '/practice' },
     { icon: Sparkles, label: 'Weak Areas', path: '/weak-areas' },
     { icon: Trophy, label: 'Achievements', path: '/achievements' },
+    { icon: PlusSquare, label: 'Manage', path: '/manage' },
     { icon: Settings, label: 'Settings', path: '/settings' },
   ];
 
@@ -236,14 +251,26 @@ export default function Layout() {
             <p className="text-[10px] font-black text-gray-500 uppercase tracking-[0.2em]">Library</p>
           </div>
           
-          <button className="w-full flex items-center gap-4 px-4 py-3 text-gray-400 font-bold hover:text-white hover:bg-white/5 rounded-xl transition-all group">
+          <button 
+            onClick={() => {
+              setIsMobileMenuOpen(false);
+              navigate('/manage');
+            }}
+            className="w-full flex items-center gap-4 px-4 py-3 text-gray-400 font-bold hover:text-white hover:bg-white/5 rounded-xl transition-all group"
+          >
             <div className="w-6 h-6 bg-gradient-to-br from-indigo-500 to-purple-500 rounded flex items-center justify-center group-hover:scale-110 transition-transform shadow-lg shadow-indigo-500/20">
               <PlusSquare className="w-4 h-4 text-white" />
             </div>
             <span className="tracking-wide">Create Session</span>
           </button>
           
-          <button className="w-full flex items-center gap-4 px-4 py-3 text-gray-400 font-bold hover:text-white hover:bg-white/5 rounded-xl transition-all group">
+          <button 
+            onClick={() => {
+              setIsMobileMenuOpen(false);
+              navigate('/syllabus');
+            }}
+            className="w-full flex items-center gap-4 px-4 py-3 text-gray-400 font-bold hover:text-white hover:bg-white/5 rounded-xl transition-all group"
+          >
             <div className="w-6 h-6 bg-gradient-to-br from-[#1DB954] to-emerald-900 rounded flex items-center justify-center group-hover:scale-110 transition-transform shadow-lg shadow-[#1DB954]/20">
               <Heart className="w-4 h-4 text-white fill-current" />
             </div>
@@ -286,13 +313,34 @@ export default function Layout() {
               </div>
             </div>
           ) : (
-            <button 
-              onClick={handleLogin}
-              className="w-full flex items-center justify-center gap-3 py-3 bg-white text-black rounded-full font-black hover:scale-105 transition-all"
-            >
-              <LogIn className="w-5 h-5" />
-              Sign In
-            </button>
+            <div className="flex flex-col gap-3">
+              {!user && (
+                <div className="p-3 bg-white/5 border border-white/5 rounded-2xl mb-2">
+                  <div className="flex items-center gap-3 mb-2">
+                    <div className="w-8 h-8 rounded-full bg-gray-800 flex items-center justify-center">
+                      <User className="w-4 h-4 text-gray-400" />
+                    </div>
+                    <div>
+                      <p className="text-xs font-bold">Guest Account</p>
+                      <p className="text-[10px] text-gray-500">Local progress only</p>
+                    </div>
+                  </div>
+                  <div className="h-1 w-full bg-gray-800 rounded-full overflow-hidden">
+                    <div 
+                      className="h-full bg-gray-600 rounded-full"
+                      style={{ width: `${((userProfile?.xp || 0) / (userProfile?.xpToNextLevel || 1000)) * 100}%` }}
+                    />
+                  </div>
+                </div>
+              )}
+              <button 
+                onClick={handleLogin}
+                className="w-full flex items-center justify-center gap-3 py-3 bg-white text-black rounded-full font-black hover:scale-105 transition-all"
+              >
+                <LogIn className="w-5 h-5" />
+                {!user ? 'Link Account' : 'Sign In'}
+              </button>
+            </div>
           )}
         </div>
       </aside>
@@ -321,9 +369,25 @@ export default function Layout() {
                 className="w-64 md:w-80 bg-white/10 border border-transparent focus:border-white/20 rounded-full py-2 pl-10 pr-4 text-sm outline-none transition-all focus:bg-white/20"
               />
             </div>
+
+            {!user && isAuthReady && (
+              <div className="hidden lg:flex items-center gap-2 px-3 py-1 bg-yellow-500/10 border border-yellow-500/20 rounded-full">
+                <div className="w-1.5 h-1.5 bg-yellow-500 rounded-full animate-pulse" />
+                <span className="text-[10px] font-black text-yellow-500 uppercase tracking-widest">Guest Mode: Local Save Only</span>
+              </div>
+            )}
           </div>
 
           <div className="flex items-center gap-2 md:gap-4">
+            {!user && (
+              <button 
+                onClick={handleLogin}
+                className="hidden md:flex items-center gap-2 px-4 py-2 bg-[#1DB954] text-black rounded-full font-black text-xs hover:scale-105 transition-all shadow-lg shadow-[#1DB954]/20"
+              >
+                <LogIn className="w-3.5 h-3.5" />
+                SIGN IN TO SYNC
+              </button>
+            )}
             <button className="p-2 text-gray-400 hover:text-white transition-colors relative">
               <Bell className="w-5 h-5" />
               <span className="absolute top-2 right-2 w-2 h-2 bg-[#1DB954] rounded-full border-2 border-black" />
