@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { Clock, BookOpen, Zap, CheckCircle2, ChevronRight, GripVertical, Edit2, Calendar, Trash2, Save, X as CloseIcon } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { useAppStore } from '../store/useAppStore';
+import { WEEKLY_BASE_SCHEDULE } from '../constants';
 import {
   DndContext,
   closestCenter,
@@ -86,7 +87,7 @@ const SortableActivity = ({ activity, day, onEdit }: SortableActivityProps) => {
 };
 
 export default function WeeklyScheduleView({ schedule, onManageSchedule }: WeeklyScheduleViewProps) {
-  const { reorderSchedule, updateActivity } = useAppStore();
+  const { reorderSchedule, updateActivity, setSchedule } = useAppStore();
   const [editingActivity, setEditingActivity] = useState<{ day: keyof WeeklySchedule, activity: Activity } | null>(null);
   const [isConnectingGoogle, setIsConnectingGoogle] = useState(false);
 
@@ -106,6 +107,12 @@ export default function WeeklyScheduleView({ schedule, onManageSchedule }: Weekl
       const oldIndex = schedule[day].findIndex(a => a.id === active.id);
       const newIndex = schedule[day].findIndex(a => a.id === over.id);
       reorderSchedule(day, oldIndex, newIndex);
+    }
+  };
+
+  const handleResetSchedule = () => {
+    if (confirm('Are you sure you want to reset your schedule to the default intensive plan? This will overwrite your current changes.')) {
+      setSchedule(WEEKLY_BASE_SCHEDULE);
     }
   };
 
@@ -141,6 +148,13 @@ export default function WeeklyScheduleView({ schedule, onManageSchedule }: Weekl
           <p className="text-gray-400">Your optimized study routine for the week.</p>
         </div>
         <div className="flex items-center gap-3">
+          <button 
+            onClick={handleResetSchedule}
+            className="px-6 py-3 bg-white/5 text-white rounded-full font-bold hover:bg-white/10 transition-all border border-white/10 flex items-center gap-2"
+          >
+            <Trash2 className="w-4 h-4" />
+            Reset to Default
+          </button>
           <button 
             onClick={handleConnectGoogle}
             disabled={isConnectingGoogle}
