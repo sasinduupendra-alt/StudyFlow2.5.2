@@ -1,12 +1,32 @@
 import React from 'react';
 import { motion } from 'motion/react';
 import { useAppStore } from '../store/useAppStore';
-import { Settings as SettingsIcon, User, Bell, Shield, Trash2, LogOut, RefreshCw } from 'lucide-react';
+import { Settings as SettingsIcon, User, Bell, Shield, Trash2, LogOut, RefreshCw, Download } from 'lucide-react';
 import { auth } from '../firebase';
 import { cn } from '../lib/utils';
 
 export default function Settings() {
-  const { user, userProfile, addToast } = useAppStore();
+  const { user, userProfile, addToast, subjects, studyLogs, exams } = useAppStore();
+
+  const handleDownloadData = () => {
+    const data = {
+      profile: userProfile,
+      subjects,
+      studyLogs,
+      exams,
+      exportDate: new Date().toISOString()
+    };
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `studyflow-data-${new Date().toISOString().split('T')[0]}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    addToast("Data exported successfully", "success");
+  };
 
   const handleLogout = async () => {
     try {
@@ -102,6 +122,29 @@ export default function Settings() {
               <div className="w-12 h-6 bg-white/10 rounded-full relative cursor-pointer">
                 <div className="absolute left-1 top-1 w-4 h-4 bg-gray-400 rounded-full" />
               </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Data Management Section */}
+        <section className="bg-[#181818] rounded-3xl p-8 border border-white/5">
+          <h3 className="text-xl font-black tracking-tight mb-6 flex items-center gap-3">
+            <Download className="w-5 h-5 text-green-400" />
+            Data Management
+          </h3>
+          <div className="space-y-4">
+            <div className="flex items-center justify-between p-4 bg-white/5 rounded-2xl border border-white/5">
+              <div>
+                <p className="font-bold">Export My Data</p>
+                <p className="text-xs text-gray-500">Download a JSON file of your study history and progress.</p>
+              </div>
+              <button 
+                onClick={handleDownloadData}
+                className="flex items-center gap-2 px-4 py-2 bg-white text-black rounded-full text-xs font-black hover:scale-105 transition-all"
+              >
+                <Download className="w-4 h-4" />
+                Download JSON
+              </button>
             </div>
           </div>
         </section>

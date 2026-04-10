@@ -188,6 +188,30 @@ export default function Layout() {
     }
   };
 
+  const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
+
+  useEffect(() => {
+    const handleBeforeInstallPrompt = (e: any) => {
+      e.preventDefault();
+      setDeferredPrompt(e);
+    };
+
+    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+
+    return () => {
+      window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+    };
+  }, []);
+
+  const handleInstallClick = async () => {
+    if (!deferredPrompt) return;
+    deferredPrompt.prompt();
+    const { outcome } = await deferredPrompt.userChoice;
+    if (outcome === 'accepted') {
+      setDeferredPrompt(null);
+    }
+  };
+
   const navItems = [
     { icon: Home, label: 'Home', path: '/' },
     { icon: LayoutDashboard, label: 'Syllabus', path: '/syllabus' },
@@ -275,6 +299,18 @@ export default function Layout() {
             </div>
             <span className="tracking-wide">Liked Topics</span>
           </button>
+
+          {deferredPrompt && (
+            <button 
+              onClick={handleInstallClick}
+              className="w-full flex items-center gap-4 px-4 py-3 text-[#1DB954] font-bold hover:bg-[#1DB954]/10 rounded-xl transition-all group mt-4 border border-[#1DB954]/20"
+            >
+              <div className="w-6 h-6 bg-[#1DB954] rounded flex items-center justify-center group-hover:scale-110 transition-transform shadow-lg shadow-[#1DB954]/20">
+                <PlusSquare className="w-4 h-4 text-black" />
+              </div>
+              <span className="tracking-wide">Download App</span>
+            </button>
+          )}
         </nav>
 
         <div className="p-4">
