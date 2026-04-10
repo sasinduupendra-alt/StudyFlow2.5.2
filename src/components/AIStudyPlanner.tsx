@@ -184,30 +184,28 @@ export default function AIStudyPlanner() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-[#1DB954]/20 rounded-xl flex items-center justify-center">
-            <Brain className="w-6 h-6 text-[#1DB954]" />
+          <div className="w-10 h-10 bg-brand/10 border border-brand/20 flex items-center justify-center">
+            <Brain className="w-5 h-5 text-brand" />
           </div>
           <div>
-            <h2 className="text-2xl font-black tracking-tight">AI Daily Planner</h2>
-            <p className="text-xs text-gray-500 font-bold uppercase tracking-wider">Personalized for your goals</p>
+            <h2 className="text-lg font-black tracking-tighter uppercase">AI_Daily_Planner</h2>
+            <p className="hud-label !text-gray-600">NEURAL_SYNC_READY</p>
           </div>
         </div>
         <button
           onClick={generatePlan}
           disabled={isGenerating}
           className={cn(
-            "flex items-center gap-2 px-4 py-2 rounded-full font-bold text-sm transition-all",
-            isGenerating 
-              ? "bg-white/5 text-gray-500 cursor-not-allowed" 
-              : "bg-[#1DB954] text-black hover:scale-105 active:scale-95"
+            "scifi-button px-6 py-2 text-[10px]",
+            isGenerating && "opacity-50 cursor-not-allowed"
           )}
         >
           {isGenerating ? (
-            <RefreshCw className="w-4 h-4 animate-spin" />
+            <RefreshCw className="w-3 h-3 animate-spin mr-2" />
           ) : (
-            <Sparkles className="w-4 h-4" />
+            <Sparkles className="w-3 h-3 mr-2" />
           )}
-          {aiPlan ? 'Regenerate Plan' : 'Generate Daily Plan'}
+          {aiPlan ? 'REGENERATE_PLAN' : 'INITIALIZE_PLAN'}
         </button>
       </div>
 
@@ -218,15 +216,15 @@ export default function AIStudyPlanner() {
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
-            className="bg-[#181818] rounded-2xl p-12 border border-white/5 flex flex-col items-center justify-center text-center space-y-4"
+            className="scifi-panel p-12 flex flex-col items-center justify-center text-center space-y-4"
           >
             <div className="relative">
-              <div className="w-16 h-16 border-4 border-[#1DB954]/20 border-t-[#1DB954] rounded-full animate-spin" />
-              <Sparkles className="absolute inset-0 m-auto w-6 h-6 text-[#1DB954] animate-pulse" />
+              <div className="w-12 h-12 border-2 border-brand/20 border-t-brand animate-spin" />
+              <Sparkles className="absolute inset-0 m-auto w-4 h-4 text-brand animate-pulse" />
             </div>
             <div>
-              <h3 className="text-lg font-bold">Analyzing Your Progress...</h3>
-              <p className="text-sm text-gray-400 max-w-xs mx-auto">Gemini is looking at your weak areas and upcoming exams to build the perfect plan.</p>
+              <h3 className="text-sm font-black uppercase tracking-tighter">Analyzing_Progress...</h3>
+              <p className="hud-label !text-gray-600 max-w-xs mx-auto">Gemini core processing weak areas and exam deadlines for optimal pathing.</p>
             </div>
           </motion.div>
         ) : aiPlan ? (
@@ -236,8 +234,8 @@ export default function AIStudyPlanner() {
             animate={{ opacity: 1, y: 0 }}
             className="space-y-6"
           >
-            <div className="bg-gradient-to-br from-[#1DB954]/10 to-transparent p-6 rounded-2xl border border-[#1DB954]/20">
-              <p className="text-gray-300 italic leading-relaxed">
+            <div className="bg-brand/5 p-4 border border-brand/20">
+              <p className="text-[11px] text-gray-400 font-black uppercase tracking-widest leading-relaxed italic">
                 "{aiPlan.summary}"
               </p>
             </div>
@@ -246,10 +244,10 @@ export default function AIStudyPlanner() {
               {aiPlan.tasks.map((task, index) => (
                 <motion.div
                   key={task.id}
-                  initial={{ opacity: 0, x: -20 }}
+                  initial={{ opacity: 0, x: -10 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: index * 0.1 }}
-                  className="bg-[#181818] p-5 rounded-xl border border-white/5 hover:border-[#1DB954]/30 transition-all group relative"
+                  className="scifi-panel-sm p-4 hover:border-brand/30 transition-all group relative"
                 >
                   <div className="flex items-start justify-between mb-3">
                     <div className="flex items-center gap-2">
@@ -257,20 +255,20 @@ export default function AIStudyPlanner() {
                         <select
                           value={editPriority}
                           onChange={(e) => setEditPriority(e.target.value as any)}
-                          className="bg-white/10 text-xs px-2 py-1 rounded outline-none"
+                          className="bg-white/5 border border-border-dim text-[9px] px-2 py-1 outline-none font-black uppercase"
                         >
-                          <option value="High">High Priority</option>
-                          <option value="Medium">Medium Priority</option>
-                          <option value="Low">Low Priority</option>
+                          <option value="High">High</option>
+                          <option value="Medium">Medium</option>
+                          <option value="Low">Low</option>
                         </select>
                       ) : (
                         <span className={cn(
-                          "px-2 py-0.5 rounded text-[10px] font-black uppercase tracking-widest",
-                          task.priority === 'High' ? "bg-red-500/20 text-red-500" :
-                          task.priority === 'Medium' ? "bg-yellow-500/20 text-yellow-500" :
-                          "bg-blue-500/20 text-blue-500"
+                          "px-2 py-0.5 border text-[8px] font-black uppercase tracking-widest",
+                          task.priority === 'High' ? "border-red-500/30 text-red-500 bg-red-500/5" :
+                          task.priority === 'Medium' ? "border-yellow-500/30 text-yellow-500 bg-yellow-500/5" :
+                          "border-blue-500/30 text-blue-500 bg-blue-500/5"
                         )}>
-                          {task.priority} Priority
+                          {task.priority}_PRIORITY
                         </span>
                       )}
                       {editingTask === task.id ? (
@@ -279,79 +277,79 @@ export default function AIStudyPlanner() {
                             type="time" 
                             value={editStartTime}
                             onChange={(e) => setEditStartTime(e.target.value)}
-                            className="bg-white/10 text-xs px-2 py-1 rounded outline-none w-20"
+                            className="bg-white/5 border border-border-dim text-[9px] px-2 py-1 outline-none w-20 font-black"
                           />
                           <input 
                             type="number" 
                             value={editDuration}
                             onChange={(e) => setEditDuration(Number(e.target.value))}
-                            className="bg-white/10 text-xs px-2 py-1 rounded outline-none w-16"
+                            className="bg-white/5 border border-border-dim text-[9px] px-2 py-1 outline-none w-12 font-black"
                             min="5"
                             step="5"
                           />
-                          <span className="text-xs text-gray-400">m</span>
+                          <span className="hud-label">M</span>
                         </div>
                       ) : (
-                        <div className="flex items-center gap-1 text-gray-500 text-[10px] font-bold uppercase">
-                          <Clock className="w-3 h-3" />
-                          {task.startTime && task.endTime ? `${task.startTime} - ${task.endTime}` : `${task.duration}m`}
+                        <div className="flex items-center gap-1 hud-label">
+                          <Clock className="w-2.5 h-2.5" />
+                          {task.startTime && task.endTime ? `${task.startTime} - ${task.endTime}` : `${task.duration}M`}
                         </div>
                       )}
                     </div>
                     {editingTask === task.id ? (
                       <div className="flex items-center gap-1">
-                        <button onClick={() => handleSaveEdit(task.id)} className="p-1 text-[#1DB954] hover:bg-white/10 rounded"><Check className="w-4 h-4" /></button>
-                        <button onClick={() => setEditingTask(null)} className="p-1 text-red-500 hover:bg-white/10 rounded"><X className="w-4 h-4" /></button>
+                        <button onClick={() => handleSaveEdit(task.id)} className="p-1 text-brand hover:bg-white/5"><Check className="w-3 h-3" /></button>
+                        <button onClick={() => setEditingTask(null)} className="p-1 text-red-500 hover:bg-white/5"><X className="w-3 h-3" /></button>
                       </div>
                     ) : (
-                      <button onClick={() => handleEditClick(task)} className="p-1 text-gray-500 hover:text-white opacity-0 group-hover:opacity-100 transition-opacity">
-                        <Edit2 className="w-4 h-4" />
+                      <button onClick={() => handleEditClick(task)} className="p-1 text-gray-700 hover:text-white opacity-0 group-hover:opacity-100 transition-opacity">
+                        <Edit2 className="w-3 h-3" />
                       </button>
                     )}
                   </div>
                   
                   {editingTask === task.id ? (
-                    <div className="space-y-3 mb-4">
+                    <div className="space-y-2 mb-4">
                       <input
                         type="text"
                         value={editTitle}
                         onChange={(e) => setEditTitle(e.target.value)}
-                        className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm font-bold focus:border-[#1DB954] outline-none transition-colors"
-                        placeholder="Task Title"
+                        className="w-full bg-white/5 border border-border-dim px-3 py-1.5 text-[11px] font-black uppercase focus:border-brand outline-none transition-colors"
+                        placeholder="TASK_TITLE"
                       />
                       <textarea
                         value={editReason}
                         onChange={(e) => setEditReason(e.target.value)}
-                        className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-gray-300 focus:border-[#1DB954] outline-none transition-colors min-h-[80px] resize-none"
-                        placeholder="Task Description/Reason"
+                        className="w-full bg-white/5 border border-border-dim px-3 py-1.5 text-[10px] text-gray-400 font-black uppercase focus:border-brand outline-none transition-colors min-h-[60px] resize-none"
+                        placeholder="TASK_DESCRIPTION"
                       />
                     </div>
                   ) : (
                     <>
-                      <h4 className="font-bold text-lg mb-2 group-hover:text-[#1DB954] transition-colors">{task.title}</h4>
-                      <p className="text-sm text-gray-400 leading-relaxed mb-4">{task.reason}</p>
+                      <h4 className="font-black text-[11px] mb-1 group-hover:text-brand transition-colors uppercase tracking-tight">{task.title}</h4>
+                      <p className="text-[9px] text-gray-600 leading-relaxed mb-4 font-black uppercase tracking-tighter">{task.reason}</p>
                     </>
                   )}
                   
                   <div className="flex items-center gap-2">
                     <button 
                       onClick={() => startFocusSession(task.subjectId, task.topicId, task.duration)}
-                      className="flex-1 py-2 bg-white/5 hover:bg-[#1DB954] hover:text-black rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-2"
+                      className="flex-1 py-2 bg-white/5 border border-border-dim hover:border-brand/50 hover:text-brand text-[9px] font-black uppercase tracking-widest transition-all flex items-center justify-center gap-2"
                     >
-                      Start This Task
+                      INITIALIZE_SESSION
                       <ArrowRight className="w-3 h-3" />
                     </button>
                     {!editingTask && (
                       <button
                         onClick={() => improveTask(task)}
                         disabled={isImproving === task.id}
-                        className="py-2 px-3 bg-white/5 hover:bg-purple-500/20 hover:text-purple-400 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
-                        title="Improve task with AI"
+                        className="py-2 px-3 bg-white/5 border border-border-dim hover:border-purple-500/50 hover:text-purple-400 text-[9px] font-black uppercase transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                        title="Optimize with AI"
                       >
                         {isImproving === task.id ? (
-                          <RefreshCw className="w-4 h-4 animate-spin" />
+                          <RefreshCw className="w-3 h-3 animate-spin" />
                         ) : (
-                          <Sparkles className="w-4 h-4" />
+                          <Sparkles className="w-3 h-3" />
                         )}
                       </button>
                     )}
@@ -365,22 +363,22 @@ export default function AIStudyPlanner() {
             key="empty"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            className="bg-[#181818] rounded-2xl p-12 border border-white/5 text-center space-y-6"
+            className="scifi-panel p-12 text-center space-y-6"
           >
-            <div className="w-20 h-20 bg-white/5 rounded-full flex items-center justify-center mx-auto">
-              <Calendar className="w-10 h-10 text-gray-600" />
+            <div className="w-16 h-16 bg-white/5 border border-border-dim flex items-center justify-center mx-auto">
+              <Calendar className="w-8 h-8 text-gray-700" />
             </div>
             <div className="space-y-2">
-              <h3 className="text-xl font-bold">No Plan Generated Yet</h3>
-              <p className="text-sm text-gray-400 max-w-sm mx-auto">
-                Let our AI analyze your syllabus, exam dates, and current mastery to create a custom study path for today.
+              <h3 className="text-sm font-black uppercase tracking-tighter">No_Plan_Generated</h3>
+              <p className="hud-label !text-gray-600 max-w-sm mx-auto">
+                Initialize AI analysis to generate an optimized study path based on current mastery metrics and deadlines.
               </p>
             </div>
             <button
               onClick={generatePlan}
-              className="px-8 py-3 bg-white text-black rounded-full font-black hover:scale-105 transition-all"
+              className="scifi-button px-8 py-3"
             >
-              Create Today's Plan
+              GENERATE_TODAY_PLAN
             </button>
           </motion.div>
         )}

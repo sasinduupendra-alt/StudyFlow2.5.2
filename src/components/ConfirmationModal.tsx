@@ -18,8 +18,8 @@ export default function ConfirmationModal({
   isOpen,
   title,
   message,
-  confirmText = 'Confirm',
-  cancelText = 'Cancel',
+  confirmText = 'CONFIRM',
+  cancelText = 'CANCEL',
   onConfirm,
   onCancel,
   variant = 'danger'
@@ -33,34 +33,37 @@ export default function ConfirmationModal({
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={onCancel}
-            className="absolute inset-0 bg-black/80 backdrop-blur-sm"
+            className="absolute inset-0 bg-black/90 backdrop-blur-md"
           />
           <motion.div
-            initial={{ opacity: 0, scale: 0.95, y: 20 }}
+            initial={{ opacity: 0, scale: 0.95, y: 10 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.95, y: 20 }}
-            className="relative w-full max-w-md bg-[#181818] border border-white/10 rounded-3xl p-6 md:p-8 shadow-2xl"
+            exit={{ opacity: 0, scale: 0.95, y: 10 }}
+            className="relative w-full max-w-md scifi-panel p-6 md:p-8 shadow-[0_0_50px_rgba(0,0,0,0.5)] border-border-dim"
           >
             <div className="flex items-center gap-4 mb-6">
               <div className={cn(
-                "w-10 h-10 md:w-12 md:h-12 rounded-2xl flex items-center justify-center shrink-0",
-                variant === 'danger' ? "bg-red-500/20 text-red-500" :
-                variant === 'warning' ? "bg-yellow-500/20 text-yellow-500" :
-                "bg-blue-500/20 text-blue-500"
+                "w-10 h-10 md:w-12 md:h-12 border flex items-center justify-center shrink-0",
+                variant === 'danger' ? "border-red-500/30 text-red-500 bg-red-500/5" :
+                variant === 'warning' ? "border-yellow-500/30 text-yellow-500 bg-yellow-500/5" :
+                "border-brand/30 text-brand bg-brand/5"
               )}>
                 <AlertTriangle className="w-5 h-5 md:w-6 md:h-6" />
               </div>
-              <h3 className="text-xl md:text-2xl font-bold tracking-tight">{title}</h3>
+              <div>
+                <label className="hud-label !text-gray-600 mb-1">SYSTEM_CONFIRMATION</label>
+                <h3 className="text-sm md:text-base font-black uppercase tracking-tighter">{title}</h3>
+              </div>
             </div>
             
-            <p className="text-gray-400 mb-8 leading-relaxed">
+            <p className="text-[11px] font-black uppercase tracking-tight text-gray-500 mb-8 leading-relaxed">
               {message}
             </p>
             
             <div className="flex gap-3">
               <button
                 onClick={onCancel}
-                className="flex-1 py-3 rounded-xl font-bold text-gray-400 hover:text-white hover:bg-white/5 transition-all"
+                className="flex-1 py-3 text-[10px] font-black uppercase tracking-widest text-gray-700 hover:text-white transition-colors"
               >
                 {cancelText}
               </button>
@@ -70,10 +73,10 @@ export default function ConfirmationModal({
                   onCancel();
                 }}
                 className={cn(
-                  "flex-1 py-3 rounded-xl font-bold transition-all hover:scale-105",
-                  variant === 'danger' ? "bg-red-500 text-white" :
-                  variant === 'warning' ? "bg-yellow-500 text-black" :
-                  "bg-[#1DB954] text-black"
+                  "flex-1 py-3 text-[10px] font-black uppercase tracking-widest transition-all",
+                  variant === 'danger' ? "bg-red-500/10 border border-red-500/30 text-red-500 hover:bg-red-500/20" :
+                  variant === 'warning' ? "bg-yellow-500/10 border border-yellow-500/30 text-yellow-500 hover:bg-yellow-500/20" :
+                  "scifi-button"
                 )}
               >
                 {confirmText}
@@ -82,9 +85,9 @@ export default function ConfirmationModal({
             
             <button
               onClick={onCancel}
-              className="absolute top-6 right-6 p-2 text-gray-500 hover:text-white rounded-full hover:bg-white/5 transition-all"
+              className="absolute top-6 right-6 p-2 text-gray-700 hover:text-white transition-colors"
             >
-              <X className="w-5 h-5" />
+              <X className="w-4 h-4" />
             </button>
           </motion.div>
         </div>

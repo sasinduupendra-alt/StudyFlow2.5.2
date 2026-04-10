@@ -233,26 +233,26 @@ export default function Layout() {
   };
 
   return (
-    <div className="flex h-screen bg-black text-white overflow-hidden font-sans selection:bg-[#1DB954] selection:text-black">
+    <div className="flex h-screen bg-surface text-white overflow-hidden font-mono selection:bg-brand selection:text-black">
       {/* Sidebar Navigation */}
       <aside className={cn(
-        "fixed inset-y-0 left-0 z-50 w-64 bg-black flex flex-col transition-transform duration-300 md:relative md:translate-x-0",
+        "fixed inset-y-0 left-0 z-50 w-64 bg-surface flex flex-col transition-transform duration-500 md:relative md:translate-x-0 border-r border-border-dim",
         isMobileMenuOpen ? "translate-x-0" : "-translate-x-full"
       )}>
-        <div className="p-6 flex items-center gap-3">
-          <Logo className="text-[#1DB954]" size={32} />
-          <h1 className="text-xl font-black tracking-tighter">StudyFlow</h1>
+        <div className="p-8 flex items-center gap-3">
+          <Logo className="text-brand" size={32} />
+          <h1 className="text-xl font-black tracking-tighter font-sans">StudyFlow</h1>
         </div>
 
-        <nav className="flex-1 px-3 py-4 space-y-1.5 overflow-y-auto scrollbar-hide">
+        <nav className="flex-1 px-4 py-4 space-y-1 overflow-y-auto scrollbar-hide">
           {navItems.map((item) => (
             <NavLink
               key={item.path}
               to={item.path}
               onClick={() => setIsMobileMenuOpen(false)}
               className={({ isActive }) => cn(
-                "flex items-center gap-4 px-4 py-3 rounded-xl font-bold transition-all group relative overflow-hidden",
-                isActive ? "bg-white/10 text-white" : "text-gray-400 hover:text-white hover:bg-white/5"
+                "flex items-center gap-4 px-4 py-3 font-black transition-all group relative overflow-hidden uppercase text-[10px] tracking-[0.2em]",
+                isActive ? "text-brand bg-brand/5" : "text-gray-600 hover:text-white hover:bg-white/5"
               )}
             >
               {({ isActive }) => (
@@ -260,18 +260,18 @@ export default function Layout() {
                   {isActive && (
                     <motion.div 
                       layoutId="activeNavIndicator"
-                      className="absolute left-0 top-0 bottom-0 w-1 bg-[#1DB954]" 
+                      className="absolute left-0 top-0 bottom-0 w-[2px] bg-brand shadow-[0_0_10px_var(--color-brand-glow)]" 
                     />
                   )}
-                  <item.icon className={cn("w-6 h-6 transition-transform group-hover:scale-110", isActive && "text-[#1DB954]")} />
-                  <span className="tracking-wide">{item.label}</span>
+                  <item.icon className={cn("w-4 h-4 transition-transform group-hover:scale-110", isActive && "text-brand")} />
+                  <span>{item.label}</span>
                 </>
               )}
             </NavLink>
           ))}
           
           <div className="pt-8 pb-3 px-4">
-            <p className="text-[10px] font-black text-gray-500 uppercase tracking-[0.2em]">Library</p>
+            <p className="hud-label">System</p>
           </div>
           
           <button 
@@ -279,12 +279,10 @@ export default function Layout() {
               setIsMobileMenuOpen(false);
               navigate('/manage');
             }}
-            className="w-full flex items-center gap-4 px-4 py-3 text-gray-400 font-bold hover:text-white hover:bg-white/5 rounded-xl transition-all group"
+            className="w-full flex items-center gap-4 px-4 py-3 text-gray-600 font-black hover:text-white hover:bg-white/5 transition-all group uppercase text-[10px] tracking-[0.2em]"
           >
-            <div className="w-6 h-6 bg-gradient-to-br from-indigo-500 to-purple-500 rounded flex items-center justify-center group-hover:scale-110 transition-transform shadow-lg shadow-indigo-500/20">
-              <PlusSquare className="w-4 h-4 text-white" />
-            </div>
-            <span className="tracking-wide">Create Session</span>
+            <PlusSquare className="w-4 h-4 group-hover:text-brand transition-colors" />
+            <span>Create Session</span>
           </button>
           
           <button 
@@ -292,86 +290,64 @@ export default function Layout() {
               setIsMobileMenuOpen(false);
               navigate('/syllabus');
             }}
-            className="w-full flex items-center gap-4 px-4 py-3 text-gray-400 font-bold hover:text-white hover:bg-white/5 rounded-xl transition-all group"
+            className="w-full flex items-center gap-4 px-4 py-3 text-gray-600 font-black hover:text-white hover:bg-white/5 transition-all group uppercase text-[10px] tracking-[0.2em]"
           >
-            <div className="w-6 h-6 bg-gradient-to-br from-[#1DB954] to-emerald-900 rounded flex items-center justify-center group-hover:scale-110 transition-transform shadow-lg shadow-[#1DB954]/20">
-              <Heart className="w-4 h-4 text-white fill-current" />
-            </div>
-            <span className="tracking-wide">Liked Topics</span>
+            <Heart className="w-4 h-4 group-hover:text-brand transition-colors" />
+            <span>Liked Topics</span>
           </button>
 
           <button 
             onClick={deferredPrompt ? handleInstallClick : () => addToast("To install, open the app in a new tab and use your browser's 'Add to Home Screen' option.", "info")}
-            className="w-full flex items-center gap-4 px-4 py-3 text-[#1DB954] font-bold hover:bg-[#1DB954]/10 rounded-xl transition-all group mt-4 border border-[#1DB954]/20"
+            className="w-full flex items-center gap-4 px-4 py-3 text-brand font-black hover:bg-brand/10 transition-all group mt-4 border border-brand/10 uppercase text-[10px] tracking-[0.2em]"
           >
-            <div className="w-6 h-6 bg-[#1DB954] rounded flex items-center justify-center group-hover:scale-110 transition-transform shadow-lg shadow-[#1DB954]/20">
-              <PlusSquare className="w-4 h-4 text-black" />
-            </div>
-            <span className="tracking-wide">{deferredPrompt ? "Install App" : "How to Install"}</span>
+            <PlusSquare className="w-4 h-4" />
+            <span>{deferredPrompt ? "Install App" : "How to Install"}</span>
           </button>
         </nav>
 
-        <div className="p-4">
+        <div className="p-4 border-t border-border-dim">
           {user ? (
-            <div className="flex flex-col gap-3 p-3 bg-[#181818] border border-white/5 rounded-2xl hover:bg-[#282828] transition-colors group shadow-xl">
-              <div className="flex items-center justify-between">
+            <div className="flex flex-col gap-4 p-5 bg-white/5 border border-border-dim relative group overflow-hidden">
+              <div className="absolute top-0 right-0 w-8 h-8 border-t border-r border-brand/20" />
+              <div className="absolute bottom-0 left-0 w-8 h-8 border-b border-l border-brand/20" />
+              
+              <div className="flex items-center justify-between relative z-10">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#1DB954] to-[#1ed760] flex items-center justify-center text-black font-bold shadow-inner">
+                  <div className="w-10 h-10 bg-brand/10 border border-brand/30 flex items-center justify-center text-brand font-black shadow-[0_0_15px_rgba(29,185,84,0.1)]">
                     {user.displayName?.[0] || user.email?.[0] || 'U'}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-bold truncate group-hover:text-[#1DB954] transition-colors">{user.displayName || 'User'}</p>
-                    <p className="text-[10px] font-black text-gray-500 uppercase tracking-widest">Level {userProfile?.level || 1}</p>
+                    <p className="text-[11px] font-black truncate group-hover:text-brand transition-colors uppercase tracking-tight">{user.displayName || 'User'}</p>
+                    <p className="hud-label !text-gray-500">LVL {userProfile?.level || 1}</p>
                   </div>
                 </div>
-                <button onClick={handleLogout} className="p-2 text-gray-500 hover:text-red-500 hover:bg-red-500/10 rounded-full transition-colors">
+                <button onClick={handleLogout} className="p-2 text-gray-600 hover:text-red-500 transition-colors">
                   <LogOut className="w-4 h-4" />
                 </button>
               </div>
               
               {/* XP Progress Bar */}
-              <div className="space-y-1.5 px-1">
-                <div className="flex justify-between text-[10px] font-bold text-gray-400">
+              <div className="space-y-2 relative z-10">
+                <div className="flex justify-between text-[8px] font-black text-gray-600 uppercase tracking-widest">
                   <span>{userProfile?.xp || 0} XP</span>
                   <span>{userProfile?.xpToNextLevel || 1000} XP</span>
                 </div>
-                <div className="h-1.5 w-full bg-black/50 rounded-full overflow-hidden shadow-inner">
+                <div className="h-1 w-full bg-black border border-white/5 overflow-hidden">
                   <div 
-                    className="h-full bg-gradient-to-r from-[#1DB954] to-[#1ed760] rounded-full transition-all duration-500 relative"
+                    className="h-full bg-brand shadow-[0_0_10px_var(--color-brand-glow)] transition-all duration-1000"
                     style={{ width: `${((userProfile?.xp || 0) / (userProfile?.xpToNextLevel || 1000)) * 100}%` }}
-                  >
-                    <div className="absolute inset-0 bg-white/20 w-full animate-[shimmer_2s_infinite]" />
-                  </div>
+                  />
                 </div>
               </div>
             </div>
           ) : (
             <div className="flex flex-col gap-3">
-              {!user && (
-                <div className="p-3 bg-white/5 border border-white/5 rounded-2xl mb-2">
-                  <div className="flex items-center gap-3 mb-2">
-                    <div className="w-8 h-8 rounded-full bg-gray-800 flex items-center justify-center">
-                      <User className="w-4 h-4 text-gray-400" />
-                    </div>
-                    <div>
-                      <p className="text-xs font-bold">Guest Account</p>
-                      <p className="text-[10px] text-gray-500">Local progress only</p>
-                    </div>
-                  </div>
-                  <div className="h-1 w-full bg-gray-800 rounded-full overflow-hidden">
-                    <div 
-                      className="h-full bg-gray-600 rounded-full"
-                      style={{ width: `${((userProfile?.xp || 0) / (userProfile?.xpToNextLevel || 1000)) * 100}%` }}
-                    />
-                  </div>
-                </div>
-              )}
               <button 
                 onClick={handleLogin}
-                className="w-full flex items-center justify-center gap-3 py-3 bg-white text-black rounded-full font-black hover:scale-105 transition-all"
+                className="scifi-button w-full"
               >
-                <LogIn className="w-5 h-5" />
-                {!user ? 'Link Account' : 'Sign In'}
+                <LogIn className="w-4 h-4" />
+                LINK ACCOUNT
               </button>
             </div>
           )}
@@ -379,73 +355,65 @@ export default function Layout() {
       </aside>
 
       {/* Main Content Area */}
-      <main className="flex-1 flex flex-col min-w-0 bg-gradient-to-b from-[#1a1a1a] to-[#121212] relative overflow-hidden">
+      <main className="flex-1 flex flex-col min-w-0 bg-surface relative overflow-hidden">
+        {/* Technical Grid Background */}
+        <div className="absolute inset-0 pointer-events-none tech-grid opacity-40" />
+        <div className="absolute inset-0 pointer-events-none tech-grid-fine opacity-20" />
+        <div className="scanline" />
+        
         {/* Top Navigation Bar */}
-        <header className="h-16 flex items-center justify-between px-4 md:px-8 sticky top-0 z-40 bg-[#121212]/40 backdrop-blur-xl border-b border-white/5">
-          <div className="flex items-center gap-4">
-            <div className="flex items-center gap-2">
-              <button onClick={() => navigate(-1)} className="p-2 bg-black/40 rounded-full text-gray-400 hover:text-white transition-colors">
-                <ChevronLeft className="w-5 h-5" />
+        <header className="h-16 flex items-center justify-between px-4 md:px-8 sticky top-0 z-40 bg-surface/80 backdrop-blur-xl border-b border-border-dim">
+          <div className="flex items-center gap-6">
+            <div className="flex items-center gap-1">
+              <button onClick={() => navigate(-1)} className="p-2 text-gray-500 hover:text-white transition-all border border-transparent hover:border-border-bright">
+                <ChevronLeft className="w-4 h-4" />
               </button>
-              <button onClick={() => navigate(1)} className="p-2 bg-black/40 rounded-full text-gray-400 hover:text-white transition-colors">
-                <ChevronRight className="w-5 h-5" />
+              <button onClick={() => navigate(1)} className="p-2 text-gray-500 hover:text-white transition-all border border-transparent hover:border-border-bright">
+                <ChevronRight className="w-4 h-4" />
               </button>
             </div>
             
-            <div className="relative hidden sm:block">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
+            <div className="relative hidden lg:block">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-600" />
               <input 
                 type="text" 
-                placeholder="What do you want to study?"
+                placeholder="SYSTEM_SEARCH_INIT..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-64 md:w-80 bg-white/10 border border-transparent focus:border-white/20 rounded-full py-2 pl-10 pr-4 text-sm outline-none transition-all focus:bg-white/20"
+                className="w-80 bg-white/5 border border-border-dim focus:border-brand/50 py-2 pl-10 pr-4 text-[10px] font-black uppercase tracking-widest outline-none transition-all focus:bg-white/10"
               />
             </div>
-
-            {!user && isAuthReady && (
-              <div className="hidden lg:flex items-center gap-2 px-3 py-1 bg-yellow-500/10 border border-yellow-500/20 rounded-full">
-                <div className="w-1.5 h-1.5 bg-yellow-500 rounded-full animate-pulse" />
-                <span className="text-[10px] font-black text-yellow-500 uppercase tracking-widest">Guest Mode: Local Save Only</span>
-              </div>
-            )}
           </div>
 
-          <div className="flex items-center gap-2 md:gap-4">
-            {!user && (
-              <button 
-                onClick={handleLogin}
-                className="hidden md:flex items-center gap-2 px-4 py-2 bg-[#1DB954] text-black rounded-full font-black text-xs hover:scale-105 transition-all shadow-lg shadow-[#1DB954]/20"
-              >
-                <LogIn className="w-3.5 h-3.5" />
-                SIGN IN TO SYNC
+          <div className="flex items-center gap-3 md:gap-6">
+            <div className="flex items-center gap-1">
+              <button className="p-2 text-gray-600 hover:text-brand transition-colors relative">
+                <Bell className="w-4 h-4" />
+                <span className="absolute top-2 right-2 w-1.5 h-1.5 bg-brand shadow-[0_0_5px_var(--color-brand-glow)]" />
               </button>
-            )}
-            <button className="p-2 text-gray-400 hover:text-white transition-colors relative">
-              <Bell className="w-5 h-5" />
-              <span className="absolute top-2 right-2 w-2 h-2 bg-[#1DB954] rounded-full border-2 border-black" />
-            </button>
-            <button className="p-2 text-gray-400 hover:text-white transition-colors">
-              <Users className="w-5 h-5" />
-            </button>
+              <button className="p-2 text-gray-600 hover:text-brand transition-colors">
+                <Users className="w-4 h-4" />
+              </button>
+            </div>
             <button 
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className="md:hidden p-2 text-gray-400 hover:text-white transition-colors"
+              className="md:hidden p-2 text-gray-600 hover:text-white transition-colors border border-border-dim"
             >
-              {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+              {isMobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
             </button>
-            <div className="w-px h-6 bg-white/10 mx-2 hidden md:block" />
-            <div className="hidden md:flex items-center gap-3 pl-2 group cursor-pointer">
-              <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center overflow-hidden">
+            <div className="w-[1px] h-6 bg-border-dim mx-2 hidden md:block" />
+            <div className="hidden md:flex items-center gap-4 pl-2 group cursor-pointer" onClick={() => navigate('/settings')}>
+              <div className="text-right hidden xl:block">
+                <p className="text-[11px] font-black group-hover:text-brand transition-colors uppercase tracking-tight">{user?.displayName?.split(' ')[0] || 'GUEST_01'}</p>
+                <p className="hud-label !text-gray-600">AUTH_VERIFIED</p>
+              </div>
+              <div className="w-9 h-9 bg-white/5 border border-border-dim flex items-center justify-center overflow-hidden group-hover:border-brand/50 transition-all">
                 {user?.photoURL ? (
-                  <img src={user.photoURL} alt="" className="w-full h-full object-cover" />
+                  <img src={user.photoURL} alt="" className="w-full h-full object-cover opacity-80 group-hover:opacity-100" />
                 ) : (
-                  <User className="w-4 h-4 text-gray-400" />
+                  <User className="w-4 h-4 text-gray-600" />
                 )}
               </div>
-              <span className="text-sm font-bold group-hover:text-[#1DB954] transition-colors">
-                {user?.displayName?.split(' ')[0] || 'Guest'}
-              </span>
             </div>
           </div>
         </header>
@@ -464,71 +432,69 @@ export default function Layout() {
               initial={{ y: 100 }}
               animate={{ y: 0 }}
               exit={{ y: 100 }}
-              className="fixed bottom-0 left-0 right-0 z-[60] bg-black border-t border-white/10 px-4 py-3 md:px-6"
+              className="fixed bottom-0 left-0 right-0 z-[60] bg-surface border-t border-border-dim px-4 py-4 md:px-8"
             >
-              <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
-                <div className="flex items-center gap-4 min-w-0 flex-1 md:flex-none">
-                  <div className="w-14 h-14 bg-white/5 rounded-lg overflow-hidden shrink-0 relative group cursor-pointer" onClick={() => setIsNowPlayingOpen(!isNowPlayingOpen)}>
+              <div className="max-w-7xl mx-auto flex items-center justify-between gap-6">
+                <div className="flex items-center gap-5 min-w-0 flex-1 md:flex-none">
+                  <div className="w-12 h-12 bg-white/5 border border-border-dim overflow-hidden shrink-0 relative group cursor-pointer" onClick={() => setIsNowPlayingOpen(!isNowPlayingOpen)}>
                     <img 
                       src={activeSubject?.image || `https://picsum.photos/seed/${activeSubject?.id}/100/100`} 
                       alt="" 
-                      className="w-full h-full object-cover"
+                      className="w-full h-full object-cover opacity-80 group-hover:opacity-100"
                       referrerPolicy="no-referrer"
                     />
-                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
-                      <ChevronRight className={cn("w-6 h-6 text-white transition-transform", isNowPlayingOpen ? "rotate-90" : "-rotate-90")} />
+                    <div className="absolute inset-0 bg-brand/20 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
+                      <ChevronRight className={cn("w-5 h-5 text-white transition-transform", isNowPlayingOpen ? "rotate-90" : "-rotate-90")} />
                     </div>
                   </div>
                   <div className="min-w-0">
-                    <h4 className="font-bold text-sm truncate hover:underline cursor-pointer">{activeSubject?.name}</h4>
-                    <p className="text-xs text-gray-400 truncate">Deep Focus Session</p>
+                    <h4 className="font-black text-[11px] uppercase tracking-tight truncate hover:text-brand cursor-pointer">{activeSubject?.name}</h4>
+                    <p className="hud-label !text-gray-600">ACTIVE_SESSION</p>
                   </div>
-                  <button className="p-2 text-gray-400 hover:text-white transition-colors hidden sm:block">
-                    <Heart className="w-5 h-5" />
-                  </button>
                 </div>
 
-                <div className="flex flex-col items-center gap-1 flex-1 max-w-xl">
-                  <div className="flex items-center gap-6">
-                    <button className="text-gray-400 hover:text-white transition-colors hidden sm:block"><Shuffle className="w-4 h-4" /></button>
-                    <button className="text-gray-400 hover:text-white transition-colors"><SkipBack className="w-5 h-5 fill-current" /></button>
+                <div className="flex flex-col items-center gap-2 flex-1 max-w-xl">
+                  <div className="flex items-center gap-8">
+                    <button className="text-gray-600 hover:text-white transition-colors hidden sm:block"><Shuffle className="w-3.5 h-3.5" /></button>
+                    <button className="text-gray-600 hover:text-white transition-colors"><SkipBack className="w-4 h-4 fill-current" /></button>
                     <button 
                       onClick={() => setIsPaused(!isPaused)}
-                      className="w-8 h-8 bg-white rounded-full flex items-center justify-center hover:scale-105 transition-transform"
+                      className="w-10 h-10 bg-white text-black flex items-center justify-center hover:bg-brand transition-all shadow-[0_0_15px_rgba(255,255,255,0.1)]"
+                      style={{ clipPath: 'polygon(20% 0%, 100% 0%, 100% 80%, 80% 100%, 0% 100%, 0% 20%)' }}
                     >
-                      {!isPaused ? <Pause className="w-5 h-5 text-black fill-current" /> : <Play className="w-5 h-5 text-black fill-current ml-0.5" />}
+                      {!isPaused ? <Pause className="w-5 h-5 fill-current" /> : <Play className="w-5 h-5 fill-current ml-0.5" />}
                     </button>
-                    <button className="text-gray-400 hover:text-white transition-colors"><SkipForward className="w-5 h-5 fill-current" /></button>
-                    <button className="text-gray-400 hover:text-white transition-colors hidden sm:block"><Repeat className="w-4 h-4" /></button>
+                    <button className="text-gray-600 hover:text-white transition-colors"><SkipForward className="w-4 h-4 fill-current" /></button>
+                    <button className="text-gray-600 hover:text-white transition-colors hidden sm:block"><Repeat className="w-3.5 h-3.5" /></button>
                   </div>
-                  <div className="w-full flex items-center gap-2">
-                    <span className="text-[10px] font-bold text-gray-500 tabular-nums w-8 text-right">{formatTime(activeSession.elapsedSeconds)}</span>
-                    <div className="flex-1 h-1 bg-white/10 rounded-full overflow-hidden group cursor-pointer">
-                      <div className="h-full bg-white group-hover:bg-[#1DB954] transition-all" style={{ width: `${progress}%` }} />
+                  <div className="w-full flex items-center gap-3">
+                    <span className="text-[9px] font-black text-gray-600 tabular-nums w-10 text-right tracking-widest">{formatTime(activeSession.elapsedSeconds)}</span>
+                    <div className="flex-1 h-[2px] bg-white/5 relative group cursor-pointer">
+                      <div className="absolute inset-0 bg-brand/10" />
+                      <div className="h-full bg-brand shadow-[0_0_10px_var(--color-brand-glow)] transition-all" style={{ width: `${progress}%` }} />
                     </div>
-                    <span className="text-[10px] font-bold text-gray-500 tabular-nums w-8">{formatTime(activeSession.totalSeconds)}</span>
+                    <span className="text-[9px] font-black text-gray-600 tabular-nums w-10 tracking-widest">{formatTime(activeSession.totalSeconds)}</span>
                   </div>
                 </div>
 
-                <div className="hidden md:flex items-center justify-end gap-3 min-w-[200px]">
-                  <button onClick={() => setIsFocusMode(true)} className="p-2 text-gray-400 hover:text-[#1DB954] transition-colors group relative">
-                    <Zap className="w-5 h-5" />
-                    <span className="absolute -top-8 left-1/2 -translate-x-1/2 bg-white text-black text-[10px] font-black px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">FOCUS MODE</span>
+                <div className="hidden md:flex items-center justify-end gap-4 min-w-[240px]">
+                  <button onClick={() => setIsFocusMode(true)} className="p-2 text-gray-600 hover:text-brand transition-colors group relative">
+                    <Zap className="w-4 h-4" />
+                    <span className="absolute -top-10 left-1/2 -translate-x-1/2 bg-brand text-black text-[8px] font-black px-2 py-1 opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap tracking-widest">HUD_FOCUS</span>
                   </button>
-                  <button onClick={finishSession} className="p-2 text-gray-400 hover:text-white transition-colors group relative">
-                    <Clock className="w-5 h-5" />
-                    <span className="absolute -top-8 left-1/2 -translate-x-1/2 bg-white text-black text-[10px] font-black px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">FINISH SESSION</span>
+                  <button onClick={finishSession} className="p-2 text-gray-600 hover:text-white transition-colors group relative">
+                    <Clock className="w-4 h-4" />
+                    <span className="absolute -top-10 left-1/2 -translate-x-1/2 bg-white text-black text-[8px] font-black px-2 py-1 opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap tracking-widest">TERM_SESSION</span>
                   </button>
-                  <button className="p-2 text-gray-400 hover:text-white transition-colors"><ListMusic className="w-5 h-5" /></button>
-                  <button className="p-2 text-gray-400 hover:text-white transition-colors"><Clock className="w-5 h-5" /></button>
-                  <div className="flex items-center gap-2 w-24">
-                    <Volume2 className="w-5 h-5 text-gray-400" />
-                    <div className="flex-1 h-1 bg-white/10 rounded-full overflow-hidden">
-                      <div className="h-full bg-white w-2/3" />
+                  <div className="w-[1px] h-4 bg-border-dim mx-1" />
+                  <div className="flex items-center gap-3 w-28">
+                    <Volume2 className="w-4 h-4 text-gray-600" />
+                    <div className="flex-1 h-[2px] bg-white/5">
+                      <div className="h-full bg-gray-500 w-2/3" />
                     </div>
                   </div>
-                  <button onClick={() => setIsNowPlayingOpen(!isNowPlayingOpen)} className="p-2 text-gray-400 hover:text-white transition-colors">
-                    <ChevronRight className={cn("w-5 h-5 transition-transform", isNowPlayingOpen ? "rotate-90" : "-rotate-90")} />
+                  <button onClick={() => setIsNowPlayingOpen(!isNowPlayingOpen)} className="p-2 text-gray-600 hover:text-white transition-colors">
+                    <ChevronRight className={cn("w-4 h-4 transition-transform", isNowPlayingOpen ? "rotate-90" : "-rotate-90")} />
                   </button>
                 </div>
               </div>

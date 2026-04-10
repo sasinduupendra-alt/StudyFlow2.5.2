@@ -33,10 +33,10 @@ export const SubjectCard = React.memo(({ subject, onStartFocus }: SubjectCardPro
 
   return (
     <motion.div 
-      whileHover={{ scale: 1.02, y: -8, borderColor: 'rgba(29, 185, 84, 0.4)' }}
+      whileHover={{ y: -5 }}
       whileTap={{ scale: 0.98 }}
-      transition={{ type: 'spring', stiffness: 300, damping: 20 }}
-      className="group relative bg-[#181818] rounded-2xl overflow-hidden border border-white/5 transition-all duration-500 shadow-2xl"
+      className="scifi-panel group cursor-pointer"
+      onClick={() => onStartFocus(subject.id)}
     >
       {/* Background Image & Gradient */}
       <div className="absolute inset-0 z-0">
@@ -44,34 +44,35 @@ export const SubjectCard = React.memo(({ subject, onStartFocus }: SubjectCardPro
           src={subject.image}
           alt={subject.name}
           containerClassName="w-full h-full"
-          className="opacity-30 group-hover:opacity-50 transition-opacity duration-700"
+          className="opacity-10 group-hover:opacity-30 transition-opacity duration-1000"
           fallbackGradient={subject.gradient}
           fallbackText={subject.name[0]}
         />
-        <div className={cn("absolute inset-0 bg-gradient-to-t from-[#121212] via-[#121212]/80 to-transparent opacity-90")} />
-        {/* Aesthetic Overlay */}
-        <div className="absolute inset-0 bg-black/20 group-hover:bg-transparent transition-colors duration-500" />
+        <div className="absolute inset-0 bg-gradient-to-t from-surface via-surface/80 to-transparent" />
       </div>
 
-      <div className="relative z-10 p-6 flex flex-col h-full min-h-[280px]">
-        <div className="flex items-start justify-between mb-4">
+      <div className="relative z-10 p-6 flex flex-col h-full min-h-[340px]">
+        <div className="flex items-start justify-between mb-6">
           <div className={cn(
-            "px-3 py-1 rounded-full border text-[10px] font-bold uppercase tracking-widest flex items-center gap-1.5",
+            "px-3 py-1 border text-[8px] font-black uppercase tracking-[0.2em] flex items-center gap-2 backdrop-blur-md",
             getStatusColor(subject.status)
           )}>
             <StatusIcon className="w-3 h-3" />
             {subject.status}
           </div>
-          <button className="p-2 text-gray-400 hover:text-white transition-colors">
-            <MoreVertical className="w-5 h-5" />
-          </button>
+          <div className="w-8 h-8 bg-white/5 border border-border-dim flex items-center justify-center text-gray-600 group-hover:text-brand transition-colors">
+            <MoreVertical className="w-4 h-4" />
+          </div>
         </div>
 
         <div className="flex-1">
-          <h3 className="text-xl md:text-2xl font-bold mb-1 group-hover:text-[#1DB954] transition-colors">{subject.name}</h3>
-          <p className="text-xs md:text-sm text-gray-400 mb-6">{subject.topics.length} Topics • {subject.weakCount} Weak Areas</p>
+          <h3 className="text-lg font-black mb-1 group-hover:text-brand transition-colors uppercase tracking-tight">{subject.name}</h3>
+          <div className="flex items-center gap-2 mb-6">
+            <div className="w-1 h-3 bg-brand/40" />
+            <p className="hud-label !text-gray-600">{subject.topics.length} MODULES_DETECTED</p>
+          </div>
           
-          <div className="flex items-center gap-4 mb-6">
+          <div className="flex items-center gap-6 mb-8">
             <div className="relative w-16 h-16">
               <svg className="w-full h-full -rotate-90">
                 <circle
@@ -80,8 +81,8 @@ export const SubjectCard = React.memo(({ subject, onStartFocus }: SubjectCardPro
                   r="28"
                   fill="none"
                   stroke="currentColor"
-                  strokeWidth="4"
-                  className="text-white/10"
+                  strokeWidth="2"
+                  className="text-white/5"
                 />
                 <circle
                   cx="32"
@@ -89,84 +90,77 @@ export const SubjectCard = React.memo(({ subject, onStartFocus }: SubjectCardPro
                   r="28"
                   fill="none"
                   stroke="currentColor"
-                  strokeWidth="4"
+                  strokeWidth="2"
                   strokeDasharray={2 * Math.PI * 28}
                   strokeDashoffset={2 * Math.PI * 28 * (1 - subject.readiness / 100)}
                   className={cn(
-                    "transition-all duration-1000",
-                    subject.readiness > 65 ? "text-[#1DB954]" : subject.readiness > 40 ? "text-yellow-500" : "text-red-500"
+                    "transition-all duration-1000 shadow-[0_0_10px_var(--color-brand-glow)]",
+                    subject.readiness > 65 ? "text-brand" : subject.readiness > 40 ? "text-yellow-500" : "text-red-500"
                   )}
                 />
               </svg>
               <div className="absolute inset-0 flex flex-col items-center justify-center">
-                <motion.span 
-                  key={subject.readiness}
-                  initial={{ scale: 1.1, color: '#1DB954' }}
-                  animate={{ scale: 1, color: '#fff' }}
-                  className="text-xs font-bold leading-none"
-                >
-                  {Math.round(subject.readiness)}%
-                </motion.span>
-                <span className="text-[8px] text-gray-500 uppercase font-bold">Ready</span>
+                <span className="text-xs font-black tabular-nums">{Math.round(subject.readiness)}%</span>
+                <span className="text-[7px] text-gray-600 uppercase font-black tracking-tighter">READY</span>
               </div>
             </div>
 
             <div className="flex-1 grid grid-cols-2 gap-2">
-              <div className="bg-white/5 backdrop-blur-md rounded-xl p-2 border border-white/5">
-                <p className="text-[10px] text-gray-500 font-bold uppercase">Score</p>
-                <p className="text-lg font-bold">{subject.score}%</p>
+              <div className="bg-white/5 p-2 border border-border-dim">
+                <p className="hud-label !text-gray-700">SCORE</p>
+                <p className="text-sm font-black tabular-nums">{subject.score}%</p>
               </div>
-              <div className="bg-white/5 backdrop-blur-md rounded-xl p-2 border border-white/5">
-                <p className="text-[10px] text-gray-500 font-bold uppercase">Priority</p>
-                <p className="text-lg font-bold">#{Math.round(subject.priorityScore)}</p>
+              <div className="bg-white/5 p-2 border border-border-dim">
+                <p className="hud-label !text-gray-700">WEAK</p>
+                <p className="text-sm font-black tabular-nums text-red-500">{subject.weakCount}</p>
               </div>
             </div>
           </div>
 
           {/* Quick Links Section */}
           <div className="mb-6 space-y-2">
-            <p className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-500 mb-2">Quick Links</p>
-            <div className="space-y-1.5">
-              {subject.topics.slice(0, 3).map((topic) => (
+            <p className="hud-label">Module_Index</p>
+            <div className="space-y-1">
+              {subject.topics.slice(0, 2).map((topic) => (
                 <button
                   key={topic.id}
                   onClick={(e) => {
                     e.stopPropagation();
                     onStartFocus(subject.id, topic.id);
                   }}
-                  className="w-full flex items-center justify-between p-2.5 rounded-xl bg-white/5 hover:bg-[#1DB954]/10 border border-transparent hover:border-[#1DB954]/20 transition-all group/link"
+                  className="w-full flex items-center justify-between p-2 bg-white/5 border border-transparent hover:border-brand/20 transition-all group/link"
                 >
-                  <span className="text-[11px] font-bold text-gray-400 group-hover/link:text-white truncate pr-2">
+                  <span className="text-[9px] font-black text-gray-600 group-hover/link:text-white truncate pr-2 uppercase tracking-tight">
                     {topic.title}
                   </span>
-                  <Zap className="w-3 h-3 text-gray-700 group-hover/link:text-[#1DB954] shrink-0 transition-colors" />
+                  <Zap className="w-3 h-3 text-gray-800 group-hover/link:text-brand shrink-0 transition-colors" />
                 </button>
               ))}
             </div>
           </div>
         </div>
 
-        <div className="flex items-center gap-3 mt-auto">
+        <div className="flex items-center gap-2 mt-auto">
           <button 
             onClick={() => onStartFocus(subject.id)}
-            className="flex-1 flex items-center justify-center gap-2 h-11 md:h-12 bg-white text-black rounded-xl font-bold hover:scale-105 active:scale-95 transition-all shadow-xl"
+            className="scifi-button flex-1"
           >
             <Zap className="w-4 h-4 fill-current" />
-            Focus
+            INIT_FOCUS
           </button>
-          <button className="w-11 h-11 md:w-12 md:h-12 flex items-center justify-center bg-white/10 hover:bg-white/20 rounded-xl transition-all">
-            <TrendingUp className="w-5 h-5" />
+          <button className="w-12 h-12 flex items-center justify-center bg-white/5 border border-border-dim hover:border-brand/30 transition-all group/btn">
+            <TrendingUp className="w-5 h-5 text-gray-600 group-hover:text-white transition-colors" />
           </button>
         </div>
       </div>
 
       {/* Mastery Progress Bar */}
-      <div className="absolute bottom-0 left-0 right-0 h-1 bg-white/5">
+      <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-white/5">
         <motion.div 
           initial={{ width: 0 }}
           whileInView={{ width: `${subject.score}%` }}
           transition={{ duration: 1, ease: "easeOut" }}
-          className="h-full bg-[#1DB954]" 
+          className="h-full bg-brand shadow-[0_0_10px_var(--color-brand-glow)]" 
         />
       </div>
     </motion.div>

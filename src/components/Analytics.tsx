@@ -89,71 +89,71 @@ export default function Analytics({ subjects, studyLogs, exams }: AnalyticsProps
   return (
     <div className="space-y-8 p-4 md:p-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="bg-[#181818] p-6 rounded-2xl border border-white/5 hover:border-white/10 transition-all group">
+        <div className="scifi-panel-sm p-6 group">
           <div className="flex items-center gap-3 mb-4">
-            <div className="p-2 bg-[#1DB954]/10 rounded-lg text-[#1DB954] group-hover:scale-110 transition-transform">
-              <Clock className="w-5 h-5" />
+            <div className="p-2 bg-brand/10 border border-brand/20 text-brand group-hover:scale-110 transition-transform">
+              <Clock className="w-4 h-4" />
             </div>
-            <span className="text-sm font-bold text-gray-400">Total Study Time</span>
+            <span className="hud-label">TOTAL_STUDY_TIME</span>
           </div>
-          <p className="text-3xl font-bold">{Math.floor(totalStudyTime / 60)}h {totalStudyTime % 60}m</p>
+          <p className="text-2xl font-black tabular-nums tracking-tighter">{Math.floor(totalStudyTime / 60)}H {totalStudyTime % 60}M</p>
         </div>
 
-        <div className="bg-[#181818] p-6 rounded-2xl border border-white/5 hover:border-white/10 transition-all group">
+        <div className="scifi-panel-sm p-6 group">
           <div className="flex items-center gap-3 mb-4">
-            <div className="p-2 bg-yellow-500/10 rounded-lg text-yellow-500 group-hover:scale-110 transition-transform">
-              <Star className="w-5 h-5" />
+            <div className="p-2 bg-yellow-500/10 border border-yellow-500/20 text-yellow-500 group-hover:scale-110 transition-transform">
+              <Star className="w-4 h-4" />
             </div>
-            <span className="text-sm font-bold text-gray-400">Avg Focus Level</span>
+            <span className="hud-label">AVG_FOCUS_LVL</span>
           </div>
-          <p className="text-3xl font-bold">{avgFocus}/5.0</p>
+          <p className="text-2xl font-black tabular-nums tracking-tighter">{avgFocus}/5.0</p>
         </div>
 
-        <div className="bg-[#181818] p-6 rounded-2xl border border-white/5 hover:border-white/10 transition-all group">
+        <div className="scifi-panel-sm p-6 group">
           <div className="flex items-center gap-3 mb-4">
-            <div className="p-2 bg-blue-500/10 rounded-lg text-blue-500 group-hover:scale-110 transition-transform">
-              <Target className="w-5 h-5" />
+            <div className="p-2 bg-blue-500/10 border border-blue-500/20 text-blue-500 group-hover:scale-110 transition-transform">
+              <Target className="w-4 h-4" />
             </div>
-            <span className="text-sm font-bold text-gray-400">Readiness Avg</span>
+            <span className="hud-label">READINESS_AVG</span>
           </div>
-          <p className="text-3xl font-bold">
+          <p className="text-2xl font-black tabular-nums tracking-tighter">
             {subjects.length > 0 ? Math.round(subjects.reduce((acc, s) => acc + s.readiness, 0) / subjects.length) : 0}%
           </p>
         </div>
 
-        <div className="bg-[#181818] p-6 rounded-2xl border border-white/5 hover:border-white/10 transition-all group">
+        <div className="scifi-panel-sm p-6 group">
           <div className="flex items-center gap-3 mb-4">
-            <div className="p-2 bg-purple-500/10 rounded-lg text-purple-500 group-hover:scale-110 transition-transform">
-              <Zap className="w-5 h-5" />
+            <div className="p-2 bg-purple-500/10 border border-purple-500/20 text-purple-500 group-hover:scale-110 transition-transform">
+              <Zap className="w-4 h-4" />
             </div>
-            <span className="text-sm font-bold text-gray-400">Sessions Logged</span>
+            <span className="hud-label">SESSIONS_LOGGED</span>
           </div>
-          <p className="text-3xl font-bold">{studyLogs.length}</p>
+          <p className="text-2xl font-black tabular-nums tracking-tighter">{studyLogs.length}</p>
         </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         <motion.div 
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
-          className="bg-[#181818] p-6 rounded-2xl border border-white/5"
+          className="scifi-panel p-6"
         >
-          <h3 className="text-xl font-bold mb-6 flex items-center gap-2">
-            <TrendingUp className="w-5 h-5 text-[#1DB954]" />
-            Subject Balance
+          <h3 className="text-sm font-black mb-6 flex items-center gap-2 uppercase tracking-tighter">
+            <TrendingUp className="w-4 h-4 text-brand" />
+            SUBJECT_BALANCE_MATRIX
           </h3>
           <div className="h-[300px]">
             <ResponsiveContainer width="100%" height="100%">
               <RadarChart data={radarData}>
-                <PolarGrid stroke="#333" />
-                <PolarAngleAxis dataKey="subject" tick={{ fill: '#9ca3af', fontSize: typeof window !== 'undefined' && window.innerWidth < 768 ? 8 : 12 }} />
-                <PolarRadiusAxis angle={30} domain={[0, 100]} tick={{ fill: '#4b5563', fontSize: 10 }} />
-                <Radar name="Performance" dataKey="Score" stroke="#1DB954" fill="#1DB954" fillOpacity={0.4} />
-                <Radar name="Readiness" dataKey="Readiness" stroke="#3b82f6" fill="#3b82f6" fillOpacity={0.4} />
+                <PolarGrid stroke="#222" />
+                <PolarAngleAxis dataKey="subject" tick={{ fill: '#444', fontSize: 9, fontWeight: 900 }} />
+                <PolarRadiusAxis angle={30} domain={[0, 100]} tick={{ fill: '#333', fontSize: 7 }} />
+                <Radar name="Performance" dataKey="Score" stroke="var(--color-brand)" fill="var(--color-brand)" fillOpacity={0.2} />
+                <Radar name="Readiness" dataKey="Readiness" stroke="#3b82f6" fill="#3b82f6" fillOpacity={0.2} />
                 <Tooltip 
-                  contentStyle={{ backgroundColor: '#181818', border: '1px solid #333', borderRadius: '8px' }}
-                  itemStyle={{ color: '#fff' }}
+                  contentStyle={{ backgroundColor: '#0a0a0a', border: '1px solid #222', borderRadius: '0px' }}
+                  itemStyle={{ color: '#fff', fontSize: '9px', fontWeight: 900, textTransform: 'uppercase' }}
                 />
               </RadarChart>
             </ResponsiveContainer>
@@ -161,14 +161,14 @@ export default function Analytics({ subjects, studyLogs, exams }: AnalyticsProps
         </motion.div>
 
         <motion.div 
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
-          className="bg-[#181818] p-6 rounded-2xl border border-white/5"
+          className="scifi-panel p-6"
         >
-          <h3 className="text-xl font-bold mb-6 flex items-center gap-2">
-            <CheckCircle2 className="w-5 h-5 text-[#1DB954]" />
-            Topic Mastery Distribution
+          <h3 className="text-sm font-black mb-6 flex items-center gap-2 uppercase tracking-tighter">
+            <CheckCircle2 className="w-4 h-4 text-brand" />
+            TOPIC_MASTERY_DISTRIBUTION
           </h3>
           <div className="h-[400px] sm:h-[300px] flex flex-col sm:flex-row items-center gap-6">
             <ResponsiveContainer width="100%" height="100%">
@@ -181,23 +181,24 @@ export default function Analytics({ subjects, studyLogs, exams }: AnalyticsProps
                   outerRadius={100}
                   paddingAngle={5}
                   dataKey="value"
+                  stroke="none"
                 >
                   {pieData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={entry.color} />
+                    <Cell key={`cell-${index}`} fill={entry.color} fillOpacity={0.6} />
                   ))}
                 </Pie>
                 <Tooltip 
-                  contentStyle={{ backgroundColor: '#181818', border: '1px solid #333', borderRadius: '8px' }}
-                  itemStyle={{ color: '#fff' }}
+                  contentStyle={{ backgroundColor: '#0a0a0a', border: '1px solid #222', borderRadius: '0px' }}
+                  itemStyle={{ color: '#fff', fontSize: '9px', fontWeight: 900, textTransform: 'uppercase' }}
                 />
               </PieChart>
             </ResponsiveContainer>
-            <div className="space-y-4 sm:pr-8 w-full sm:w-auto">
+            <div className="space-y-3 sm:pr-8 w-full sm:w-auto">
               {pieData.map((d) => (
                 <div key={d.name} className="flex items-center gap-3">
-                  <div className="w-3 h-3 rounded-full" style={{ backgroundColor: d.color }} />
-                  <span className="text-sm text-gray-400">{d.name}</span>
-                  <span className="text-sm font-bold ml-auto">{d.value}</span>
+                  <div className="w-2 h-2" style={{ backgroundColor: d.color }} />
+                  <span className="hud-label !text-gray-600">{d.name}</span>
+                  <span className="text-[10px] font-black ml-auto tabular-nums">{d.value}</span>
                 </div>
               ))}
             </div>
@@ -206,56 +207,56 @@ export default function Analytics({ subjects, studyLogs, exams }: AnalyticsProps
       </div>
 
       <motion.div 
-        initial={{ opacity: 0, y: 20 }}
+        initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.3 }}
-        className="bg-[#181818] p-6 rounded-2xl border border-white/5"
+        className="scifi-panel p-6"
       >
-        <h3 className="text-xl font-bold mb-6 flex items-center gap-2">
-          <Star className="w-5 h-5 text-yellow-500" />
-          Focus Level Trend (Last 7 Sessions)
+        <h3 className="text-sm font-black mb-6 flex items-center gap-2 uppercase tracking-tighter">
+          <Star className="w-4 h-4 text-yellow-500" />
+          FOCUS_LEVEL_TREND_ANALYSIS
         </h3>
         <div className="h-[200px]">
           <ResponsiveContainer width="100%" height="100%">
             <AreaChart data={focusTrendData}>
               <defs>
                 <linearGradient id="focusGradient" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#fbbf24" stopOpacity={0.3}/>
+                  <stop offset="5%" stopColor="#fbbf24" stopOpacity={0.2}/>
                   <stop offset="95%" stopColor="#fbbf24" stopOpacity={0}/>
                 </linearGradient>
               </defs>
-              <CartesianGrid strokeDasharray="3 3" stroke="#333" vertical={false} />
-              <XAxis dataKey="name" stroke="#4b5563" fontSize={10} />
-              <YAxis stroke="#4b5563" fontSize={10} domain={[0, 5]} />
+              <CartesianGrid strokeDasharray="3 3" stroke="#111" vertical={false} />
+              <XAxis dataKey="name" stroke="#333" fontSize={7} fontWeight={900} />
+              <YAxis stroke="#333" fontSize={7} fontWeight={900} domain={[0, 5]} />
               <Tooltip 
-                contentStyle={{ backgroundColor: '#181818', border: '1px solid #333', borderRadius: '8px' }}
-                itemStyle={{ color: '#fff' }}
+                contentStyle={{ backgroundColor: '#0a0a0a', border: '1px solid #222', borderRadius: '0px' }}
+                itemStyle={{ color: '#fff', fontSize: '9px', fontWeight: 900, textTransform: 'uppercase' }}
               />
-              <Area type="monotone" dataKey="focus" stroke="#fbbf24" fillOpacity={1} fill="url(#focusGradient)" strokeWidth={2} />
+              <Area type="monotone" dataKey="focus" stroke="#fbbf24" fillOpacity={1} fill="url(#focusGradient)" strokeWidth={1} />
             </AreaChart>
           </ResponsiveContainer>
         </div>
       </motion.div>
 
       <motion.div 
-        initial={{ opacity: 0, y: 20 }}
+        initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.4 }}
-        className="bg-[#181818] p-6 rounded-2xl border border-white/5"
+        className="scifi-panel p-6"
       >
-        <h3 className="text-xl font-bold mb-6 flex items-center gap-2">
-          <TrendingUp className="w-5 h-5 text-[#1DB954]" />
-          Subject Mastery Trend (Last 14 Days)
+        <h3 className="text-sm font-black mb-6 flex items-center gap-2 uppercase tracking-tighter">
+          <TrendingUp className="w-4 h-4 text-brand" />
+          SUBJECT_MASTERY_TIMELINE
         </h3>
         <div className="h-[300px]">
           <ResponsiveContainer width="100%" height="100%">
             <LineChart data={masteryTrendData}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#333" vertical={false} />
-              <XAxis dataKey="name" stroke="#4b5563" fontSize={10} />
-              <YAxis stroke="#4b5563" fontSize={10} domain={[0, 100]} />
+              <CartesianGrid strokeDasharray="3 3" stroke="#111" vertical={false} />
+              <XAxis dataKey="name" stroke="#333" fontSize={7} fontWeight={900} />
+              <YAxis stroke="#333" fontSize={7} fontWeight={900} domain={[0, 100]} />
               <Tooltip 
-                contentStyle={{ backgroundColor: '#181818', border: '1px solid #333', borderRadius: '8px' }}
-                itemStyle={{ color: '#fff' }}
+                contentStyle={{ backgroundColor: '#0a0a0a', border: '1px solid #222', borderRadius: '0px' }}
+                itemStyle={{ color: '#fff', fontSize: '9px', fontWeight: 900, textTransform: 'uppercase' }}
               />
               {subjects.map((subject, index) => (
                 <Line 
@@ -263,9 +264,9 @@ export default function Analytics({ subjects, studyLogs, exams }: AnalyticsProps
                   type="monotone" 
                   dataKey={subject.name} 
                   stroke={SUBJECT_COLORS[index % SUBJECT_COLORS.length]} 
-                  strokeWidth={2} 
-                  dot={{ r: 3 }}
-                  activeDot={{ r: 5 }}
+                  strokeWidth={1} 
+                  dot={{ r: 2 }}
+                  activeDot={{ r: 4 }}
                 />
               ))}
             </LineChart>
@@ -274,101 +275,102 @@ export default function Analytics({ subjects, studyLogs, exams }: AnalyticsProps
         <div className="flex flex-wrap gap-4 mt-6 justify-center">
           {subjects.map((subject, index) => (
             <div key={subject.id} className="flex items-center gap-2">
-              <div className="w-3 h-3 rounded-full" style={{ backgroundColor: SUBJECT_COLORS[index % SUBJECT_COLORS.length] }} />
-              <span className="text-xs text-gray-400">{subject.name}</span>
+              <div className="w-2 h-2" style={{ backgroundColor: SUBJECT_COLORS[index % SUBJECT_COLORS.length] }} />
+              <span className="hud-label !text-gray-600">{subject.name}</span>
             </div>
           ))}
         </div>
       </motion.div>
 
-      <div className="bg-[#181818] p-6 rounded-2xl border border-white/5">
-        <h3 className="text-xl font-bold mb-6 flex items-center gap-2">
-          <Trophy className="w-5 h-5 text-yellow-500" />
-          Exam Performance Trend
+      <div className="scifi-panel p-6">
+        <h3 className="text-sm font-black mb-6 flex items-center gap-2 uppercase tracking-tighter">
+          <Trophy className="w-4 h-4 text-yellow-500" />
+          EXAM_PERFORMANCE_METRICS
         </h3>
         {exams.length > 0 ? (
           <div className="h-[300px]">
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={examTrendData}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#333" vertical={false} />
-                <XAxis dataKey="name" stroke="#4b5563" fontSize={10} />
-                <YAxis stroke="#4b5563" fontSize={10} domain={[0, 100]} />
+                <CartesianGrid strokeDasharray="3 3" stroke="#111" vertical={false} />
+                <XAxis dataKey="name" stroke="#333" fontSize={7} fontWeight={900} />
+                <YAxis stroke="#333" fontSize={7} fontWeight={900} domain={[0, 100]} />
                 <Tooltip 
-                  contentStyle={{ backgroundColor: '#181818', border: '1px solid #333', borderRadius: '8px' }}
-                  itemStyle={{ color: '#fff' }}
+                  contentStyle={{ backgroundColor: '#0a0a0a', border: '1px solid #222', borderRadius: '0px' }}
+                  itemStyle={{ color: '#fff', fontSize: '9px', fontWeight: 900, textTransform: 'uppercase' }}
                 />
-                <Line type="monotone" dataKey="average" stroke="#fbbf24" strokeWidth={3} dot={{ r: 6, fill: '#fbbf24' }} activeDot={{ r: 8 }} />
+                <Line type="monotone" dataKey="average" stroke="#fbbf24" strokeWidth={2} dot={{ r: 4, fill: '#fbbf24' }} activeDot={{ r: 6 }} />
               </LineChart>
             </ResponsiveContainer>
           </div>
         ) : (
-          <div className="h-[200px] flex flex-col items-center justify-center text-gray-500">
-            <Trophy className="w-12 h-12 mb-2 opacity-20" />
-            <p>No exam data available yet.</p>
+          <div className="h-[200px] flex flex-col items-center justify-center text-gray-700">
+            <Trophy className="w-8 h-8 mb-2 opacity-20" />
+            <p className="hud-label !text-gray-800">NO_DATA_DETECTED</p>
           </div>
         )}
       </div>
 
-      <div className="bg-[#181818] p-6 rounded-2xl border border-white/5">
-        <h3 className="text-xl font-bold mb-6 flex items-center gap-2">
-          <BarChart2 className="w-5 h-5 text-blue-500" />
-          Subject Performance per Exam
+      <div className="scifi-panel p-6">
+        <h3 className="text-sm font-black mb-6 flex items-center gap-2 uppercase tracking-tighter">
+          <BarChart2 className="w-4 h-4 text-blue-500" />
+          SUBJECT_PERFORMANCE_PER_EXAM
         </h3>
         {exams.length > 0 ? (
           <div className="h-[400px]">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={subjectExamPerformanceData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#333" vertical={false} />
-                <XAxis dataKey="name" stroke="#4b5563" fontSize={10} />
-                <YAxis stroke="#4b5563" fontSize={10} domain={[0, 100]} />
+                <CartesianGrid strokeDasharray="3 3" stroke="#111" vertical={false} />
+                <XAxis dataKey="name" stroke="#333" fontSize={7} fontWeight={900} />
+                <YAxis stroke="#333" fontSize={7} fontWeight={900} domain={[0, 100]} />
                 <Tooltip 
-                  contentStyle={{ backgroundColor: '#181818', border: '1px solid #333', borderRadius: '8px' }}
-                  itemStyle={{ color: '#fff' }}
+                  contentStyle={{ backgroundColor: '#0a0a0a', border: '1px solid #222', borderRadius: '0px' }}
+                  itemStyle={{ color: '#fff', fontSize: '9px', fontWeight: 900, textTransform: 'uppercase' }}
                 />
                 {subjects.map((subject, index) => (
                   <Bar 
                     key={subject.id} 
                     dataKey={subject.name} 
                     fill={SUBJECT_COLORS[index % SUBJECT_COLORS.length]} 
-                    radius={[4, 4, 0, 0]}
+                    fillOpacity={0.6}
+                    radius={[0, 0, 0, 0]}
                   />
                 ))}
               </BarChart>
             </ResponsiveContainer>
           </div>
         ) : (
-          <div className="h-[200px] flex flex-col items-center justify-center text-gray-500">
-            <BarChart2 className="w-12 h-12 mb-2 opacity-20" />
-            <p>No exam data available yet.</p>
+          <div className="h-[200px] flex flex-col items-center justify-center text-gray-700">
+            <BarChart2 className="w-8 h-8 mb-2 opacity-20" />
+            <p className="hud-label !text-gray-800">NO_DATA_DETECTED</p>
           </div>
         )}
         <div className="flex flex-wrap gap-4 mt-6 justify-center">
           {subjects.map((subject, index) => (
             <div key={subject.id} className="flex items-center gap-2">
-              <div className="w-3 h-3 rounded-full" style={{ backgroundColor: SUBJECT_COLORS[index % SUBJECT_COLORS.length] }} />
-              <span className="text-xs text-gray-400">{subject.name}</span>
+              <div className="w-2 h-2" style={{ backgroundColor: SUBJECT_COLORS[index % SUBJECT_COLORS.length] }} />
+              <span className="hud-label !text-gray-600">{subject.name}</span>
             </div>
           ))}
         </div>
       </div>
 
-      <div className="bg-gradient-to-br from-[#1DB954]/10 to-transparent p-8 rounded-3xl border border-[#1DB954]/20">
-        <h3 className="text-2xl font-bold mb-4 flex items-center gap-3">
-          <AlertTriangle className="w-6 h-6 text-[#1DB954]" />
-          A/L Study Rules
+      <div className="bg-brand/5 p-8 border border-brand/20">
+        <h3 className="text-sm font-black mb-6 flex items-center gap-3 uppercase tracking-tighter">
+          <AlertTriangle className="w-4 h-4 text-brand" />
+          A/L_PROTOCOL_RULES
         </h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           <div className="space-y-2">
-            <p className="font-bold text-[#1DB954]">Deep Work Block</p>
-            <p className="text-sm text-gray-400">90 minutes study + 10–15 min break for maximum cognitive retention.</p>
+            <p className="text-[10px] font-black text-brand uppercase tracking-widest">DEEP_WORK_BLOCK</p>
+            <p className="text-[9px] text-gray-600 font-black uppercase tracking-tighter">90M study + 15M break for maximum cognitive retention metrics.</p>
           </div>
           <div className="space-y-2">
-            <p className="font-bold text-[#1DB954]">Tuition Conversion</p>
-            <p className="text-sm text-gray-400">Mandatory same-day review of tuition lessons. Non-negotiable.</p>
+            <p className="text-[10px] font-black text-brand uppercase tracking-widest">TUITION_CONVERSION</p>
+            <p className="text-[9px] text-gray-600 font-black uppercase tracking-tighter">Mandatory same-day review of tuition lessons. Non-negotiable sync.</p>
           </div>
           <div className="space-y-2">
-            <p className="font-bold text-[#1DB954]">Nightly Routine</p>
-            <p className="text-sm text-gray-400">20–30 min error-log + formula recall before sleep every single day.</p>
+            <p className="text-[10px] font-black text-brand uppercase tracking-widest">NIGHTLY_ROUTINE</p>
+            <p className="text-[9px] text-gray-600 font-black uppercase tracking-tighter">20M error-log + formula recall before sleep cycle initialization.</p>
           </div>
         </div>
       </div>

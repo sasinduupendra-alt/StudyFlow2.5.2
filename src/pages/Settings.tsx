@@ -45,144 +45,147 @@ export default function Settings() {
       className="p-4 md:p-8 max-w-4xl mx-auto"
     >
       <div className="mb-12">
-        <h1 className="text-4xl font-black tracking-tight mb-2 flex items-center gap-4">
-          <SettingsIcon className="w-10 h-10 text-[#1DB954]" />
-          Settings
+        <h1 className="text-3xl font-black tracking-tighter mb-2 flex items-center gap-4 uppercase">
+          <SettingsIcon className="w-8 h-8 text-brand" />
+          SYSTEM_SETTINGS
         </h1>
-        <p className="text-gray-400 font-medium">Manage your account, preferences, and data.</p>
+        <p className="hud-label !text-gray-600">CORE_CONFIGURATION_INTERFACE</p>
       </div>
 
       <div className="space-y-8">
         {/* Profile Section */}
-        <section className="bg-[#181818] rounded-3xl p-8 border border-white/5">
+        <section className="scifi-panel p-8">
           <div className="flex items-center gap-6 mb-8">
-            <div className="w-20 h-20 rounded-full overflow-hidden bg-gradient-to-br from-indigo-500 to-purple-600 border-4 border-white/5">
+            <div className="w-20 h-20 bg-white/5 border border-border-dim flex items-center justify-center relative group">
               {user?.photoURL ? (
-                <img src={user.photoURL} alt="Profile" className="w-full h-full object-cover" referrerPolicy="no-referrer" />
+                <img src={user.photoURL} alt="Profile" className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" referrerPolicy="no-referrer" />
               ) : (
-                <div className="w-full h-full flex items-center justify-center text-2xl font-black">
+                <div className="text-2xl font-black text-brand">
                   {user?.displayName?.[0] || user?.email?.[0] || 'U'}
                 </div>
               )}
+              <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-brand flex items-center justify-center">
+                <div className="w-2 h-2 bg-black" />
+              </div>
             </div>
             <div>
-              <h2 className="text-2xl font-black tracking-tight">{user?.displayName || 'StudyFlow User'}</h2>
-              <p className="text-gray-500 font-bold">{user?.email}</p>
+              <h2 className="text-xl font-black tracking-tighter uppercase">{user?.displayName || 'StudyFlow_User'}</h2>
+              <p className="hud-label !text-gray-600">{user?.email}</p>
             </div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="bg-white/5 p-4 rounded-2xl border border-white/5">
-              <p className="text-[10px] font-black uppercase tracking-widest text-gray-500 mb-1">Total Points</p>
-              <p className="text-2xl font-black text-[#1DB954]">{userProfile.points}</p>
+            <div className="bg-white/5 p-4 border border-border-dim">
+              <p className="hud-label !text-gray-600 mb-1">TOTAL_POINTS</p>
+              <p className="text-2xl font-black text-brand tabular-nums">{userProfile.points}</p>
             </div>
-            <div className="bg-white/5 p-4 rounded-2xl border border-white/5">
-              <p className="text-[10px] font-black uppercase tracking-widest text-gray-500 mb-1">Current Streak</p>
-              <p className="text-2xl font-black text-orange-500">{userProfile.streak} Days</p>
+            <div className="bg-white/5 p-4 border border-border-dim">
+              <p className="hud-label !text-gray-600 mb-1">STREAK_SYNC</p>
+              <p className="text-2xl font-black text-orange-500 tabular-nums">{userProfile.streak}_DAYS</p>
             </div>
           </div>
         </section>
 
         {/* Preferences Section */}
-        <section className="bg-[#181818] rounded-3xl p-8 border border-white/5">
-          <h3 className="text-xl font-black tracking-tight mb-6 flex items-center gap-3">
-            <Bell className="w-5 h-5 text-blue-400" />
-            Preferences
+        <section className="scifi-panel p-8">
+          <h3 className="text-sm font-black tracking-tighter mb-6 flex items-center gap-3 uppercase">
+            <Bell className="w-4 h-4 text-blue-400" />
+            USER_PREFERENCES
           </h3>
           <div className="space-y-4">
-            <div className="flex items-center justify-between p-4 bg-white/5 rounded-2xl border border-white/5">
+            <div className="flex items-center justify-between p-4 bg-white/5 border border-border-dim">
               <div>
-                <p className="font-bold">Browser Notifications</p>
-                <p className="text-xs text-gray-500">Get notified when study sessions end.</p>
+                <p className="text-[11px] font-black uppercase tracking-widest">BROWSER_NOTIFICATIONS</p>
+                <p className="text-[9px] text-gray-600 font-black uppercase tracking-tighter">Session completion alerts.</p>
               </div>
               <button 
                 onClick={() => Notification.requestPermission()}
                 className={cn(
-                  "px-4 py-2 rounded-full text-xs font-black uppercase tracking-widest transition-all",
-                  Notification.permission === 'granted' ? "bg-[#1DB954]/20 text-[#1DB954]" : "bg-white text-black hover:scale-105"
+                  "px-4 py-1.5 text-[9px] font-black uppercase tracking-widest transition-all border",
+                  Notification.permission === 'granted' ? "border-brand/30 text-brand bg-brand/5" : "bg-white text-black hover:bg-brand hover:border-brand"
                 )}
               >
-                {Notification.permission === 'granted' ? 'Enabled' : 'Enable'}
+                {Notification.permission === 'granted' ? 'ACTIVE' : 'INITIALIZE'}
               </button>
             </div>
-            <div className="flex items-center justify-between p-4 bg-white/5 rounded-2xl border border-white/5">
+            <div className="flex items-center justify-between p-4 bg-white/5 border border-border-dim">
               <div>
-                <p className="font-bold">Email Notifications</p>
-                <p className="text-xs text-gray-500">Receive weekly progress reports.</p>
+                <p className="text-[11px] font-black uppercase tracking-widest">EMAIL_SYNC</p>
+                <p className="text-[9px] text-gray-600 font-black uppercase tracking-tighter">Weekly progress telemetry.</p>
               </div>
-              <div className="w-12 h-6 bg-[#1DB954] rounded-full relative cursor-pointer">
-                <div className="absolute right-1 top-1 w-4 h-4 bg-white rounded-full" />
+              <div className="w-10 h-4 bg-brand/20 border border-brand/40 relative cursor-pointer">
+                <div className="absolute right-0.5 top-0.5 w-2.5 h-2.5 bg-brand" />
               </div>
             </div>
-            <div className="flex items-center justify-between p-4 bg-white/5 rounded-2xl border border-white/5">
+            <div className="flex items-center justify-between p-4 bg-white/5 border border-border-dim">
               <div>
-                <p className="font-bold">Focus Mode Music</p>
-                <p className="text-xs text-gray-500">Auto-play ambient sounds during sessions.</p>
+                <p className="text-[11px] font-black uppercase tracking-widest">FOCUS_AUDIO</p>
+                <p className="text-[9px] text-gray-600 font-black uppercase tracking-tighter">Neural-sync ambient soundscapes.</p>
               </div>
-              <div className="w-12 h-6 bg-white/10 rounded-full relative cursor-pointer">
-                <div className="absolute left-1 top-1 w-4 h-4 bg-gray-400 rounded-full" />
+              <div className="w-10 h-4 bg-white/5 border border-border-dim relative cursor-pointer">
+                <div className="absolute left-0.5 top-0.5 w-2.5 h-2.5 bg-gray-700" />
               </div>
             </div>
           </div>
         </section>
 
         {/* Data Management Section */}
-        <section className="bg-[#181818] rounded-3xl p-8 border border-white/5">
-          <h3 className="text-xl font-black tracking-tight mb-6 flex items-center gap-3">
-            <Download className="w-5 h-5 text-green-400" />
-            Data Management
+        <section className="scifi-panel p-8">
+          <h3 className="text-sm font-black tracking-tighter mb-6 flex items-center gap-3 uppercase">
+            <Download className="w-4 h-4 text-brand" />
+            DATA_MANAGEMENT
           </h3>
           <div className="space-y-4">
-            <div className="flex items-center justify-between p-4 bg-white/5 rounded-2xl border border-white/5">
+            <div className="flex items-center justify-between p-4 bg-white/5 border border-border-dim">
               <div>
-                <p className="font-bold">Export My Data</p>
-                <p className="text-xs text-gray-500">Download a JSON file of your study history and progress.</p>
+                <p className="text-[11px] font-black uppercase tracking-widest">EXPORT_CORE_DATA</p>
+                <p className="text-[9px] text-gray-600 font-black uppercase tracking-tighter">Download JSON telemetry log.</p>
               </div>
               <button 
                 onClick={handleDownloadData}
-                className="flex items-center gap-2 px-4 py-2 bg-white text-black rounded-full text-xs font-black hover:scale-105 transition-all"
+                className="scifi-button px-4 py-2 text-[9px]"
               >
-                <Download className="w-4 h-4" />
-                Download JSON
+                <Download className="w-3 h-3 mr-2" />
+                EXPORT_JSON
               </button>
             </div>
 
-            <div className="flex items-center justify-between p-4 bg-white/5 rounded-2xl border border-white/5">
+            <div className="flex items-center justify-between p-4 bg-white/5 border border-border-dim">
               <div>
-                <p className="font-bold">Download Source Code</p>
-                <p className="text-xs text-gray-500">Get the full project files to run locally or deploy elsewhere.</p>
+                <p className="text-[11px] font-black uppercase tracking-widest">SOURCE_CODE_PULL</p>
+                <p className="text-[9px] text-gray-600 font-black uppercase tracking-tighter">Local deployment package.</p>
               </div>
               <div className="text-right">
-                <p className="text-[10px] font-black text-[#1DB954] uppercase mb-1">Use AI Studio Menu</p>
-                <p className="text-[9px] text-gray-500 max-w-[150px]">Click the gear icon (Settings) in the top right of AI Studio and select 'Export to ZIP'.</p>
+                <p className="text-[9px] font-black text-brand uppercase mb-1">AI_STUDIO_OVERRIDE</p>
+                <p className="text-[8px] text-gray-700 font-black uppercase max-w-[150px]">Use 'Export to ZIP' in AI Studio settings menu.</p>
               </div>
             </div>
           </div>
         </section>
 
         {/* Danger Zone */}
-        <section className="bg-[#181818] rounded-3xl p-8 border border-red-500/10">
-          <h3 className="text-xl font-black tracking-tight mb-6 flex items-center gap-3 text-red-500">
-            <Shield className="w-5 h-5" />
-            Danger Zone
+        <section className="scifi-panel p-8 border-red-500/20">
+          <h3 className="text-sm font-black tracking-tighter mb-6 flex items-center gap-3 text-red-500 uppercase">
+            <Shield className="w-4 h-4" />
+            DANGER_ZONE
           </h3>
           <div className="space-y-4">
-            <button className="w-full flex items-center justify-between p-4 bg-red-500/5 hover:bg-red-500/10 rounded-2xl border border-red-500/10 transition-colors group">
+            <button className="w-full flex items-center justify-between p-4 bg-red-500/5 hover:bg-red-500/10 border border-red-500/20 transition-colors group">
               <div className="text-left">
-                <p className="font-bold text-red-500">Reset All Data</p>
-                <p className="text-xs text-red-500/60">This will clear all study logs and subjects.</p>
+                <p className="text-[11px] font-black text-red-500 uppercase tracking-widest">RESET_ALL_DATA</p>
+                <p className="text-[9px] text-red-500/60 font-black uppercase tracking-tighter">Permanent deletion of all telemetry logs.</p>
               </div>
-              <RefreshCw className="w-5 h-5 text-red-500 group-hover:rotate-180 transition-transform duration-500" />
+              <RefreshCw className="w-4 h-4 text-red-500 group-hover:rotate-180 transition-transform duration-500" />
             </button>
             <button 
               onClick={handleLogout}
-              className="w-full flex items-center justify-between p-4 bg-white/5 hover:bg-white/10 rounded-2xl border border-white/5 transition-colors group"
+              className="w-full flex items-center justify-between p-4 bg-white/5 hover:bg-white/10 border border-border-dim transition-colors group"
             >
               <div className="text-left">
-                <p className="font-bold">Sign Out</p>
-                <p className="text-xs text-gray-500">Log out of your current session.</p>
+                <p className="text-[11px] font-black uppercase tracking-widest">TERMINATE_SESSION</p>
+                <p className="text-[9px] text-gray-600 font-black uppercase tracking-tighter">Sign out of current neural link.</p>
               </div>
-              <LogOut className="w-5 h-5 text-gray-400 group-hover:translate-x-1 transition-transform" />
+              <LogOut className="w-4 h-4 text-gray-700 group-hover:translate-x-1 transition-transform" />
             </button>
           </div>
         </section>

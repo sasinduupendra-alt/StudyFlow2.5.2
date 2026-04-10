@@ -88,43 +88,43 @@ function SortableTopicItem({
   };
 
   return (
-    <div ref={setNodeRef} style={style} className={cn("flex flex-col p-3 bg-white/5 rounded-xl gap-3 border border-white/5", isDragging && "shadow-2xl border-[#1DB954]/50 scale-[1.02]")}>
+    <div ref={setNodeRef} style={style} className={cn("flex flex-col p-3 bg-white/5 border border-border-dim gap-3", isDragging && "shadow-2xl border-brand/50 scale-[1.02]")}>
       <div className={cn("flex", editingTopic?.topicId === topic.id ? "flex-col" : "items-center justify-between")}>
         {editingTopic?.topicId === topic.id ? (
-          <form onSubmit={editTopicForm.handleSubmit(onEditTopicSubmit)} className="flex flex-col gap-4 flex-1 bg-black/20 p-4 rounded-xl border border-white/10">
+          <form onSubmit={editTopicForm.handleSubmit(onEditTopicSubmit)} className="flex flex-col gap-4 flex-1 bg-black/20 p-4 border border-border-dim">
             <div className="flex justify-between items-center">
-              <h4 className="text-xs font-bold text-[#1DB954]">Edit Topic</h4>
+              <h4 className="text-[10px] font-black text-brand uppercase tracking-widest">Edit_Topic_Parameters</h4>
               <div className="flex items-center gap-2">
-                <button type="submit" className="px-2 py-1 bg-[#1DB954] text-black text-[10px] font-bold rounded flex items-center gap-1 hover:scale-105 transition-transform"><Save className="w-3 h-3" /> Save</button>
-                <button type="button" onClick={() => setEditingTopic(null)} className="px-2 py-1 bg-white/10 text-white text-[10px] font-bold rounded flex items-center gap-1 hover:bg-white/20 transition-colors"><X className="w-3 h-3" /> Cancel</button>
+                <button type="submit" className="px-2 py-1 bg-brand text-black text-[10px] font-black uppercase tracking-widest hover:scale-105 transition-transform flex items-center gap-1"><Save className="w-3 h-3" /> SAVE</button>
+                <button type="button" onClick={() => setEditingTopic(null)} className="px-2 py-1 bg-white/5 text-white text-[10px] font-black uppercase tracking-widest border border-border-dim hover:bg-white/10 transition-colors flex items-center gap-1"><X className="w-3 h-3" /> CANCEL</button>
               </div>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               <div className="space-y-1.5">
-                <label className="text-[10px] text-gray-400 uppercase font-bold tracking-wider">Topic Title</label>
-                <input {...editTopicForm.register('title')} className={cn("w-full bg-white/5 border rounded-lg px-3 py-2 text-sm outline-none focus:border-[#1DB954] transition-colors", editTopicForm.formState.errors.title ? "border-red-500" : "border-white/10")} />
-                {editTopicForm.formState.errors.title && <p className="text-[10px] text-red-500">{editTopicForm.formState.errors.title.message}</p>}
+                <label className="hud-label !text-gray-600">TOPIC_TITLE</label>
+                <input {...editTopicForm.register('title')} className={cn("w-full bg-black/40 border px-3 py-2 text-[10px] font-black uppercase outline-none focus:border-brand transition-colors", editTopicForm.formState.errors.title ? "border-red-500" : "border-border-dim")} />
+                {editTopicForm.formState.errors.title && <p className="text-[9px] text-red-500 font-black uppercase">{editTopicForm.formState.errors.title.message}</p>}
               </div>
               <div className="space-y-1.5">
-                <label className="text-[10px] text-gray-400 uppercase font-bold tracking-wider">Image URL</label>
-                <input {...editTopicForm.register('image')} placeholder="Topic Image URL" className={cn("w-full bg-white/5 border rounded-lg px-3 py-2 text-sm outline-none focus:border-[#1DB954] transition-colors", editTopicForm.formState.errors.image ? "border-red-500" : "border-white/10")} />
-                {editTopicForm.formState.errors.image && <p className="text-[10px] text-red-500">{editTopicForm.formState.errors.image.message}</p>}
+                <label className="hud-label !text-gray-600">IMAGE_ENDPOINT</label>
+                <input {...editTopicForm.register('image')} placeholder="URL_PATH" className={cn("w-full bg-black/40 border px-3 py-2 text-[10px] font-black outline-none focus:border-brand transition-colors", editTopicForm.formState.errors.image ? "border-red-500" : "border-border-dim")} />
+                {editTopicForm.formState.errors.image && <p className="text-[9px] text-red-500 font-black uppercase">{editTopicForm.formState.errors.image.message}</p>}
               </div>
             </div>
           </form>
         ) : (
           <>
             <div className="flex items-center gap-3">
-              <button {...attributes} {...listeners} className="cursor-grab active:cursor-grabbing p-1 hover:bg-white/10 rounded text-gray-500">
+              <button {...attributes} {...listeners} className="cursor-grab active:cursor-grabbing p-1 hover:bg-white/10 text-gray-700">
                 <GripVertical className="w-4 h-4" />
               </button>
-              {topic.image && <div className="w-10 h-10 rounded-lg overflow-hidden bg-white/5"><img src={topic.image} alt="" className="w-full h-full object-cover" referrerPolicy="no-referrer" /></div>}
-              <p className="text-sm font-bold">{topic.title}</p>
+              {topic.image && <div className="w-10 h-10 border border-border-dim overflow-hidden bg-white/5"><img src={topic.image} alt="" className="w-full h-full object-cover opacity-80" referrerPolicy="no-referrer" /></div>}
+              <p className="text-[11px] font-black uppercase tracking-tight">{topic.title}</p>
             </div>
             <div className="flex items-center gap-2">
-              <button onClick={() => setEditingTopic({ subjectId, topicId: topic.id })} className="p-1 text-gray-500 hover:text-white"><Edit2 className="w-4 h-4" /></button>
-              {!editingTopic && <button onClick={() => setResourceModal({ isOpen: true, subjectId, topicId: topic.id, topicTitle: topic.title, resources: topic.resources || [] })} className="p-1 text-gray-500 hover:text-[#1DB954]"><LinkIcon className="w-4 h-4" /></button>}
-              <button onClick={() => setConfirmModal({ isOpen: true, title: 'Delete Topic', message: `Delete "${topic.title}"?`, onConfirm: () => onDeleteTopic(subjectId, topic.id) })} className="p-1 text-gray-500 hover:text-red-500"><Trash2 className="w-4 h-4" /></button>
+              <button onClick={() => setEditingTopic({ subjectId, topicId: topic.id })} className="p-1 text-gray-700 hover:text-white transition-colors"><Edit2 className="w-3.5 h-3.5" /></button>
+              {!editingTopic && <button onClick={() => setResourceModal({ isOpen: true, subjectId, topicId: topic.id, topicTitle: topic.title, resources: topic.resources || [] })} className="p-1 text-gray-700 hover:text-brand transition-colors"><LinkIcon className="w-3.5 h-3.5" /></button>}
+              <button onClick={() => setConfirmModal({ isOpen: true, title: 'Delete Topic', message: `Delete "${topic.title}"?`, onConfirm: () => onDeleteTopic(subjectId, topic.id) })} className="p-1 text-gray-700 hover:text-red-500 transition-colors"><Trash2 className="w-3.5 h-3.5" /></button>
             </div>
           </>
         )}
@@ -143,9 +143,9 @@ function SortableTopicItem({
               onEditTopic(subjectId, topic.id, topic.title, val, topic.image, topic.resources); 
             }
           }} 
-          className="flex-1 h-1 bg-white/10 rounded-full appearance-none cursor-pointer accent-[#1DB954]" 
+          className="flex-1 h-0.5 bg-white/5 rounded-none appearance-none cursor-pointer accent-brand" 
         />
-        <span className="text-[10px] font-bold text-[#1DB954] w-8">{editingTopic?.topicId === topic.id ? editTopicForm.watch('mastery') : topic.mastery}%</span>
+        <span className="text-[9px] font-black text-brand w-8 tabular-nums">{editingTopic?.topicId === topic.id ? editTopicForm.watch('mastery') : topic.mastery}%</span>
       </div>
     </div>
   );
@@ -287,19 +287,19 @@ export default function SyllabusManager({
   return (
     <div className="space-y-6">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <h3 className="text-xl font-bold flex items-center gap-2">
-          <BookOpen className="w-5 h-5 text-[#1DB954]" />
-          Subject & Topic Management
+        <h3 className="text-sm font-black flex items-center gap-2 uppercase tracking-tighter">
+          <BookOpen className="w-4 h-4 text-brand" />
+          SYLLABUS_MANAGEMENT_INTERFACE
         </h3>
         <div className="flex items-center gap-4">
           <div className="relative flex-1 md:w-64">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3 h-3 text-gray-700" />
             <input 
               type="text"
-              placeholder="Search subjects or topics..."
+              placeholder="SEARCH_SYLLABUS..."
               value={syllabusSearch}
               onChange={(e) => setSyllabusSearch(e.target.value)}
-              className="w-full bg-white/5 border border-white/10 rounded-xl pl-10 pr-4 py-2 text-sm outline-none focus:ring-1 focus:ring-[#1DB954] transition-all"
+              className="w-full bg-white/5 border border-border-dim pl-10 pr-4 py-2 text-[10px] font-black uppercase outline-none focus:border-brand transition-all"
             />
           </div>
           <button 
@@ -309,62 +309,66 @@ export default function SyllabusManager({
               message: 'Are you sure you want to reset the syllabus to defaults? This will erase your current progress.',
               onConfirm: onResetSyllabus
             })} 
-            className="text-xs font-bold text-red-500 hover:underline whitespace-nowrap"
+            className="text-[9px] font-black text-red-500 hover:underline whitespace-nowrap uppercase tracking-widest"
           >
-            Reset to Default
+            RESET_TO_DEFAULT
           </button>
         </div>
       </div>
       
-      <form onSubmit={addSubjectForm.handleSubmit(onAddSubjectSubmit)} className="bg-[#181818] p-6 rounded-2xl border border-white/5">
+      <form onSubmit={addSubjectForm.handleSubmit(onAddSubjectSubmit)} className="scifi-panel p-6">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           <div className="space-y-1">
+            <label className="hud-label !text-gray-600">SUBJECT_NAME</label>
             <input 
               {...addSubjectForm.register('name')}
-              placeholder="New Subject Name" 
+              placeholder="NEW_SUBJECT_ID" 
               className={cn(
-                "w-full bg-white/5 border rounded-xl px-4 py-2 outline-none focus:ring-1 focus:ring-[#1DB954]",
-                addSubjectForm.formState.errors.name ? "border-red-500" : "border-white/10"
+                "w-full bg-black/40 border px-4 py-2 text-[10px] font-black uppercase outline-none focus:border-brand transition-colors",
+                addSubjectForm.formState.errors.name ? "border-red-500" : "border-border-dim"
               )} 
             />
-            {addSubjectForm.formState.errors.name && <p className="text-[10px] text-red-500">{addSubjectForm.formState.errors.name.message}</p>}
+            {addSubjectForm.formState.errors.name && <p className="text-[9px] text-red-500 font-black uppercase">{addSubjectForm.formState.errors.name.message}</p>}
           </div>
           <div className="space-y-1">
+            <label className="hud-label !text-gray-600">IMAGE_URL</label>
             <input 
               {...addSubjectForm.register('image')}
-              placeholder="Image URL (Optional)" 
+              placeholder="URL_PATH" 
               className={cn(
-                "w-full bg-white/5 border rounded-xl px-4 py-2 outline-none focus:ring-1 focus:ring-[#1DB954]",
-                addSubjectForm.formState.errors.image ? "border-red-500" : "border-white/10"
+                "w-full bg-black/40 border px-4 py-2 text-[10px] font-black outline-none focus:border-brand transition-colors",
+                addSubjectForm.formState.errors.image ? "border-red-500" : "border-border-dim"
               )} 
             />
-            {addSubjectForm.formState.errors.image && <p className="text-[10px] text-red-500">{addSubjectForm.formState.errors.image.message}</p>}
+            {addSubjectForm.formState.errors.image && <p className="text-[9px] text-red-500 font-black uppercase">{addSubjectForm.formState.errors.image.message}</p>}
           </div>
           <div className="space-y-1">
+            <label className="hud-label !text-gray-600">EXAM_DATE</label>
             <input 
               {...addSubjectForm.register('examDate')}
               type="date"
               className={cn(
-                "w-full bg-white/5 border rounded-xl px-4 py-2 outline-none focus:ring-1 focus:ring-[#1DB954] text-gray-400",
-                addSubjectForm.formState.errors.examDate ? "border-red-500" : "border-white/10"
+                "w-full bg-black/40 border px-4 py-2 text-[10px] font-black uppercase outline-none focus:border-brand transition-colors text-gray-500",
+                addSubjectForm.formState.errors.examDate ? "border-red-500" : "border-border-dim"
               )} 
             />
           </div>
           <div className="space-y-1 md:col-span-4">
+            <label className="hud-label !text-gray-600">SUBJECT_NOTES</label>
             <textarea 
               {...addSubjectForm.register('notes')}
-              placeholder="Subject Notes (Optional)"
+              placeholder="ADDITIONAL_TELEMETRY_DATA..."
               className={cn(
-                "w-full bg-white/5 border rounded-xl px-4 py-2 outline-none focus:ring-1 focus:ring-[#1DB954] resize-none h-20",
-                addSubjectForm.formState.errors.notes ? "border-red-500" : "border-white/10"
+                "w-full bg-black/40 border px-4 py-2 text-[10px] font-black uppercase outline-none focus:border-brand transition-colors resize-none h-20",
+                addSubjectForm.formState.errors.notes ? "border-red-500" : "border-border-dim"
               )} 
             />
           </div>
           <button 
             type="submit"
-            className="bg-[#1DB954] text-black font-bold rounded-xl py-2 hover:scale-105 transition-transform md:col-span-4"
+            className="scifi-button w-full py-2 text-[10px] md:col-span-4"
           >
-            Add Subject
+            INITIALIZE_SUBJECT
           </button>
         </div>
       </form>
@@ -376,46 +380,46 @@ export default function SyllabusManager({
             return s.name.toLowerCase().includes(searchLower) || s.topics.some(t => t.title.toLowerCase().includes(searchLower));
           })
           .map(s => (
-          <div key={s.id} className="bg-[#181818] rounded-2xl border border-white/5 overflow-hidden">
+          <div key={s.id} className="scifi-panel overflow-hidden">
             <div className={cn("p-4 flex hover:bg-white/5 transition-colors gap-4", editingSubject === s.id ? "flex-col" : "items-center justify-between")}>
               <div className="flex items-center gap-4 flex-1">
-                <div className="w-10 h-10 rounded-lg bg-white/10 overflow-hidden relative shrink-0">
-                  <img src={s.image || `https://picsum.photos/seed/${s.id}/100/100`} alt="" className="w-full h-full object-cover" referrerPolicy="no-referrer" />
+                <div className="w-10 h-10 border border-border-dim bg-white/5 overflow-hidden relative shrink-0">
+                  <img src={s.image || `https://picsum.photos/seed/${s.id}/100/100`} alt="" className="w-full h-full object-cover opacity-80" referrerPolicy="no-referrer" />
                 </div>
                 {editingSubject === s.id ? (
-                  <form onSubmit={editSubjectForm.handleSubmit(onEditSubjectSubmit)} className="flex flex-col gap-4 flex-1 w-full bg-black/20 p-5 rounded-xl border border-white/10">
+                  <form onSubmit={editSubjectForm.handleSubmit(onEditSubjectSubmit)} className="flex flex-col gap-4 flex-1 w-full bg-black/20 p-5 border border-border-dim">
                     <div className="flex justify-between items-center">
-                      <h4 className="text-sm font-bold text-[#1DB954]">Edit Subject</h4>
+                      <h4 className="text-[10px] font-black text-brand uppercase tracking-widest">Edit_Subject_Parameters</h4>
                       <div className="flex items-center gap-2">
-                        <button type="submit" className="px-3 py-1.5 bg-[#1DB954] text-black text-xs font-bold rounded-lg flex items-center gap-1 hover:scale-105 transition-transform"><Save className="w-3 h-3" /> Save</button>
-                        <button type="button" onClick={() => setEditingSubject(null)} className="px-3 py-1.5 bg-white/10 text-white text-xs font-bold rounded-lg flex items-center gap-1 hover:bg-white/20 transition-colors"><X className="w-3 h-3" /> Cancel</button>
+                        <button type="submit" className="px-3 py-1.5 bg-brand text-black text-[10px] font-black uppercase tracking-widest hover:scale-105 transition-transform flex items-center gap-1"><Save className="w-3 h-3" /> SAVE</button>
+                        <button type="button" onClick={() => setEditingSubject(null)} className="px-3 py-1.5 bg-white/5 text-white text-[10px] font-black uppercase tracking-widest border border-border-dim hover:bg-white/10 transition-colors flex items-center gap-1"><X className="w-3 h-3" /> CANCEL</button>
                       </div>
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div className="space-y-1.5">
-                        <label className="text-[10px] text-gray-400 uppercase font-bold tracking-wider">Subject Name</label>
-                        <input {...editSubjectForm.register('name')} className={cn("w-full bg-white/5 border rounded-lg px-3 py-2 text-sm outline-none focus:border-[#1DB954] transition-colors", editSubjectForm.formState.errors.name ? "border-red-500" : "border-white/10")} />
-                        {editSubjectForm.formState.errors.name && <p className="text-[10px] text-red-500">{editSubjectForm.formState.errors.name.message}</p>}
+                        <label className="hud-label !text-gray-600">SUBJECT_NAME</label>
+                        <input {...editSubjectForm.register('name')} className={cn("w-full bg-black/40 border px-3 py-2 text-[10px] font-black uppercase outline-none focus:border-brand transition-colors", editSubjectForm.formState.errors.name ? "border-red-500" : "border-border-dim")} />
+                        {editSubjectForm.formState.errors.name && <p className="text-[9px] text-red-500 font-black uppercase">{editSubjectForm.formState.errors.name.message}</p>}
                       </div>
                       <div className="space-y-1.5">
-                        <label className="text-[10px] text-gray-400 uppercase font-bold tracking-wider">Image URL</label>
-                        <input {...editSubjectForm.register('image')} placeholder="Image URL" className={cn("w-full bg-white/5 border rounded-lg px-3 py-2 text-sm outline-none focus:border-[#1DB954] transition-colors", editSubjectForm.formState.errors.image ? "border-red-500" : "border-white/10")} />
-                        {editSubjectForm.formState.errors.image && <p className="text-[10px] text-red-500">{editSubjectForm.formState.errors.image.message}</p>}
+                        <label className="hud-label !text-gray-600">IMAGE_URL</label>
+                        <input {...editSubjectForm.register('image')} placeholder="URL_PATH" className={cn("w-full bg-black/40 border px-3 py-2 text-[10px] font-black outline-none focus:border-brand transition-colors", editSubjectForm.formState.errors.image ? "border-red-500" : "border-border-dim")} />
+                        {editSubjectForm.formState.errors.image && <p className="text-[9px] text-red-500 font-black uppercase">{editSubjectForm.formState.errors.image.message}</p>}
                       </div>
                       <div className="space-y-1.5 md:col-span-2">
-                        <label className="text-[10px] text-gray-400 uppercase font-bold tracking-wider">Exam Date</label>
-                        <input {...editSubjectForm.register('examDate')} type="date" className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm outline-none focus:border-[#1DB954] text-gray-300 transition-colors" />
+                        <label className="hud-label !text-gray-600">EXAM_DATE</label>
+                        <input {...editSubjectForm.register('examDate')} type="date" className="w-full bg-black/40 border border-border-dim px-3 py-2 text-[10px] font-black uppercase outline-none focus:border-brand text-gray-500 transition-colors" />
                       </div>
                       <div className="space-y-1.5 md:col-span-2">
-                        <label className="text-[10px] text-gray-400 uppercase font-bold tracking-wider">Notes</label>
-                        <textarea {...editSubjectForm.register('notes')} placeholder="Subject Notes (Optional)" className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm outline-none focus:border-[#1DB954] resize-none h-24 transition-colors" />
+                        <label className="hud-label !text-gray-600">SUBJECT_NOTES</label>
+                        <textarea {...editSubjectForm.register('notes')} placeholder="ADDITIONAL_TELEMETRY..." className="w-full bg-black/40 border border-border-dim px-3 py-2 text-[10px] font-black uppercase outline-none focus:border-brand resize-none h-24 transition-colors" />
                       </div>
                     </div>
                   </form>
                 ) : ( 
                   <div className="flex flex-col">
-                    <span className="font-bold">{s.name}</span>
-                    {s.examDate && <span className="text-[10px] text-[#1DB954] font-bold uppercase tracking-wider">Exam: {new Date(s.examDate).toLocaleDateString()}</span>}
+                    <span className="text-[11px] font-black uppercase tracking-tight">{s.name}</span>
+                    {s.examDate && <span className="hud-label !text-brand mt-0.5">EXAM_SYNC: {new Date(s.examDate).toLocaleDateString()}</span>}
                   </div>
                 )}
               </div>
@@ -424,20 +428,20 @@ export default function SyllabusManager({
                   <button 
                     onClick={() => generateTopics(s)}
                     disabled={isGenerating === s.id}
-                    className="p-2 text-[#1DB954] hover:bg-[#1DB954]/10 rounded-lg flex items-center gap-2 text-xs font-bold"
+                    className="p-2 text-brand hover:bg-brand/10 border border-brand/20 transition-colors flex items-center gap-2 text-[9px] font-black uppercase tracking-widest"
                   >
-                    {isGenerating === s.id ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
-                    <span className="hidden sm:inline">AI Topics</span>
+                    {isGenerating === s.id ? <RefreshCw className="w-3 h-3 animate-spin" /> : <Sparkles className="w-3 h-3" />}
+                    <span className="hidden sm:inline">AI_SYNC</span>
                   </button>
-                  <button onClick={() => setEditingSubject(s.id)} className="p-2 text-gray-500 hover:text-white"><Edit2 className="w-4 h-4" /></button>
-                  <button onClick={() => setExpandedSubject(expandedSubject === s.id ? null : s.id)} className="p-2 text-gray-500 hover:text-white">{expandedSubject === s.id ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}</button>
-                  <button onClick={() => setConfirmModal({ isOpen: true, title: 'Delete Subject', message: `Delete "${s.name}"?`, onConfirm: () => onDeleteSubject(s.id) })} className="p-2 text-gray-500 hover:text-red-500"><Trash2 className="w-4 h-4" /></button>
+                  <button onClick={() => setEditingSubject(s.id)} className="p-2 text-gray-700 hover:text-white transition-colors"><Edit2 className="w-4 h-4" /></button>
+                  <button onClick={() => setExpandedSubject(expandedSubject === s.id ? null : s.id)} className="p-2 text-gray-700 hover:text-white transition-colors">{expandedSubject === s.id ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}</button>
+                  <button onClick={() => setConfirmModal({ isOpen: true, title: 'Delete Subject', message: `Delete "${s.name}"?`, onConfirm: () => onDeleteSubject(s.id) })} className="p-2 text-gray-700 hover:text-red-500 transition-colors"><Trash2 className="w-4 h-4" /></button>
                 </div>
               )}
             </div>
             <AnimatePresence>
               {expandedSubject === s.id && (
-                <motion.div initial={{ height: 0 }} animate={{ height: 'auto' }} exit={{ height: 0 }} className="border-t border-white/5 overflow-hidden">
+                <motion.div initial={{ height: 0 }} animate={{ height: 'auto' }} exit={{ height: 0 }} className="border-t border-border-dim overflow-hidden">
                   <div className="p-4 space-y-4">
                     <DndContext 
                       sensors={sensors}
@@ -506,33 +510,35 @@ function AddTopicForm({ subjectId, onAddTopic, setError }: AddTopicFormProps) {
   };
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="bg-white/5 p-4 rounded-xl border border-dashed border-white/10">
+    <form onSubmit={handleSubmit(onSubmit)} className="bg-white/5 p-4 border border-dashed border-border-dim">
       <div className="flex flex-col gap-3">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
           <div className="space-y-1">
+            <label className="hud-label !text-gray-600">TOPIC_TITLE</label>
             <input 
               {...register('title')}
-              placeholder="New Topic Title" 
+              placeholder="NEW_TOPIC_ID" 
               className={cn(
-                "w-full bg-white/5 border rounded-lg px-3 py-2 text-sm outline-none",
-                errors.title ? "border-red-500" : "border-white/10"
+                "w-full bg-black/40 border px-3 py-2 text-[10px] font-black uppercase outline-none focus:border-brand transition-colors",
+                errors.title ? "border-red-500" : "border-border-dim"
               )} 
             />
           </div>
           <div className="space-y-1">
+            <label className="hud-label !text-gray-600">IMAGE_ENDPOINT</label>
             <input 
               {...register('image')}
-              placeholder="Topic Image URL (Optional)" 
+              placeholder="URL_PATH" 
               className={cn(
-                "w-full bg-white/5 border rounded-lg px-3 py-2 text-sm outline-none",
-                errors.image ? "border-red-500" : "border-white/10"
+                "w-full bg-black/40 border px-3 py-2 text-[10px] font-black outline-none focus:border-brand transition-colors",
+                errors.image ? "border-red-500" : "border-border-dim"
               )} 
             />
           </div>
         </div>
-        <button type="submit" className="bg-white/10 hover:bg-white/20 text-white text-sm font-bold py-2 rounded-lg flex items-center justify-center gap-2">
-          <Plus className="w-4 h-4" />
-          Add Topic
+        <button type="submit" className="scifi-button w-full py-2 text-[10px]">
+          <Plus className="w-3 h-3 mr-2" />
+          INITIALIZE_TOPIC
         </button>
       </div>
     </form>

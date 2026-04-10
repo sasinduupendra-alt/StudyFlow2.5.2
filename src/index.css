@@ -1,8 +1,17 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@300;400;500;600;700;800&display=swap');
 @import "tailwindcss";
 
 @theme {
   --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+  
+  --color-brand: #1DB954;
+  --color-brand-glow: rgba(29, 185, 84, 0.5);
+  --color-surface: #050505;
+  --color-surface-raised: #0A0A0A;
+  --color-surface-elevated: #111111;
+  --color-border-dim: rgba(255, 255, 255, 0.05);
+  --color-border-bright: rgba(255, 255, 255, 0.15);
 }
 
 @layer base {
@@ -11,15 +20,18 @@
   }
 
   body {
-    @apply bg-black text-white antialiased;
-    font-feature-settings: "cv02", "cv03", "cv04", "cv11", "ss01";
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
+    @apply bg-surface text-white font-mono selection:bg-brand selection:text-black antialiased overflow-x-hidden;
+    letter-spacing: -0.02em;
+    font-feature-settings: "tnum";
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-sans font-black tracking-tighter uppercase;
   }
 
   ::-webkit-scrollbar {
-    width: 6px;
-    height: 6px;
+    width: 4px;
+    height: 4px;
   }
 
   ::-webkit-scrollbar-track {
@@ -28,67 +40,98 @@
 
   ::-webkit-scrollbar-thumb {
     background: rgba(255, 255, 255, 0.1);
-    border-radius: 10px;
-    border: 2px solid transparent;
-    background-clip: content-box;
+    border-radius: 0;
   }
 
   ::-webkit-scrollbar-thumb:hover {
-    background: rgba(255, 255, 255, 0.2);
-    background-clip: content-box;
+    background: var(--color-brand);
   }
 }
 
 @layer components {
+  .scifi-panel {
+    @apply bg-surface-raised border border-border-dim relative overflow-hidden;
+    clip-path: polygon(
+      0 0, 
+      calc(100% - 15px) 0, 100% 15px, 
+      100% 100%, 
+      15px 100%, 0 calc(100% - 15px)
+    );
+  }
+
+  .scifi-panel-sm {
+    @apply bg-surface-raised border border-border-dim relative overflow-hidden;
+    clip-path: polygon(
+      0 0, 
+      calc(100% - 8px) 0, 100% 8px, 
+      100% 100%, 
+      8px 100%, 0 calc(100% - 8px)
+    );
+  }
+
+  .scifi-button {
+    @apply relative px-6 py-3 bg-white text-black font-black uppercase tracking-widest text-[10px] transition-all duration-300 hover:bg-brand hover:shadow-[0_0_20px_var(--color-brand-glow)] active:scale-95 flex items-center justify-center gap-2;
+    clip-path: polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px);
+  }
+
+  .scifi-button-outline {
+    @apply relative px-6 py-3 border border-border-bright text-white font-black uppercase tracking-widest text-[10px] transition-all duration-300 hover:border-brand hover:text-brand hover:bg-brand/5 active:scale-95 flex items-center justify-center gap-2;
+    clip-path: polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px);
+  }
+
+  .hud-label {
+    @apply text-[9px] font-black uppercase tracking-[0.3em] text-gray-600;
+  }
+
+  .hud-value {
+    @apply text-sm font-black tabular-nums tracking-tight;
+  }
+
+  .tech-grid {
+    background-image: 
+      linear-gradient(to right, rgba(255,255,255,0.03) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(255,255,255,0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+  }
+
+  .tech-grid-fine {
+    background-image: 
+      linear-gradient(to right, rgba(255,255,255,0.02) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(255,255,255,0.02) 1px, transparent 1px);
+    background-size: 10px 10px;
+  }
+
   .glass-panel {
-    @apply bg-white/5 backdrop-blur-md border border-white/10;
-  }
-
-  .spotify-card {
-    @apply bg-[#181818] hover:bg-[#282828] transition-all duration-300 rounded-xl p-4;
-  }
-
-  .btn-primary {
-    @apply bg-[#1DB954] hover:bg-[#1ed760] text-black font-bold py-2 px-6 rounded-full transition-all transform hover:scale-105 active:scale-95;
+    @apply bg-white/5 backdrop-blur-xl border border-white/10 shadow-2xl;
   }
 }
 
 @layer utilities {
-  .pb-safe {
-    padding-bottom: env(safe-area-inset-bottom);
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
   }
-  .pt-safe {
-    padding-top: env(safe-area-inset-top);
-  }
-  .pl-safe {
-    padding-left: env(safe-area-inset-left);
-  }
-  .pr-safe {
-    padding-right: env(safe-area-inset-right);
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
   }
 }
 
-.scrollbar-hide::-webkit-scrollbar {
-  display: none;
+@keyframes scanline {
+  0% { transform: translateY(-100%); }
+  100% { transform: translateY(100%); }
 }
 
-.scrollbar-hide {
-  -ms-overflow-style: none;
-  scrollbar-width: none;
+.scanline {
+  @apply absolute inset-0 pointer-events-none overflow-hidden;
 }
 
-@keyframes float {
-  0% { transform: translateY(0px); }
-  50% { transform: translateY(-10px); }
-  100% { transform: translateY(0px); }
+.scanline::after {
+  content: '';
+  @apply absolute top-0 left-0 w-full h-20 bg-gradient-to-b from-transparent via-brand/5 to-transparent;
+  animation: scanline 8s linear infinite;
 }
 
 @keyframes shimmer {
   0% { transform: translateX(-100%); }
   100% { transform: translateX(100%); }
 }
-
-.animate-float {
-  animation: float 3s ease-in-out infinite;
-}
-

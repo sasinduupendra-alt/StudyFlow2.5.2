@@ -74,40 +74,50 @@ export default function ExamTracker({
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h3 className="text-xl font-bold flex items-center gap-2">
-          <Trophy className="w-5 h-5 text-yellow-500" />
-          Exam Performance Tracker
+        <h3 className="text-sm font-black flex items-center gap-2 uppercase tracking-tighter">
+          <Trophy className="w-4 h-4 text-brand" />
+          PERFORMANCE_METRICS_INTERFACE
         </h3>
         <button 
           onClick={() => { resetExamForm(); setIsAddingExam(true); }} 
-          className="px-4 py-2 bg-[#1DB954] text-black rounded-xl text-sm font-bold flex items-center gap-2"
+          className="scifi-button px-4 py-2 text-[10px]"
         >
-          <Plus className="w-4 h-4" />
-          Add Result
+          <Plus className="w-3 h-3" />
+          ADD_RESULT_LOG
         </button>
       </div>
       <AnimatePresence>
         {(isAddingExam || editingExamId) && (
           <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="overflow-hidden">
-            <div className="bg-[#181818] p-6 rounded-2xl border border-[#1DB954]/30 space-y-6 mb-6">
+            <div className="scifi-panel p-6 border-brand/30 space-y-6 mb-6">
               <div className="flex items-center justify-between">
-                <h4 className="font-bold text-lg">{editingExamId ? 'Edit Exam Result' : 'New Exam Result'}</h4>
-                <button onClick={resetExamForm} className="p-2"><X className="w-5 h-5 text-gray-500" /></button>
+                <h4 className="text-sm font-black uppercase tracking-tighter">{editingExamId ? 'EDIT_EXAM_RESULT' : 'NEW_EXAM_RESULT'}</h4>
+                <button onClick={resetExamForm} className="p-2 text-gray-700 hover:text-white transition-colors"><X className="w-4 h-4" /></button>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-4">
-                  <input type="text" value={examTitle} onChange={(e) => setExamTitle(e.target.value)} placeholder="Exam Title" className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 outline-none" />
-                  <input type="date" value={examDate} onChange={(e) => setExamDate(e.target.value)} className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 outline-none" />
-                  <textarea value={examNotes} onChange={(e) => setExamNotes(e.target.value)} placeholder="Notes" className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 outline-none h-24" />
+                  <div className="space-y-1">
+                    <label className="hud-label !text-gray-600">EXAM_IDENTIFIER</label>
+                    <input type="text" value={examTitle} onChange={(e) => setExamTitle(e.target.value)} placeholder="EXAM TITLE" className="w-full bg-black/40 border border-border-dim px-4 py-3 text-[10px] font-black uppercase outline-none focus:border-brand transition-colors" />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="hud-label !text-gray-600">CHRONO_STAMP</label>
+                    <input type="date" value={examDate} onChange={(e) => setExamDate(e.target.value)} className="w-full bg-black/40 border border-border-dim px-4 py-3 text-[10px] font-black uppercase outline-none focus:border-brand transition-colors" />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="hud-label !text-gray-600">SYSTEM_NOTES</label>
+                    <textarea value={examNotes} onChange={(e) => setExamNotes(e.target.value)} placeholder="NOTES" className="w-full bg-black/40 border border-border-dim px-4 py-3 text-[10px] font-black uppercase outline-none focus:border-brand transition-colors h-24 resize-none" />
+                  </div>
                 </div>
                 <div className="space-y-4">
-                  <div className="space-y-3 max-h-[300px] overflow-y-auto pr-2 scrollbar-hide">
+                  <label className="hud-label !text-gray-600">SUBJECT_SCORES</label>
+                  <div className="space-y-2 max-h-[300px] overflow-y-auto pr-2 scrollbar-hide">
                     {subjects.map(subject => {
                       const mark = examMarks.find(m => m.subjectId === subject.id);
                       return (
-                        <div key={subject.id} className="flex items-center justify-between p-3 bg-white/5 rounded-xl border border-white/5">
-                          <span className="text-sm font-medium">{subject.name}</span>
-                          <input type="number" min="0" max="100" value={mark?.score || 0} onChange={(e) => { const score = parseInt(e.target.value) || 0; setExamMarks(examMarks.map(m => m.subjectId === subject.id ? { ...m, score } : m)); }} className="w-20 bg-black/40 border border-white/10 rounded-lg px-3 py-1 text-right outline-none" />
+                        <div key={subject.id} className="flex items-center justify-between p-3 bg-white/5 border border-border-dim">
+                          <span className="text-[10px] font-black uppercase tracking-tight">{subject.name}</span>
+                          <input type="number" min="0" max="100" value={mark?.score || 0} onChange={(e) => { const score = parseInt(e.target.value) || 0; setExamMarks(examMarks.map(m => m.subjectId === subject.id ? { ...m, score } : m)); }} className="w-20 bg-black/40 border border-border-dim px-3 py-1 text-right text-[10px] font-black outline-none focus:border-brand transition-colors" />
                         </div>
                       );
                     })}
@@ -115,8 +125,8 @@ export default function ExamTracker({
                 </div>
               </div>
               <div className="flex justify-end">
-                <button onClick={handleSaveExam} className="px-8 py-3 bg-[#1DB954] text-black font-bold rounded-xl">
-                  {editingExamId ? 'Update' : 'Save'}
+                <button onClick={handleSaveExam} className="scifi-button px-8 py-3 text-[10px]">
+                  {editingExamId ? 'UPDATE_ENTRY' : 'SAVE_ENTRY'}
                 </button>
               </div>
             </div>
@@ -125,20 +135,20 @@ export default function ExamTracker({
       </AnimatePresence>
       <div className="space-y-4">
         {exams.slice().reverse().map(exam => (
-          <div key={exam.id} className="bg-[#181818] p-6 rounded-2xl border border-white/5 flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div key={exam.id} className="scifi-panel p-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div className="flex items-center gap-4">
-              <div className="w-12 h-12 rounded-xl bg-yellow-500/10 flex items-center justify-center text-yellow-500">
-                <Trophy className="w-6 h-6" />
+              <div className="w-12 h-12 border border-border-dim flex items-center justify-center text-gray-700">
+                <Trophy className="w-5 h-5" />
               </div>
               <div>
-                <h4 className="font-bold text-lg">{exam.title}</h4>
-                <p className="text-xs text-gray-500">{new Date(exam.date).toLocaleDateString()}</p>
+                <h4 className="text-sm font-black uppercase tracking-tighter">{exam.title}</h4>
+                <p className="text-[10px] font-black text-gray-600 tabular-nums uppercase tracking-widest">{new Date(exam.date).toLocaleDateString()}</p>
               </div>
             </div>
             <div className="flex items-center gap-8">
               <div className="text-right">
-                <p className="text-xs font-bold text-gray-500 uppercase">Average</p>
-                <p className="text-2xl font-black text-[#1DB954]">{exam.averageScore.toFixed(1)}%</p>
+                <p className="hud-label !text-gray-600">AVERAGE_SCORE</p>
+                <p className="text-2xl font-black text-brand tabular-nums tracking-tighter">{exam.averageScore.toFixed(1)}%</p>
               </div>
               <div className="flex items-center gap-2">
                 <button 
@@ -150,9 +160,9 @@ export default function ExamTracker({
                     setExamNotes(exam.notes || ''); 
                     setIsAddingExam(false); 
                   }} 
-                  className="p-2 text-gray-500 hover:text-white"
+                  className="p-2 text-gray-700 hover:text-white transition-colors"
                 >
-                  <Edit2 className="w-5 h-5" />
+                  <Edit2 className="w-4 h-4" />
                 </button>
                 <button 
                   onClick={() => setConfirmModal({ 
@@ -161,9 +171,9 @@ export default function ExamTracker({
                     message: `Delete "${exam.title}"?`, 
                     onConfirm: () => onDeleteExam(exam.id) 
                   })} 
-                  className="p-2 text-gray-500 hover:text-red-500"
+                  className="p-2 text-gray-700 hover:text-red-500 transition-colors"
                 >
-                  <Trash2 className="w-5 h-5" />
+                  <Trash2 className="w-4 h-4" />
                 </button>
               </div>
             </div>

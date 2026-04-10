@@ -64,16 +64,18 @@ export default function Home() {
   if (subjects.length === 0 && !searchQuery) {
     return (
       <div className="h-[80vh] flex flex-col items-center justify-center text-center p-8 space-y-6">
-        <div className="w-32 h-32 bg-white/5 rounded-full flex items-center justify-center mb-4">
-          <BookOpen className="w-16 h-16 text-gray-600" />
+        <div className="w-24 h-24 bg-white/5 border border-border-dim flex items-center justify-center mb-4 relative">
+          <div className="absolute top-0 left-0 w-4 h-4 border-t border-l border-brand/40" />
+          <div className="absolute bottom-0 right-0 w-4 h-4 border-b border-r border-brand/40" />
+          <BookOpen className="w-10 h-10 text-gray-600" />
         </div>
-        <h2 className="text-3xl font-black tracking-tight">Your Syllabus is Empty</h2>
-        <p className="text-gray-400 max-w-md mx-auto">Add your subjects and topics to start tracking your progress and getting AI insights.</p>
+        <h2 className="text-2xl font-black tracking-tighter uppercase">System_Empty</h2>
+        <p className="text-gray-500 max-w-md mx-auto text-xs font-black uppercase tracking-widest leading-relaxed">No subject data detected in current database. Initialize syllabus to begin tracking.</p>
         <button 
           onClick={() => navigate('/manage')}
-          className="px-8 py-4 bg-[#1DB954] text-black rounded-full font-black hover:scale-105 transition-all"
+          className="scifi-button"
         >
-          Add Your First Subject
+          INITIALIZE_SYLLABUS
         </button>
       </div>
     );
@@ -128,14 +130,17 @@ export default function Home() {
       {recentlyStudied.length > 0 && !searchQuery && (
         <motion.section variants={itemVariants}>
           <div className="flex items-center justify-between mb-6">
-            <h2 className="text-2xl font-bold tracking-tight">Recently Studied</h2>
-            <button className="text-sm font-bold text-gray-400 hover:text-white hover:underline">Show all</button>
+            <div className="flex items-center gap-3">
+              <div className="w-1 h-6 bg-brand shadow-[0_0_10px_var(--color-brand-glow)]" />
+              <h2 className="text-lg font-black tracking-tighter uppercase">Recent_Cache</h2>
+            </div>
+            <button className="hud-label hover:text-brand transition-colors">ACCESS_ALL</button>
           </div>
           <motion.div 
             variants={containerVariants}
             initial="hidden"
             animate="show"
-            className="flex gap-4 overflow-x-auto pb-4 scrollbar-hide"
+            className="flex gap-6 overflow-x-auto pb-6 scrollbar-hide"
           >
             {recentlyStudied.map(topicId => {
               const subject = subjects.find(s => s.topics.some(t => t.id === topicId));
@@ -145,7 +150,7 @@ export default function Home() {
                 <motion.div 
                   key={topicId} 
                   variants={itemVariants}
-                  className="min-w-[180px] w-[180px]"
+                  className="min-w-[220px] w-[220px]"
                 >
                   <TopicCard 
                     topic={topic} 
@@ -162,31 +167,34 @@ export default function Home() {
       {studyLogs.length > 0 && !searchQuery && (
         <motion.section variants={itemVariants}>
           <div className="flex items-center justify-between mb-6">
-            <h2 className="text-2xl font-bold tracking-tight">Recent Sessions</h2>
-            <button onClick={() => navigate('/analytics')} className="text-sm font-bold text-gray-400 hover:text-white hover:underline">View History</button>
+            <div className="flex items-center gap-3">
+              <div className="w-1 h-6 bg-brand shadow-[0_0_10px_var(--color-brand-glow)]" />
+              <h2 className="text-lg font-black tracking-tighter uppercase">Log_History</h2>
+            </div>
+            <button onClick={() => navigate('/analytics')} className="hud-label hover:text-brand transition-colors">ANALYZE_DATA</button>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {studyLogs.slice(0, 3).map((log) => {
               const subject = subjects.find(s => s.id === log.subjectId);
               const topic = subject?.topics.find(t => t.id === log.topicId);
               return (
                 <motion.div
                   key={log.id}
-                  whileHover={{ scale: 1.02, backgroundColor: '#282828' }}
+                  whileHover={{ x: 4 }}
                   onClick={() => navigate(`/session/${log.id}`)}
-                  className="bg-[#181818] p-4 rounded-xl border border-white/5 cursor-pointer transition-all group"
+                  className="scifi-panel-sm p-4 cursor-pointer transition-all group"
                 >
                   <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 bg-[#1DB954]/10 rounded-lg flex items-center justify-center shrink-0">
-                      <Clock className="w-6 h-6 text-[#1DB954]" />
+                    <div className="w-10 h-10 bg-brand/5 border border-brand/20 flex items-center justify-center shrink-0">
+                      <Clock className="w-5 h-5 text-brand" />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <h4 className="font-bold text-sm truncate group-hover:text-[#1DB954] transition-colors">{topic?.title || 'Study Session'}</h4>
-                      <p className="text-xs text-gray-500 truncate">{subject?.name}</p>
+                      <h4 className="font-black text-[11px] uppercase truncate group-hover:text-brand transition-colors">{topic?.title || 'Study Session'}</h4>
+                      <p className="hud-label !text-gray-600 truncate">{subject?.name}</p>
                     </div>
                     <div className="text-right">
-                      <p className="text-sm font-black">{log.duration}m</p>
-                      <p className="text-[10px] text-gray-600 font-bold uppercase">{new Date(log.timestamp).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}</p>
+                      <p className="text-sm font-black tabular-nums">{log.duration}M</p>
+                      <p className="text-[9px] text-gray-600 font-black uppercase tracking-tighter">{new Date(log.timestamp).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}</p>
                     </div>
                   </div>
                 </motion.div>
@@ -199,31 +207,34 @@ export default function Home() {
       {!searchQuery && (
         <motion.section variants={itemVariants}>
           <div className="flex items-center justify-between mb-6">
-            <h2 className="text-2xl font-bold tracking-tight">Made For You</h2>
-            <button className="text-sm font-bold text-gray-400 hover:text-white hover:underline">See all</button>
+            <div className="flex items-center gap-3">
+              <div className="w-1 h-6 bg-brand shadow-[0_0_10px_var(--color-brand-glow)]" />
+              <h2 className="text-lg font-black tracking-tighter uppercase">AI_Generation</h2>
+            </div>
+            <button className="hud-label hover:text-brand transition-colors">REFRESH_MIX</button>
           </div>
           <motion.div 
             variants={containerVariants}
             initial="hidden"
             animate="show"
-            className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-6"
+            className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6"
           >
             {[
               {
                 id: 'mix-1',
                 title: 'Daily Mix 1',
                 description: `Focus on ${processedSubjects[0]?.name || 'your weakest area'}`,
-                gradient: 'from-[#1DB954] to-[#121212]',
+                gradient: 'from-brand/20 to-transparent',
                 icon: Zap,
                 color: '#1DB954',
                 action: () => startFocusSession(processedSubjects[0]?.id || '', processedSubjects[0]?.topics[0]?.id || ''),
-                tag: 'WEAK AREAS'
+                tag: 'WEAK_AREAS'
               },
               {
                 id: 'mix-2',
                 title: 'Review Mix',
                 description: 'Spaced repetition for long-term retention.',
-                gradient: 'from-[#4d569d] to-[#121212]',
+                gradient: 'from-blue-500/20 to-transparent',
                 icon: Clock,
                 color: '#4d569d',
                 action: () => {},
@@ -233,7 +244,7 @@ export default function Home() {
                 id: 'mix-3',
                 title: 'Mastery Mix',
                 description: 'Polish your strong areas to reach 100%.',
-                gradient: 'from-[#e91e63] to-[#121212]',
+                gradient: 'from-purple-500/20 to-transparent',
                 icon: Target,
                 color: '#e91e63',
                 action: () => {},
@@ -243,7 +254,7 @@ export default function Home() {
                 id: 'mix-4',
                 title: 'The Grind',
                 description: 'High-intensity session for maximum points.',
-                gradient: 'from-[#ff5722] to-[#121212]',
+                gradient: 'from-orange-500/20 to-transparent',
                 icon: Flame,
                 color: '#ff5722',
                 action: () => {},
@@ -253,7 +264,7 @@ export default function Home() {
                 id: 'mix-5',
                 title: 'Chill Study',
                 description: 'Light review and resource browsing.',
-                gradient: 'from-[#00bcd4] to-[#121212]',
+                gradient: 'from-cyan-500/20 to-transparent',
                 icon: Coffee,
                 color: '#00bcd4',
                 action: () => {},
@@ -263,33 +274,32 @@ export default function Home() {
               <motion.div 
                 key={mix.id}
                 variants={itemVariants}
-                whileHover={{ y: -8, scale: 1.02 }}
-                className="group relative bg-[#181818] p-4 rounded-2xl transition-all duration-300 hover:bg-[#282828] cursor-pointer shadow-lg border border-white/5 hover:border-white/10 hover:shadow-2xl"
+                whileHover={{ y: -8 }}
+                className="scifi-panel-sm p-4 transition-all duration-500 hover:bg-white/5 cursor-pointer group"
                 onClick={mix.action}
               >
-                <div className={cn("aspect-square rounded-xl mb-4 relative overflow-hidden bg-gradient-to-br shadow-inner", mix.gradient)}>
-                  <div className="absolute inset-0 flex items-center justify-center opacity-20 group-hover:opacity-40 group-hover:scale-110 transition-all duration-500">
-                    <mix.icon className="w-24 h-24 text-white" />
+                <div className={cn("aspect-square mb-4 relative overflow-hidden bg-surface border border-border-dim group-hover:border-brand/30 transition-colors", mix.gradient)}>
+                  <div className="absolute inset-0 flex items-center justify-center opacity-10 group-hover:opacity-30 group-hover:scale-110 transition-all duration-700">
+                    <mix.icon className="w-16 h-16 text-white" />
                   </div>
-                  <div className="absolute inset-0 bg-black/20 group-hover:bg-transparent transition-colors duration-500" />
                   
                   <motion.div 
-                    initial={{ opacity: 0, y: 10 }}
-                    whileHover={{ opacity: 1, y: 0 }}
-                    className="absolute bottom-3 right-3 w-12 h-12 bg-[#1DB954] rounded-full flex items-center justify-center shadow-xl translate-y-4 group-hover:translate-y-0 transition-all duration-300 hover:scale-105"
+                    initial={{ opacity: 0 }}
+                    whileHover={{ opacity: 1 }}
+                    className="absolute inset-0 flex items-center justify-center bg-brand/10 backdrop-blur-sm transition-all"
                   >
-                    <Play className="w-6 h-6 text-black fill-current ml-1" />
+                    <Play className="w-8 h-8 text-brand fill-current" />
                   </motion.div>
-
-                  <div className="absolute top-3 left-3">
-                    <span className="px-2 py-1 bg-black/40 backdrop-blur-md rounded text-[8px] font-black text-white tracking-widest uppercase border border-white/10">
+ 
+                  <div className="absolute top-2 left-2">
+                    <span className="px-2 py-0.5 bg-black/60 border border-white/10 text-[7px] font-black text-white tracking-[0.2em] uppercase">
                       {mix.tag}
                     </span>
                   </div>
                 </div>
                 
-                <h3 className="font-bold text-sm mb-1 truncate group-hover:text-[#1DB954] transition-colors">{mix.title}</h3>
-                <p className="text-xs text-gray-400 line-clamp-2 leading-relaxed">
+                <h3 className="font-black text-[11px] mb-1 truncate group-hover:text-brand transition-colors uppercase tracking-tight">{mix.title}</h3>
+                <p className="text-[9px] text-gray-600 line-clamp-2 leading-relaxed font-black uppercase tracking-tighter">
                   {mix.description}
                 </p>
               </motion.div>
@@ -300,16 +310,19 @@ export default function Home() {
 
       <motion.section variants={itemVariants}>
         <div className="flex items-center justify-between mb-6">
-          <h2 className="text-2xl font-bold tracking-tight">
-            {searchQuery ? `Search results for "${searchQuery}"` : 'Your Subjects'}
-          </h2>
-          {!searchQuery && <button onClick={() => navigate('/manage')} className="text-sm font-bold text-gray-400 hover:text-white hover:underline">Show all</button>}
+          <div className="flex items-center gap-3">
+            <div className="w-1 h-6 bg-brand shadow-[0_0_10px_var(--color-brand-glow)]" />
+            <h2 className="text-lg font-black tracking-tighter uppercase">
+              {searchQuery ? `Search_Results: "${searchQuery}"` : 'Subject_Database'}
+            </h2>
+          </div>
+          {!searchQuery && <button onClick={() => navigate('/manage')} className="hud-label hover:text-brand transition-colors">EXPAND_ALL</button>}
         </div>
         <motion.div 
           variants={containerVariants}
           initial="hidden"
           animate="show"
-          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6"
+          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
         >
           {filteredSubjects.map(subject => (
             <motion.div key={subject.id} variants={itemVariants}>
@@ -321,35 +334,36 @@ export default function Home() {
 
       <motion.section 
         variants={itemVariants}
-        className="relative bg-gradient-to-br from-[#1DB954]/20 via-[#1DB954]/5 to-transparent p-8 md:p-12 rounded-[2rem] border border-[#1DB954]/20 overflow-hidden group"
+        className="scifi-panel p-8 md:p-12 group"
       >
-        <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-[#1DB954]/10 rounded-full blur-[100px] -translate-y-1/2 translate-x-1/3 group-hover:bg-[#1DB954]/20 transition-colors duration-700 pointer-events-none" />
-        <div className="relative flex flex-col md:flex-row items-center gap-8 md:gap-12">
-          <div className="flex-1 space-y-6 text-center md:text-left">
-            <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-[#1DB954]/20 rounded-full text-[#1DB954] text-xs font-black tracking-widest uppercase border border-[#1DB954]/30 shadow-[0_0_15px_rgba(29,185,84,0.2)]">
-              <Sparkles className="w-4 h-4" />
-              AI Analysis Ready
+        <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-brand/5 rounded-full blur-[100px] -translate-y-1/2 translate-x-1/3 group-hover:bg-brand/10 transition-colors duration-1000 pointer-events-none" />
+        <div className="relative flex flex-col lg:flex-row items-center gap-10 lg:gap-16">
+          <div className="flex-1 space-y-6 text-center lg:text-left">
+            <div className="inline-flex items-center gap-2 px-4 py-1 bg-brand/10 border border-brand/20 text-brand text-[9px] font-black tracking-[0.3em] uppercase shadow-[0_0_15px_rgba(29,185,84,0.1)]">
+              <Sparkles className="w-3 h-3" />
+              AI_ANALYSIS_ACTIVE
             </div>
-            <h2 className="text-4xl md:text-5xl font-black tracking-tight leading-tight">Deep Dive into Your Progress</h2>
-            <p className="text-gray-400 text-lg max-w-xl">Our AI has analyzed your performance. You're showing strong growth in some areas but might need more focus on others.</p>
-            <div className="flex flex-wrap justify-center md:justify-start gap-4 pt-4">
+            <h2 className="text-4xl md:text-6xl font-black tracking-tighter leading-[0.9] uppercase">Deep_Dive_Analytics</h2>
+            <p className="text-gray-500 text-sm max-w-xl font-black uppercase tracking-widest leading-relaxed">Neural network processing complete. Performance metrics indicate growth potential in core modules. Initialize deep scan for detailed insights.</p>
+            <div className="flex flex-wrap justify-center lg:justify-start gap-4 pt-4">
               <button 
                 onClick={() => navigate('/weak-areas')}
-                className="px-8 py-4 bg-[#1DB954] text-black rounded-full font-black hover:scale-105 transition-all shadow-[0_8px_20px_rgba(29,185,84,0.3)] flex items-center gap-2"
+                className="scifi-button px-8 py-4"
               >
-                Generate New Insights
+                GENERATE_INSIGHTS
               </button>
               <button 
                 onClick={() => navigate('/analytics')}
-                className="px-8 py-4 bg-white/5 hover:bg-white/10 text-white border border-white/10 rounded-full font-black transition-all backdrop-blur-md"
+                className="scifi-button-outline px-8 py-4"
               >
-                View Full Analytics
+                VIEW_FULL_DATA
               </button>
             </div>
           </div>
-          <div className="w-full md:w-1/3 aspect-square bg-black/40 backdrop-blur-xl rounded-3xl border border-white/10 flex items-center justify-center relative overflow-hidden group-hover:border-[#1DB954]/30 transition-colors duration-500 shadow-2xl">
-            <div className="absolute inset-0 bg-gradient-to-br from-[#1DB954]/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-            <TrendingUp className="w-32 h-32 text-[#1DB954] animate-pulse drop-shadow-[0_0_30px_rgba(29,185,84,0.5)]" />
+          <div className="w-full lg:w-1/4 aspect-square bg-white/5 border border-border-dim flex items-center justify-center relative overflow-hidden group-hover:border-brand/30 transition-all duration-700 shadow-2xl scale-95 group-hover:scale-100">
+            <div className="absolute inset-0 bg-brand/5 opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
+            <TrendingUp className="w-24 h-24 text-brand animate-pulse drop-shadow-[0_0_20px_rgba(29,185,84,0.4)]" />
+            <div className="absolute bottom-2 left-2 hud-label !text-gray-700">SCAN_ACTIVE</div>
           </div>
         </div>
       </motion.section>
