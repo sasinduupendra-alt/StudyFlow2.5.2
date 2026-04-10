@@ -2,11 +2,8 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Brain, Send, CheckCircle2, XCircle, AlertCircle, RefreshCw, Star } from 'lucide-react';
 import { useAppStore } from '../store/useAppStore';
-import { GoogleGenAI } from '@google/genai';
-import { doc, updateDoc } from 'firebase/firestore';
-import { db } from '../firebase';
-
-const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+import { getAI } from '../services/gemini';
+import { supabase } from '../lib/supabase';
 
 export default function AIPracticeMode() {
   const { subjects, user, addToast, setSubjects } = useAppStore();
@@ -32,8 +29,9 @@ export default function AIPracticeMode() {
     try {
       const prompt = `Generate a challenging practice question for an Advanced Level student studying ${selectedSubject.name}, specifically focusing on the topic: ${selectedTopic.title}. The question should test deep understanding, not just memorization. Return ONLY the question text, nothing else.`;
       
+      const ai = getAI();
       const response = await ai.models.generateContent({
-        model: 'gemini-2.5-flash',
+        model: 'gemini-3-flash-preview',
         contents: prompt,
       });
 
@@ -64,8 +62,9 @@ Evaluate the answer and provide a JSON response with the following schema:
 }
 Return ONLY valid JSON.`;
 
+      const ai = getAI();
       const response = await ai.models.generateContent({
-        model: 'gemini-2.5-flash',
+        model: 'gemini-3-flash-preview',
         contents: prompt,
         config: {
           responseMimeType: 'application/json',
@@ -84,12 +83,14 @@ Return ONLY valid JSON.`;
       const newSubjects = subjects.map(s => s.id === selectedSubject.id ? { ...s, topics: updatedTopics } : s);
       setSubjects(newSubjects);
 
-      // Update Firestore if logged in
+      // Update Supabase if logged in
       if (user) {
         try {
-          await updateDoc(doc(db, 'users', user.uid, 'subjects', selectedSubject.id), {
-            topics: updatedTopics
-          });
+          await supabase
+            .from('subjects')
+            .update({ topics: updatedTopics })
+            .eq('id', selectedSubject.id)
+            .eq('user_id', user.id);
         } catch (e) {
           console.error("Failed to sync mastery to cloud", e);
         }

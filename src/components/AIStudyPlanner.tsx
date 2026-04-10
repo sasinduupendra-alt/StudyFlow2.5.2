@@ -2,7 +2,8 @@ import React, { useState } from 'react';
 import { Sparkles, Calendar, Clock, AlertCircle, CheckCircle2, RefreshCw, Brain, Target, ArrowRight, Edit2, Check, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useAppStore } from '../store/useAppStore';
-import { GoogleGenAI, Type } from "@google/genai";
+import { Type } from "@google/genai";
+import { getAI } from '../services/gemini';
 import { cn } from '../lib/utils';
 import { AIStudyPlan, AIPlanTask } from '../types';
 
@@ -41,7 +42,7 @@ export default function AIStudyPlanner() {
   const improveTask = async (task: AIPlanTask) => {
     setIsImproving(task.id);
     try {
-      const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+      const ai = getAI();
       
       const prompt = `
         You are an expert academic study planner.
@@ -86,7 +87,7 @@ export default function AIStudyPlanner() {
   const generatePlan = async () => {
     setIsGenerating(true);
     try {
-      const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+      const ai = getAI();
       
       const subjectData = subjects.map(s => ({
         name: s.name,

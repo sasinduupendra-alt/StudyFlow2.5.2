@@ -3,8 +3,7 @@ import { motion } from 'motion/react';
 import { useAppStore } from '../store/useAppStore';
 import SyllabusTracker from '../components/SyllabusTracker';
 import WeeklyTaskChecklist from '../components/WeeklyTaskChecklist';
-import { db } from '../firebase';
-import { doc, writeBatch } from 'firebase/firestore';
+import { supabase } from '../lib/supabase';
 
 export default function Syllabus() {
   const { subjects, user, userProfile, highlightedSubjectId, setSubjects, setUserProfile } = useAppStore();
@@ -42,14 +41,19 @@ export default function Syllabus() {
 
     setUserProfile({ ...userProfile, badges: updatedBadges });
 
-    // Update Firestore if logged in (and not anonymous)
+    // Update Supabase if logged in (and not anonymous)
     if (user) {
-      const batch = writeBatch(db);
-      batch.update(doc(db, 'users', user.uid, 'subjects', subjectId), { topics: updatedTopics });
-      batch.update(doc(db, 'users', user.uid), { badges: updatedBadges });
-
       try {
-        await batch.commit();
+        await supabase
+          .from('subjects')
+          .update({ topics: updatedTopics })
+          .eq('id', subjectId)
+          .eq('user_id', user.id);
+        
+        await supabase
+          .from('users')
+          .update({ badges: updatedBadges })
+          .eq('id', user.id);
       } catch (e) {
         console.error("Failed to update mastery in cloud", e);
       }

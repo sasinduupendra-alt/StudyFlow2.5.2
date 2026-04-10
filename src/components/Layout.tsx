@@ -14,10 +14,8 @@ import Logo from './Logo';
 import NowPlayingSidebar from './NowPlayingSidebar';
 import FocusMode from './FocusMode';
 import StudyLogForm from './StudyLogForm';
-import { auth, googleProvider, signInWithPopup, db } from '../firebase';
-import { onAuthStateChanged } from 'firebase/auth';
-import { doc, setDoc, collection, updateDoc, getDoc } from 'firebase/firestore';
-import { useFirestoreSync } from '../hooks/useFirestoreSync';
+import { supabase } from '../lib/supabase';
+import { useSupabaseSync } from '../hooks/useSupabaseSync';
 import ErrorBoundary from './ErrorBoundary';
 
 export default function Layout() {
@@ -25,8 +23,8 @@ export default function Layout() {
   const navigate = useNavigate();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   
-  // Sync Firestore data when user is logged in
-  useFirestoreSync();
+  // Sync Supabase data when user is logged in
+  useSupabaseSync();
 
   const { 
     user, 
@@ -137,11 +135,11 @@ export default function Layout() {
     addToast(`Study session logged! +${xpEarned} XP`, 'success');
     setActiveSession(null);
 
-    // Update Firestore if logged in
+    // Update Supabase if logged in
     if (user) {
       try {
-        await setDoc(doc(collection(db, 'users', user.uid, 'study_logs'), id), newLog);
-        await updateDoc(doc(db, 'users', user.uid), updatedProfile as any);
+        await supabase.from('study_logs').insert(newLog);
+        await supabase.from('users').upsert({ id: user.id, ...updatedProfile });
       } catch (error) {
         console.error('Failed to save log to cloud:', error);
         addToast('Failed to sync study log to cloud.', 'error');
@@ -162,19 +160,25 @@ export default function Layout() {
   const signInInProgress = React.useRef(false);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
-      if (!currentUser) {
-        setAuth(null, true);
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (session) {
+        setAuth(session.user, true);
       } else {
-        setAuth(currentUser, true);
+        setAuth(null, true);
       }
     });
-    return () => unsubscribe();
+
+    return () => subscription.unsubscribe();
   }, [setAuth]);
 
   const handleLogin = async () => {
     try {
-      await signInWithPopup(auth, googleProvider);
+      await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: window.location.origin
+        }
+      });
     } catch (error) {
       console.error('Login failed:', error);
     }
@@ -182,7 +186,7 @@ export default function Layout() {
 
   const handleLogout = async () => {
     try {
-      await auth.signOut();
+      await supabase.auth.signOut();
       navigate('/');
     } catch (error) {
       console.error('Logout failed:', error);
@@ -284,10 +288,10 @@ export default function Layout() {
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#1DB954] to-[#1ed760] flex items-center justify-center text-black font-bold shadow-inner">
-                    {user.displayName?.[0] || user.email?.[0] || 'U'}
+                    {user.user_metadata?.full_name?.[0] || user.email?.[0] || 'U'}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-bold truncate group-hover:text-[#1DB954] transition-colors">{user.displayName || 'User'}</p>
+                    <p className="text-sm font-bold truncate group-hover:text-[#1DB954] transition-colors">{user.user_metadata?.full_name || 'User'}</p>
                     <p className="text-[10px] font-black text-gray-500 uppercase tracking-widest">Level {userProfile?.level || 1}</p>
                   </div>
                 </div>
@@ -404,14 +408,14 @@ export default function Layout() {
             <div className="w-px h-6 bg-white/10 mx-2 hidden md:block" />
             <div className="hidden md:flex items-center gap-3 pl-2 group cursor-pointer">
               <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center overflow-hidden">
-                {user?.photoURL ? (
-                  <img src={user.photoURL} alt="" className="w-full h-full object-cover" />
+                {user?.user_metadata?.avatar_url ? (
+                  <img src={user.user_metadata.avatar_url} alt="" className="w-full h-full object-cover" />
                 ) : (
                   <User className="w-4 h-4 text-gray-400" />
                 )}
               </div>
               <span className="text-sm font-bold group-hover:text-[#1DB954] transition-colors">
-                {user?.displayName?.split(' ')[0] || 'Guest'}
+                {user?.user_metadata?.full_name?.split(' ')[0] || 'Guest'}
               </span>
             </div>
           </div>

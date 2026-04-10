@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
-import { doc, onSnapshot } from 'firebase/firestore';
-import { db } from '../firebase';
+import { supabase } from '../lib/supabase';
 import { StudyLog } from '../types';
 import { useAppStore } from '../store/useAppStore';
 
@@ -33,27 +32,46 @@ export function useStudySession(sessionId: string | undefined) {
       return;
     }
 
-    // If logged in and not found locally (or to get real-time updates), use Firestore
-    const sessionRef = doc(db, 'users', user.uid, 'study_logs', sessionId);
+    // If logged in and not found locally (or to get real-time updates), use Supabase
+    const fetchSession = async () => {
+      try {
+        const { data, error: fetchError } = await supabase
+          .from('study_logs')
+          .select('*')
+          .eq('id', sessionId)
+          .eq('user_id', user.id)
+          .single();
 
-    const unsubscribe = onSnapshot(
-      sessionRef,
-      (docSnap) => {
-        if (docSnap.exists()) {
-          setSession(docSnap.data() as StudyLog);
-        } else {
-          setSession(null);
-        }
-        setLoading(false);
-      },
-      (err) => {
-        console.error('Error listening to study session:', err);
+        if (fetchError) throw fetchError;
+        setSession(data as StudyLog);
+      } catch (err) {
+        console.error('Error fetching study session:', err);
         setError(err as Error);
+      } finally {
         setLoading(false);
       }
-    );
+    };
 
-    return () => unsubscribe();
+    fetchSession();
+
+    // Real-time subscription
+    const subscription = supabase
+      .channel(`study_log_${sessionId}`)
+      .on('postgres_changes', { 
+        event: '*', 
+        schema: 'public', 
+        table: 'study_logs', 
+        filter: `id=eq.${sessionId}` 
+      }, (payload) => {
+        if (payload.new) {
+          setSession(payload.new as StudyLog);
+        }
+      })
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(subscription);
+    };
   }, [user, sessionId]);
 
   return { session, loading, error };

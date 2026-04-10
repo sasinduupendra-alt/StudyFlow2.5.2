@@ -2,10 +2,9 @@ import React from 'react';
 import { motion } from 'motion/react';
 import { useAppStore } from '../store/useAppStore';
 import AIInsights from '../components/AIInsights';
-import { db } from '../firebase';
-import { doc, updateDoc, writeBatch } from 'firebase/firestore';
+import { supabase } from '../lib/supabase';
 import { useMutation } from '@tanstack/react-query';
-import { genAI } from '../services/gemini';
+import { getAI } from '../services/gemini';
 
 export default function WeakAreas() {
   const { recommendations, subjects, user, addToast, setRecommendations } = useAppStore();
@@ -16,7 +15,11 @@ export default function WeakAreas() {
 
     if (user) {
       try {
-        await updateDoc(doc(db, 'users', user.uid, 'recommendations', id), { liked: !recommendations.find(r => r.id === id)?.liked });
+        await supabase
+          .from('recommendations')
+          .update({ liked: !recommendations.find(r => r.id === id)?.liked })
+          .eq('id', id)
+          .eq('user_id', user.id);
       } catch (e) {
         console.error("Failed to like recommendation in cloud", e);
       }
@@ -29,7 +32,11 @@ export default function WeakAreas() {
 
     if (user) {
       try {
-        await updateDoc(doc(db, 'users', user.uid, 'recommendations', id), { dismissed: true });
+        await supabase
+          .from('recommendations')
+          .update({ dismissed: true })
+          .eq('id', id)
+          .eq('user_id', user.id);
       } catch (e) {
         console.error("Failed to dismiss recommendation in cloud", e);
       }
@@ -42,8 +49,9 @@ export default function WeakAreas() {
       Subjects: ${JSON.stringify(subjects.map(s => ({ name: s.name, readiness: s.readiness, weakCount: s.weakCount })))}
       Return a JSON array of objects with fields: id, title, description, priority (High/Medium/Low), reason.`;
 
-      const result = await genAI.models.generateContent({
-        model: "gemini-1.5-flash",
+      const ai = getAI();
+      const result = await ai.models.generateContent({
+        model: "gemini-3-flash-preview",
         contents: [{ role: 'user', parts: [{ text: prompt }] }],
         config: { responseMimeType: "application/json" }
       });
@@ -59,12 +67,11 @@ export default function WeakAreas() {
       setRecommendations([...recommendations, ...newRecs]);
       
       if (user) {
-        const batch = writeBatch(db);
-        newRecs.forEach((rec: any) => {
-          const recRef = doc(db, 'users', user.uid, 'recommendations', rec.id);
-          batch.set(recRef, rec);
-        });
-        await batch.commit();
+        const recsToInsert = newRecs.map((rec: any) => ({
+          ...rec,
+          user_id: user.id
+        }));
+        await supabase.from('recommendations').insert(recsToInsert);
       }
       return newRecs;
     },

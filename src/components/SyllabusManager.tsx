@@ -23,7 +23,7 @@ import {
   useSortable
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { GoogleGenAI } from "@google/genai";
+import { getAI } from '../services/gemini';
 import { useAppStore } from '../store/useAppStore';
 
 const subjectSchema = z.object({
@@ -198,14 +198,14 @@ export default function SyllabusManager({
   const generateTopics = async (subject: Subject) => {
     setIsGenerating(subject.id);
     try {
-      const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+      const ai = getAI();
       
       const prompt = `Generate a list of 5-8 core topics for the subject "${subject.name}". 
       Return the response as a JSON array of strings. 
       Example: ["Topic 1", "Topic 2"]`;
 
       const response = await ai.models.generateContent({
-        model: "gemini-3.1-pro-preview",
+        model: "gemini-3-flash-preview",
         contents: prompt
       });
       

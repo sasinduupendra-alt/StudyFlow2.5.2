@@ -86,8 +86,7 @@ const SortableActivity = ({ activity, day, onEdit }: SortableActivityProps) => {
   );
 };
 
-import { auth, googleProvider, signInWithPopup, db } from '../firebase';
-import { doc, setDoc } from 'firebase/firestore';
+import { supabase } from '../lib/supabase';
 
 export default function WeeklyScheduleView({ schedule, onManageSchedule }: WeeklyScheduleViewProps) {
   const { reorderSchedule, updateActivity, resetToDefault, user, addToast } = useAppStore();
@@ -102,7 +101,9 @@ export default function WeeklyScheduleView({ schedule, onManageSchedule }: Weekl
     if (!user) return;
     setIsSaving(true);
     try {
-      await setDoc(doc(db, 'users', user.uid, 'config', 'schedule'), newSchedule);
+      await supabase
+        .from('config')
+        .upsert({ user_id: user.id, key: 'schedule', data: newSchedule });
       addToast('Schedule synced to cloud', 'success');
     } catch (error) {
       console.error('Failed to save schedule:', error);

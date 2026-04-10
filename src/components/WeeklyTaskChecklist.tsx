@@ -3,8 +3,7 @@ import { CheckCircle2, Circle, BookOpen, Plus, Trash2, Edit2, X, Check } from 'l
 import { motion, AnimatePresence } from 'motion/react';
 import { cn } from '../lib/utils';
 import { useAppStore } from '../store/useAppStore';
-import { doc, updateDoc } from 'firebase/firestore';
-import { db } from '../firebase';
+import { supabase } from '../lib/supabase';
 import { WeeklyTask } from '../types';
 import { INITIAL_SUBJECTS } from '../constants';
 
@@ -21,9 +20,11 @@ export default function WeeklyTaskChecklist() {
 
     if (user) {
       try {
-        await updateDoc(doc(db, 'users', user.uid, 'subjects', subjectId), {
-          weeklyTasks: newTasks
-        });
+        await supabase
+          .from('subjects')
+          .update({ weeklyTasks: newTasks })
+          .eq('id', subjectId)
+          .eq('user_id', user.id);
       } catch (error) {
         console.error('Failed to update tasks in cloud:', error);
         addToast('Failed to sync tasks to cloud', 'error');
@@ -105,9 +106,11 @@ export default function WeeklyTaskChecklist() {
     if (user) {
       try {
         for (const subject of newSubjects) {
-          await updateDoc(doc(db, 'users', user.uid, 'subjects', subject.id), {
-            weeklyTasks: subject.weeklyTasks
-          });
+          await supabase
+            .from('subjects')
+            .update({ weeklyTasks: subject.weeklyTasks })
+            .eq('id', subject.id)
+            .eq('user_id', user.id);
         }
         addToast('All tasks reset for the new week!', 'success');
       } catch (error) {

@@ -2,7 +2,7 @@ import React from 'react';
 import { motion } from 'motion/react';
 import { useAppStore } from '../store/useAppStore';
 import { Settings as SettingsIcon, User, Bell, Shield, Trash2, LogOut, RefreshCw } from 'lucide-react';
-import { auth } from '../firebase';
+import { supabase } from '../lib/supabase';
 import { cn } from '../lib/utils';
 
 export default function Settings() {
@@ -10,7 +10,7 @@ export default function Settings() {
 
   const handleLogout = async () => {
     try {
-      await auth.signOut();
+      await supabase.auth.signOut();
       addToast("Logged out successfully", "info");
     } catch (error) {
       console.error("Logout failed", error);
@@ -37,16 +37,16 @@ export default function Settings() {
         <section className="bg-[#181818] rounded-3xl p-8 border border-white/5">
           <div className="flex items-center gap-6 mb-8">
             <div className="w-20 h-20 rounded-full overflow-hidden bg-gradient-to-br from-indigo-500 to-purple-600 border-4 border-white/5">
-              {user?.photoURL ? (
-                <img src={user.photoURL} alt="Profile" className="w-full h-full object-cover" referrerPolicy="no-referrer" />
+              {user?.user_metadata?.avatar_url ? (
+                <img src={user.user_metadata.avatar_url} alt="Profile" className="w-full h-full object-cover" referrerPolicy="no-referrer" />
               ) : (
                 <div className="w-full h-full flex items-center justify-center text-2xl font-black">
-                  {user?.displayName?.[0] || user?.email?.[0] || 'U'}
+                  {user?.user_metadata?.full_name?.[0] || user?.email?.[0] || 'U'}
                 </div>
               )}
             </div>
             <div>
-              <h2 className="text-2xl font-black tracking-tight">{user?.displayName || 'StudyFlow User'}</h2>
+              <h2 className="text-2xl font-black tracking-tight">{user?.user_metadata?.full_name || 'StudyFlow User'}</h2>
               <p className="text-gray-500 font-bold">{user?.email}</p>
             </div>
           </div>
