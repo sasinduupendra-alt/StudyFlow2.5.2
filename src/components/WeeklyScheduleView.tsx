@@ -5,6 +5,8 @@ import { Clock, BookOpen, Zap, CheckCircle2, ChevronRight, GripVertical, Edit2, 
 import { cn } from '../lib/utils';
 import { useAppStore } from '../store/useAppStore';
 import { WEEKLY_BASE_SCHEDULE } from '../constants';
+import { auth, db, handleFirestoreError, OperationType } from '../firebase';
+import { doc, setDoc } from 'firebase/firestore';
 import {
   DndContext,
   closestCenter,
@@ -86,9 +88,6 @@ const SortableActivity = ({ activity, day, onEdit }: SortableActivityProps) => {
   );
 };
 
-import { auth, googleProvider, signInWithPopup, db } from '../firebase';
-import { doc, setDoc } from 'firebase/firestore';
-
 export default function WeeklyScheduleView({ schedule, onManageSchedule }: WeeklyScheduleViewProps) {
   const { reorderSchedule, updateActivity, resetToDefault, user, addToast } = useAppStore();
   const [editingActivity, setEditingActivity] = useState<{ day: keyof WeeklySchedule, activity: Activity } | null>(null);
@@ -104,8 +103,7 @@ export default function WeeklyScheduleView({ schedule, onManageSchedule }: Weekl
       await setDoc(doc(db, 'users', user.uid, 'config', 'schedule'), newSchedule);
       addToast('Schedule synced to cloud', 'success');
     } catch (error) {
-      console.error('Failed to save schedule:', error);
-      addToast('Failed to save schedule', 'error');
+      handleFirestoreError(error, OperationType.WRITE, `users/${user.uid}/config/schedule`);
     } finally {
       setIsSaving(false);
     }

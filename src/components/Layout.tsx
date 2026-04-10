@@ -14,9 +14,9 @@ import Logo from './Logo';
 import NowPlayingSidebar from './NowPlayingSidebar';
 import FocusMode from './FocusMode';
 import StudyLogForm from './StudyLogForm';
-import { auth, googleProvider, signInWithPopup, db } from '../firebase';
+import { auth, googleProvider, signInWithPopup, db, handleFirestoreError, OperationType } from '../firebase';
 import { onAuthStateChanged } from 'firebase/auth';
-import { doc, setDoc, collection, updateDoc, getDoc } from 'firebase/firestore';
+import { doc, setDoc, collection, updateDoc } from 'firebase/firestore';
 import { useFirestoreSync } from '../hooks/useFirestoreSync';
 import ErrorBoundary from './ErrorBoundary';
 
@@ -143,8 +143,7 @@ export default function Layout() {
         await setDoc(doc(collection(db, 'users', user.uid, 'study_logs'), id), newLog);
         await updateDoc(doc(db, 'users', user.uid), updatedProfile as any);
       } catch (error) {
-        console.error('Failed to save log to cloud:', error);
-        addToast('Failed to sync study log to cloud.', 'error');
+        handleFirestoreError(error, OperationType.WRITE, `users/${user.uid}/study_logs/${id}`);
       }
     }
   };
