@@ -3,6 +3,7 @@ import { WeeklySchedule, Activity } from '../types';
 import { motion, AnimatePresence } from 'motion/react';
 import { Clock, Zap, BookOpen, Coffee, Moon, ChevronRight, Calendar } from 'lucide-react';
 import { cn } from '../lib/utils';
+import { parseTimeStr } from '../lib/timeUtils';
 
 interface CurrentScheduleBlockProps {
   schedule: WeeklySchedule;
@@ -21,14 +22,6 @@ export const CurrentScheduleBlock = React.memo(({ schedule, onViewFullSchedule }
   const currentDay = days[currentTime.getDay()];
   const todaySchedule = schedule[currentDay] || [];
 
-  const parseTime = (timeStr: string) => {
-    const [time, modifier] = timeStr.trim().split(' ');
-    let [hours, minutes] = time.split(':').map(Number);
-    if (modifier === 'PM' && hours < 12) hours += 12;
-    if (modifier === 'AM' && hours === 12) hours = 0;
-    return hours * 60 + minutes;
-  };
-
   const getActiveActivity = () => {
     const currentMinutes = currentTime.getHours() * 60 + currentTime.getMinutes();
     
@@ -36,8 +29,8 @@ export const CurrentScheduleBlock = React.memo(({ schedule, onViewFullSchedule }
       const [startStr, endStr] = activity.time.split(' – ');
       if (!startStr || !endStr) return false;
       
-      const startMinutes = parseTime(startStr);
-      const endMinutes = parseTime(endStr);
+      const startMinutes = parseTimeStr(startStr);
+      const endMinutes = parseTimeStr(endStr);
       
       return currentMinutes >= startMinutes && currentMinutes < endMinutes;
     });
@@ -47,7 +40,7 @@ export const CurrentScheduleBlock = React.memo(({ schedule, onViewFullSchedule }
     const currentMinutes = currentTime.getHours() * 60 + currentTime.getMinutes();
     return todaySchedule.find(activity => {
       const [startStr] = activity.time.split(' – ');
-      return parseTime(startStr) > currentMinutes;
+      return parseTimeStr(startStr) > currentMinutes;
     });
   };
 
@@ -188,12 +181,12 @@ export const CurrentScheduleBlock = React.memo(({ schedule, onViewFullSchedule }
         <div className="mt-6 pt-6 border-t border-white/5">
           <div className="flex items-center justify-between text-[10px] font-bold text-gray-500 uppercase mb-3">
             <span>Today's Progress</span>
-            <span>{Math.round((todaySchedule.filter(a => parseTime(a.time.split(' – ')[0]) < (currentTime.getHours() * 60 + currentTime.getMinutes())).length / todaySchedule.length) * 100)}%</span>
+            <span>{Math.round((todaySchedule.filter(a => parseTimeStr(a.time.split(' – ')[0]) < (currentTime.getHours() * 60 + currentTime.getMinutes())).length / todaySchedule.length) * 100)}%</span>
           </div>
           <div className="h-1 bg-white/5 rounded-full overflow-hidden">
             <motion.div 
               initial={{ width: 0 }}
-              animate={{ width: `${(todaySchedule.filter(a => parseTime(a.time.split(' – ')[0]) < (currentTime.getHours() * 60 + currentTime.getMinutes())).length / todaySchedule.length) * 100}%` }}
+              animate={{ width: `${(todaySchedule.filter(a => parseTimeStr(a.time.split(' – ')[0]) < (currentTime.getHours() * 60 + currentTime.getMinutes())).length / todaySchedule.length) * 100}%` }}
               className="h-full bg-[#1DB954]"
             />
           </div>

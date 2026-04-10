@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { 
   doc, 
   onSnapshot, 
@@ -33,11 +33,22 @@ export function useFirestoreSync() {
     exams
   } = useAppStore();
 
+  // Use refs to store the initial local data for cloud initialization
+  // This avoids the infinite loop caused by depending on the state itself
+  const initialDataRef = useRef({
+    subjects,
+    schedule,
+    userProfile,
+    studyLogs,
+    exams
+  });
+
   useEffect(() => {
     // Skip sync for anonymous users to keep it "Local Only"
     if (!user) return;
 
     const userId = user.uid;
+    const initial = initialDataRef.current;
 
     // 1. Sync User Profile
     const profileRef = doc(db, 'users', userId);
@@ -53,7 +64,7 @@ export function useFirestoreSync() {
           } as UserProfile);
         } else {
           // Initialize cloud with current local profile
-          await setDoc(profileRef, userProfile);
+          await setDoc(profileRef, initial.userProfile);
         }
       } catch (error) {
         handleFirestoreError(error, OperationType.WRITE, `users/${userId}`);
@@ -72,7 +83,7 @@ export function useFirestoreSync() {
           setSubjects(subjectsData);
         } else {
           // Initialize cloud with current local subjects
-          for (const subject of subjects) {
+          for (const subject of initial.subjects) {
             await setDoc(doc(db, 'users', userId, 'subjects', subject.id), subject);
           }
         }
@@ -92,7 +103,7 @@ export function useFirestoreSync() {
           setSchedule(docSnap.data() as WeeklySchedule);
         } else {
           // Initialize cloud with current local schedule
-          await setDoc(scheduleRef, schedule);
+          await setDoc(scheduleRef, initial.schedule);
         }
       } catch (error) {
         handleFirestoreError(error, OperationType.WRITE, schedulePath);
@@ -112,7 +123,7 @@ export function useFirestoreSync() {
           setStudyLogs(logsData);
         } else {
           // Initialize cloud with current local logs
-          for (const log of studyLogs) {
+          for (const log of initial.studyLogs) {
             await setDoc(doc(db, 'users', userId, 'study_logs', log.id), log);
           }
         }
@@ -134,7 +145,7 @@ export function useFirestoreSync() {
           setExams(examsData);
         } else {
           // Initialize cloud with current local exams
-          for (const exam of exams) {
+          for (const exam of initial.exams) {
             await setDoc(doc(db, 'users', userId, 'exams', exam.id), exam);
           }
         }
@@ -152,5 +163,5 @@ export function useFirestoreSync() {
       unsubscribeLogs();
       unsubscribeExams();
     };
-  }, [user, setUserProfile, setSubjects, setSchedule, setStudyLogs, setExams, subjects, schedule, userProfile, studyLogs, exams]);
+  }, [user?.uid, setUserProfile, setSubjects, setSchedule, setStudyLogs, setExams]);
 }

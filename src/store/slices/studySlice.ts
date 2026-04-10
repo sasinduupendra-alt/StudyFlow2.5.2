@@ -1,23 +1,7 @@
 import { StateCreator } from 'zustand';
 import { Subject, StudyLog, WeeklySchedule, AIRecommendation, ExamRecord, AIStudyPlan, AIPlanTask, Activity } from '../../types';
 import { INITIAL_SUBJECTS, WEEKLY_BASE_SCHEDULE } from '../../constants';
-
-const parseTimeStr = (timeStr: string) => {
-  const [time, modifier] = timeStr.trim().split(' ');
-  let [hours, minutes] = time.split(':').map(Number);
-  if (modifier === 'PM' && hours < 12) hours += 12;
-  if (modifier === 'AM' && hours === 12) hours = 0;
-  return hours * 60 + minutes;
-};
-
-const formatTimeStr = (totalMinutes: number) => {
-  let hours = Math.floor(totalMinutes / 60);
-  const minutes = totalMinutes % 60;
-  const modifier = hours >= 12 ? 'PM' : 'AM';
-  hours = hours % 12;
-  if (hours === 0) hours = 12;
-  return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')} ${modifier}`;
-};
+import { parseTimeStr, formatTimeStr } from '../../lib/timeUtils';
 
 const recalculateActivityTimes = (activities: Activity[]) => {
   if (activities.length === 0) return [];
