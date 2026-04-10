@@ -146,6 +146,17 @@ export default function Settings() {
                 Download JSON
               </button>
             </div>
+
+            <div className="flex items-center justify-between p-4 bg-white/5 rounded-2xl border border-white/5">
+              <div>
+                <p className="font-bold">Download Source Code</p>
+                <p className="text-xs text-gray-500">Get the full project files to run locally or deploy elsewhere.</p>
+              </div>
+              <div className="text-right">
+                <p className="text-[10px] font-black text-[#1DB954] uppercase mb-1">Use AI Studio Menu</p>
+                <p className="text-[9px] text-gray-500 max-w-[150px]">Click the gear icon (Settings) in the top right of AI Studio and select 'Export to ZIP'.</p>
+              </div>
+            </div>
           </div>
         </section>
 

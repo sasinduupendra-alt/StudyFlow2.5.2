@@ -300,17 +300,15 @@ export default function Layout() {
             <span className="tracking-wide">Liked Topics</span>
           </button>
 
-          {deferredPrompt && (
-            <button 
-              onClick={handleInstallClick}
-              className="w-full flex items-center gap-4 px-4 py-3 text-[#1DB954] font-bold hover:bg-[#1DB954]/10 rounded-xl transition-all group mt-4 border border-[#1DB954]/20"
-            >
-              <div className="w-6 h-6 bg-[#1DB954] rounded flex items-center justify-center group-hover:scale-110 transition-transform shadow-lg shadow-[#1DB954]/20">
-                <PlusSquare className="w-4 h-4 text-black" />
-              </div>
-              <span className="tracking-wide">Download App</span>
-            </button>
-          )}
+          <button 
+            onClick={deferredPrompt ? handleInstallClick : () => addToast("To install, open the app in a new tab and use your browser's 'Add to Home Screen' option.", "info")}
+            className="w-full flex items-center gap-4 px-4 py-3 text-[#1DB954] font-bold hover:bg-[#1DB954]/10 rounded-xl transition-all group mt-4 border border-[#1DB954]/20"
+          >
+            <div className="w-6 h-6 bg-[#1DB954] rounded flex items-center justify-center group-hover:scale-110 transition-transform shadow-lg shadow-[#1DB954]/20">
+              <PlusSquare className="w-4 h-4 text-black" />
+            </div>
+            <span className="tracking-wide">{deferredPrompt ? "Install App" : "How to Install"}</span>
+          </button>
         </nav>
 
         <div className="p-4">
