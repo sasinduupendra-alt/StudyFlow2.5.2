@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { WeeklySchedule, Activity } from '../types';
 import { motion, AnimatePresence } from 'motion/react';
-import { Clock, BookOpen, Zap, CheckCircle2, ChevronRight, GripVertical, Edit2, Calendar, Trash2, Save, X as CloseIcon } from 'lucide-react';
+import { Clock, BookOpen, Zap, CheckCircle2, ChevronRight, GripVertical, Edit2, Trash2, Save, X as CloseIcon } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { useAppStore } from '../store/useAppStore';
 import { WEEKLY_BASE_SCHEDULE } from '../constants';
@@ -92,7 +92,6 @@ import { doc, setDoc } from 'firebase/firestore';
 export default function WeeklyScheduleView({ schedule, onManageSchedule }: WeeklyScheduleViewProps) {
   const { reorderSchedule, updateActivity, resetToDefault, user, addToast } = useAppStore();
   const [editingActivity, setEditingActivity] = useState<{ day: keyof WeeklySchedule, activity: Activity } | null>(null);
-  const [isConnectingGoogle, setIsConnectingGoogle] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const isInitialMount = React.useRef(true);
 
@@ -155,30 +154,6 @@ export default function WeeklyScheduleView({ schedule, onManageSchedule }: Weekl
     }
   };
 
-  const handleConnectGoogle = async () => {
-    setIsConnectingGoogle(true);
-    try {
-      const response = await fetch('/api/auth/google/url');
-      const { url } = await response.json();
-      
-      const authWindow = window.open(url, 'google_auth', 'width=600,height=700');
-      
-      const handleMessage = (event: MessageEvent) => {
-        if (event.data?.type === 'OAUTH_AUTH_SUCCESS') {
-          localStorage.setItem('google_calendar_tokens', JSON.stringify(event.data.tokens));
-          alert('Successfully connected to Google Calendar!');
-          window.removeEventListener('message', handleMessage);
-        }
-      };
-      
-      window.addEventListener('message', handleMessage);
-    } catch (error) {
-      console.error('Failed to connect Google Calendar:', error);
-    } finally {
-      setIsConnectingGoogle(false);
-    }
-  };
-
   return (
     <div className="p-4 md:p-8 space-y-12 pb-32">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -207,14 +182,6 @@ export default function WeeklyScheduleView({ schedule, onManageSchedule }: Weekl
           >
             <Trash2 className="w-4 h-4" />
             Reset to Default
-          </button>
-          <button 
-            onClick={handleConnectGoogle}
-            disabled={isConnectingGoogle}
-            className="px-6 py-3 bg-[#4285F4] text-white rounded-full font-bold hover:scale-105 transition-all shadow-xl flex items-center gap-2 disabled:opacity-50"
-          >
-            <Calendar className="w-4 h-4" />
-            {isConnectingGoogle ? 'Connecting...' : 'Connect Google Calendar'}
           </button>
           <button 
             onClick={onManageSchedule}
