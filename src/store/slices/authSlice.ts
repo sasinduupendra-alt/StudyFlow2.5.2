@@ -1,5 +1,5 @@
 import { StateCreator } from 'zustand';
-import { User } from '@supabase/supabase-js';
+import { User } from 'firebase/auth';
 import { UserProfile } from '../../types';
 import { INITIAL_BADGES } from '../../constants';
 

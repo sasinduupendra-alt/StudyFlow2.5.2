@@ -2,7 +2,8 @@ import React from 'react';
 import { motion } from 'motion/react';
 import { useAppStore } from '../store/useAppStore';
 import ManageData from '../components/ManageData';
-import { supabase } from '../lib/supabase';
+import { db, auth } from '../firebase';
+import { doc, setDoc, updateDoc, deleteDoc, writeBatch } from 'firebase/firestore';
 import { WeeklySchedule, Activity, ExamRecord, Subject, Topic, Resource, StudyLog } from '../types';
 import { INITIAL_SUBJECTS, INITIAL_BADGES, WEEKLY_BASE_SCHEDULE } from '../constants';
 
@@ -30,9 +31,8 @@ export default function Manage() {
 
     if (user) {
       try {
-        await supabase
-          .from('config')
-          .upsert({ user_id: user.id, key: 'schedule', data: newSchedule });
+        const scheduleRef = doc(db, 'users', user.uid, 'config', 'schedule');
+        await setDoc(scheduleRef, newSchedule);
         addToast(`Updated schedule for ${day}`, 'success');
       } catch (e) {
         console.error("Failed to update schedule in cloud", e);
@@ -48,11 +48,7 @@ export default function Manage() {
 
     if (user) {
       try {
-        await supabase
-          .from('study_logs')
-          .delete()
-          .eq('id', id)
-          .eq('user_id', user.id);
+        await deleteDoc(doc(db, 'users', user.uid, 'study_logs', id));
         addToast("Log deleted", "info");
       } catch (e) {
         console.error("Failed to delete log in cloud", e);
@@ -67,10 +63,11 @@ export default function Manage() {
 
     if (user) {
       try {
-        await supabase
-          .from('study_logs')
-          .delete()
-          .eq('user_id', user.id);
+        const batch = writeBatch(db);
+        studyLogs.forEach(log => {
+          batch.delete(doc(db, 'users', user.uid, 'study_logs', log.id));
+        });
+        await batch.commit();
         addToast("All logs cleared", "info");
       } catch (e) {
         console.error("Failed to clear logs in cloud", e);
@@ -90,9 +87,7 @@ export default function Manage() {
 
     if (user) {
       try {
-        await supabase
-          .from('exams')
-          .insert({ ...examData, user_id: user.id });
+        await setDoc(doc(db, 'users', user.uid, 'exams', id), examData);
         addToast("Exam added", "success");
       } catch (e) {
         console.error("Failed to add exam in cloud", e);
@@ -112,11 +107,7 @@ export default function Manage() {
         if (examData.rank === undefined) delete examData.rank;
         if (examData.notes === undefined) delete examData.notes;
         
-        await supabase
-          .from('exams')
-          .update(examData)
-          .eq('id', id)
-          .eq('user_id', user.id);
+        await updateDoc(doc(db, 'users', user.uid, 'exams', id), examData);
         addToast("Exam updated", "success");
       } catch (e) {
         console.error("Failed to edit exam in cloud", e);
@@ -132,11 +123,7 @@ export default function Manage() {
 
     if (user) {
       try {
-        await supabase
-          .from('exams')
-          .delete()
-          .eq('id', id)
-          .eq('user_id', user.id);
+        await deleteDoc(doc(db, 'users', user.uid, 'exams', id));
         addToast("Exam deleted", "info");
       } catch (e) {
         console.error("Failed to delete exam in cloud", e);
@@ -168,9 +155,7 @@ export default function Manage() {
 
     if (user) {
       try {
-        await supabase
-          .from('subjects')
-          .insert({ ...newSubject, user_id: user.id });
+        await setDoc(doc(db, 'users', user.uid, 'subjects', id), newSubject);
         addToast(`Subject ${name} added`, "success");
       } catch (e) {
         console.error("Failed to add subject in cloud", e);
@@ -192,16 +177,12 @@ export default function Manage() {
 
     if (user) {
       try {
-        await supabase
-          .from('subjects')
-          .update({ 
-            name, 
-            ...(image !== undefined && { image }),
-            ...(examDate !== undefined && { examDate }),
-            ...(notes !== undefined && { notes })
-          })
-          .eq('id', id)
-          .eq('user_id', user.id);
+        await updateDoc(doc(db, 'users', user.uid, 'subjects', id), { 
+          name, 
+          ...(image !== undefined && { image }),
+          ...(examDate !== undefined && { examDate }),
+          ...(notes !== undefined && { notes })
+        });
         addToast("Subject updated", "success");
       } catch (e) {
         console.error("Failed to edit subject in cloud", e);
@@ -217,11 +198,7 @@ export default function Manage() {
 
     if (user) {
       try {
-        await supabase
-          .from('subjects')
-          .delete()
-          .eq('id', id)
-          .eq('user_id', user.id);
+        await deleteDoc(doc(db, 'users', user.uid, 'subjects', id));
         addToast("Subject deleted", "info");
       } catch (e) {
         console.error("Failed to delete subject in cloud", e);
@@ -248,11 +225,9 @@ export default function Manage() {
 
     if (user) {
       try {
-        await supabase
-          .from('subjects')
-          .update({ topics: updatedTopics })
-          .eq('id', subjectId)
-          .eq('user_id', user.id);
+        await updateDoc(doc(db, 'users', user.uid, 'subjects', subjectId), {
+          topics: updatedTopics
+        });
         addToast(`Topic ${title} added to ${subject.name}`, "success");
       } catch (e) {
         console.error("Failed to add topic in cloud", e);
@@ -284,11 +259,9 @@ export default function Manage() {
 
     if (user) {
       try {
-        await supabase
-          .from('subjects')
-          .update({ topics: updatedTopics })
-          .eq('id', subjectId)
-          .eq('user_id', user.id);
+        await updateDoc(doc(db, 'users', user.uid, 'subjects', subjectId), {
+          topics: updatedTopics
+        });
         addToast("Topic updated", "success");
       } catch (e) {
         console.error("Failed to edit topic in cloud", e);
@@ -308,11 +281,9 @@ export default function Manage() {
 
     if (user) {
       try {
-        await supabase
-          .from('subjects')
-          .update({ topics: updatedTopics })
-          .eq('id', subjectId)
-          .eq('user_id', user.id);
+        await updateDoc(doc(db, 'users', user.uid, 'subjects', subjectId), {
+          topics: updatedTopics
+        });
         addToast("Resources updated", "success");
       } catch (e) {
         console.error("Failed to update resources in cloud", e);
@@ -332,11 +303,9 @@ export default function Manage() {
 
     if (user) {
       try {
-        await supabase
-          .from('subjects')
-          .update({ topics: updatedTopics })
-          .eq('id', subjectId)
-          .eq('user_id', user.id);
+        await updateDoc(doc(db, 'users', user.uid, 'subjects', subjectId), {
+          topics: updatedTopics
+        });
         addToast("Topic deleted", "info");
       } catch (e) {
         console.error("Failed to delete topic in cloud", e);
@@ -352,11 +321,9 @@ export default function Manage() {
 
     if (user) {
       try {
-        await supabase
-          .from('subjects')
-          .update({ topics })
-          .eq('id', subjectId)
-          .eq('user_id', user.id);
+        await updateDoc(doc(db, 'users', user.uid, 'subjects', subjectId), {
+          topics
+        });
       } catch (e) {
         console.error("Failed to reorder topics in cloud", e);
       }
@@ -368,16 +335,16 @@ export default function Manage() {
 
     if (user) {
       try {
+        const batch = writeBatch(db);
         // Delete existing
-        await supabase
-          .from('subjects')
-          .delete()
-          .eq('user_id', user.id);
-        
+        subjects.forEach(s => {
+          batch.delete(doc(db, 'users', user.uid, 'subjects', s.id));
+        });
         // Add initial
-        const subjectsToInsert = INITIAL_SUBJECTS.map(s => ({ ...s, user_id: user.id }));
-        await supabase.from('subjects').insert(subjectsToInsert);
-        
+        INITIAL_SUBJECTS.forEach(s => {
+          batch.set(doc(db, 'users', user.uid, 'subjects', s.id), s);
+        });
+        await batch.commit();
         addToast("Syllabus reset to default", "success");
       } catch (e) {
         console.error("Failed to reset syllabus in cloud", e);
@@ -402,9 +369,7 @@ export default function Manage() {
 
     if (user) {
       try {
-        await supabase
-          .from('users')
-          .upsert({ id: user.id, ...initialProfile });
+        await setDoc(doc(db, 'users', user.uid), initialProfile);
         addToast("Profile reset to default", "success");
       } catch (e) {
         console.error("Failed to reset profile in cloud", e);
@@ -419,9 +384,8 @@ export default function Manage() {
 
     if (user) {
       try {
-        await supabase
-          .from('config')
-          .upsert({ user_id: user.id, key: 'schedule', data: WEEKLY_BASE_SCHEDULE });
+        const scheduleRef = doc(db, 'users', user.uid, 'config', 'schedule');
+        await setDoc(scheduleRef, WEEKLY_BASE_SCHEDULE);
         addToast("Schedule reset to default", "success");
       } catch (e) {
         console.error("Failed to reset schedule in cloud", e);

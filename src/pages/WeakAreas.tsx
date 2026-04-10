@@ -2,7 +2,8 @@ import React from 'react';
 import { motion } from 'motion/react';
 import { useAppStore } from '../store/useAppStore';
 import AIInsights from '../components/AIInsights';
-import { supabase } from '../lib/supabase';
+import { db } from '../firebase';
+import { doc, updateDoc, writeBatch } from 'firebase/firestore';
 import { useMutation } from '@tanstack/react-query';
 import { getAI } from '../services/gemini';
 
@@ -15,11 +16,7 @@ export default function WeakAreas() {
 
     if (user) {
       try {
-        await supabase
-          .from('recommendations')
-          .update({ liked: !recommendations.find(r => r.id === id)?.liked })
-          .eq('id', id)
-          .eq('user_id', user.id);
+        await updateDoc(doc(db, 'users', user.uid, 'recommendations', id), { liked: !recommendations.find(r => r.id === id)?.liked });
       } catch (e) {
         console.error("Failed to like recommendation in cloud", e);
       }
@@ -32,11 +29,7 @@ export default function WeakAreas() {
 
     if (user) {
       try {
-        await supabase
-          .from('recommendations')
-          .update({ dismissed: true })
-          .eq('id', id)
-          .eq('user_id', user.id);
+        await updateDoc(doc(db, 'users', user.uid, 'recommendations', id), { dismissed: true });
       } catch (e) {
         console.error("Failed to dismiss recommendation in cloud", e);
       }
@@ -67,11 +60,12 @@ export default function WeakAreas() {
       setRecommendations([...recommendations, ...newRecs]);
       
       if (user) {
-        const recsToInsert = newRecs.map((rec: any) => ({
-          ...rec,
-          user_id: user.id
-        }));
-        await supabase.from('recommendations').insert(recsToInsert);
+        const batch = writeBatch(db);
+        newRecs.forEach((rec: any) => {
+          const recRef = doc(db, 'users', user.uid, 'recommendations', rec.id);
+          batch.set(recRef, rec);
+        });
+        await batch.commit();
       }
       return newRecs;
     },
