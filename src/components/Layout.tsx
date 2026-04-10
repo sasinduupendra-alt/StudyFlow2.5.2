@@ -174,24 +174,8 @@ export default function Layout() {
   const handleLogin = async () => {
     try {
       await signInWithPopup(auth, googleProvider);
-      addToast('Successfully signed in!', 'success');
-    } catch (error: any) {
+    } catch (error) {
       console.error('Login failed:', error);
-      let message = 'Login failed. Please try again.';
-      
-      if (error.code === 'auth/unauthorized-domain') {
-        message = 'Unauthorized Domain: Please add your Vercel URL to the "Authorized Domains" list in Firebase Console (Authentication > Settings).';
-      } else if (error.code === 'auth/popup-blocked') {
-        message = 'Popup Blocked: Please allow popups for this site to sign in.';
-      } else if (error.code === 'auth/popup-closed-by-user') {
-        message = 'Sign-in window was closed before completion.';
-      } else if (error.code === 'auth/operation-not-allowed') {
-        message = 'Google Sign-In is not enabled in your Firebase project. Please enable it in the Firebase Console.';
-      } else if (error.message) {
-        message = `Login Error: ${error.message}`;
-      }
-      
-      addToast(message, 'error');
     }
   };
 
