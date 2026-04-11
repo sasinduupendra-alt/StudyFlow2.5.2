@@ -15,7 +15,8 @@ import {
   Subject, 
   WeeklySchedule, 
   StudyLog, 
-  ExamRecord 
+  ExamRecord,
+  Task
 } from '../types';
 
 export function useFirestoreSync() {
@@ -26,11 +27,13 @@ export function useFirestoreSync() {
     setSchedule, 
     setStudyLogs, 
     setExams,
+    setTasks,
     subjects,
     schedule,
     userProfile,
     studyLogs,
-    exams
+    exams,
+    tasks
   } = useAppStore();
 
   // Use refs to store the initial local data for cloud initialization
@@ -40,7 +43,8 @@ export function useFirestoreSync() {
     schedule,
     userProfile,
     studyLogs,
-    exams
+    exams,
+    tasks
   });
 
   useEffect(() => {
@@ -156,12 +160,34 @@ export function useFirestoreSync() {
       handleFirestoreError(error, OperationType.GET, examsPath);
     });
 
+    // 6. Sync Tasks
+    const tasksPath = `users/${userId}/tasks`;
+    const tasksRef = collection(db, 'users', userId, 'tasks');
+    const unsubscribeTasks = onSnapshot(tasksRef, async (querySnap) => {
+      try {
+        if (!querySnap.empty) {
+          const tasksData = querySnap.docs.map(doc => ({ id: doc.id, ...doc.data() } as Task));
+          setTasks(tasksData);
+        } else {
+          // Initialize cloud with current local tasks
+          for (const task of initial.tasks) {
+            await setDoc(doc(db, 'users', userId, 'tasks', task.id), task);
+          }
+        }
+      } catch (error) {
+        handleFirestoreError(error, OperationType.WRITE, tasksPath);
+      }
+    }, (error) => {
+      handleFirestoreError(error, OperationType.GET, tasksPath);
+    });
+
     return () => {
       unsubscribeProfile();
       unsubscribeSubjects();
       unsubscribeSchedule();
       unsubscribeLogs();
       unsubscribeExams();
+      unsubscribeTasks();
     };
-  }, [user?.uid, setUserProfile, setSubjects, setSchedule, setStudyLogs, setExams]);
+  }, [user?.uid, setUserProfile, setSubjects, setSchedule, setStudyLogs, setExams, setTasks]);
 }

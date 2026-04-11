@@ -4,7 +4,7 @@ import {
   Home, Search, Library, PlusSquare, Heart, 
   LayoutDashboard, Calendar, BarChart2, Settings, 
   Menu, X, Zap, LogIn, LogOut, User, Trophy, Sparkles,
-  ChevronLeft, ChevronRight, Bell, Users, Clock,
+  ChevronLeft, ChevronRight, Bell, Users, Clock, ListTodo,
   Shuffle, SkipBack, SkipForward, Repeat, Pause, Play, ListMusic, Volume2, Brain
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
@@ -216,8 +216,10 @@ export default function Layout() {
     { icon: Home, label: 'Home', path: '/' },
     { icon: LayoutDashboard, label: 'Syllabus', path: '/syllabus' },
     { icon: Calendar, label: 'Schedule', path: '/schedule' },
+    { icon: ListTodo, label: 'Tasks', path: '/tasks' },
+    { icon: Brain, label: 'Review', path: '/review' },
     { icon: BarChart2, label: 'Analytics', path: '/analytics' },
-    { icon: Brain, label: 'Practice', path: '/practice' },
+    { icon: Zap, label: 'Practice', path: '/practice' },
     { icon: Sparkles, label: 'Weak Areas', path: '/weak-areas' },
     { icon: Trophy, label: 'Achievements', path: '/achievements' },
     { icon: PlusSquare, label: 'Manage', path: '/manage' },

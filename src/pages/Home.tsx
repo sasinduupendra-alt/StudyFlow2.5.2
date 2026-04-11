@@ -1,6 +1,6 @@
 import React, { useMemo, useCallback } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Zap, Clock, Target, Flame, Coffee, Play, Sparkles, TrendingUp, BookOpen } from 'lucide-react';
+import { Zap, Clock, Target, Flame, Coffee, Play, Sparkles, TrendingUp, BookOpen, Brain } from 'lucide-react';
 import { useAppStore } from '../store/useAppStore';
 import { cn } from '../lib/utils';
 import CurrentScheduleBlock from '../components/CurrentScheduleBlock';
@@ -48,6 +48,14 @@ export default function Home() {
       s.topics.some(t => t.title.toLowerCase().includes(searchQuery.toLowerCase()))
     );
   }, [processedSubjects, searchQuery]);
+
+  const dueTopicsCount = useMemo(() => {
+    const now = new Date();
+    return subjects.flatMap(s => s.topics).filter(t => {
+      if (!t.nextReview) return true;
+      return new Date(t.nextReview) <= now;
+    }).length;
+  }, [subjects]);
 
   if (!isAuthReady) {
     return (
@@ -113,6 +121,30 @@ export default function Home() {
           onViewFullSchedule={() => navigate('/schedule')} 
         />
       </motion.section>
+
+      {dueTopicsCount > 0 && (
+        <motion.section 
+          variants={itemVariants}
+          initial={{ opacity: 0, x: -20 }}
+          animate={{ opacity: 1, x: 0 }}
+          className="scifi-panel p-4 bg-brand/10 border-brand/30 flex items-center justify-between group cursor-pointer"
+          onClick={() => navigate('/review')}
+        >
+          <div className="flex items-center gap-4">
+            <div className="p-2 bg-brand text-black">
+              <Brain className="w-5 h-5" />
+            </div>
+            <div>
+              <h3 className="text-sm font-black uppercase tracking-tight">Neural_Recalibration_Required</h3>
+              <p className="hud-label !text-brand/70">{dueTopicsCount} topics are due for spaced repetition review</p>
+            </div>
+          </div>
+          <div className="flex items-center gap-2 text-brand font-black text-[10px] uppercase tracking-widest group-hover:translate-x-1 transition-transform">
+            Initialize_Review
+            <Zap className="w-3 h-3" />
+          </div>
+        </motion.section>
+      )}
 
       <motion.section variants={itemVariants}>
         <Planner 
@@ -235,9 +267,9 @@ export default function Home() {
                 title: 'Review Mix',
                 description: 'Spaced repetition for long-term retention.',
                 gradient: 'from-blue-500/20 to-transparent',
-                icon: Clock,
+                icon: Brain,
                 color: '#4d569d',
-                action: () => {},
+                action: () => navigate('/review'),
                 tag: 'REPETITION'
               },
               {

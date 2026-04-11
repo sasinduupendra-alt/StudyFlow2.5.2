@@ -85,6 +85,11 @@
               "title": { "type": "string" },
               "mastery": { "type": "number" },
               "image": { "type": "string" },
+              "lastReviewed": { "type": "string", "format": "date-time" },
+              "nextReview": { "type": "string", "format": "date-time" },
+              "interval": { "type": "number" },
+              "easeFactor": { "type": "number" },
+              "reviewCount": { "type": "number" },
               "resources": {
                 "type": "array",
                 "items": {
@@ -128,6 +133,24 @@
           "type": { "type": "string", "enum": ["study", "tuition", "break", "rest"] }
         }
       }
+    },
+    "Task": {
+      "title": "Task",
+      "description": "A study task with SNR prioritization",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "title": { "type": "string" },
+        "description": { "type": "string" },
+        "frequency": { "type": "string", "enum": ["Daily", "Weekly", "Monthly"] },
+        "completed": { "type": "boolean" },
+        "subjectId": { "type": "string" },
+        "dueDate": { "type": "string", "format": "date-time" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "impact": { "type": "number", "description": "1-10 (Signal)" },
+        "effort": { "type": "number", "description": "1-10 (Noise)" }
+      },
+      "required": ["id", "title", "frequency", "completed", "createdAt", "impact", "effort"]
     }
   },
   "firestore": {
@@ -150,6 +173,10 @@
     "/users/{userId}/config/schedule": {
       "schema": "WeeklySchedule",
       "description": "User's weekly study schedule"
+    },
+    "/users/{userId}/tasks/{taskId}": {
+      "schema": "Task",
+      "description": "User's study tasks"
     }
   }
 }

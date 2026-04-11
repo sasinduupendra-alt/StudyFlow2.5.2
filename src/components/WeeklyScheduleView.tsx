@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
-import { WeeklySchedule, Activity } from '../types';
+import { WeeklySchedule, Activity, Task, Subject } from '../types';
 import { motion, AnimatePresence } from 'motion/react';
-import { Clock, BookOpen, Zap, CheckCircle2, ChevronRight, GripVertical, Edit2, Trash2, Save, X as CloseIcon } from 'lucide-react';
+import { Clock, BookOpen, Zap, CheckCircle2, Circle, ChevronRight, GripVertical, Edit2, Trash2, Save, X as CloseIcon, ListTodo, Sparkles } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { useAppStore } from '../store/useAppStore';
-import { WEEKLY_BASE_SCHEDULE } from '../constants';
+import { WEEKLY_BASE_SCHEDULE, INITIAL_TASKS } from '../constants';
 import { auth, db, handleFirestoreError, OperationType } from '../firebase';
-import { doc, setDoc } from 'firebase/firestore';
+import { doc, setDoc, updateDoc } from 'firebase/firestore';
 import {
   DndContext,
   closestCenter,
@@ -34,9 +34,12 @@ interface SortableActivityProps {
   activity: Activity;
   day: keyof WeeklySchedule;
   onEdit: (activity: Activity) => void;
+  tasks: Task[];
+  subjects: Subject[];
+  onToggleTask: (id: string) => void;
 }
 
-const SortableActivity = ({ activity, day, onEdit }: SortableActivityProps) => {
+const SortableActivity = ({ activity, day, onEdit, tasks, subjects, onToggleTask }: SortableActivityProps) => {
   const {
     attributes,
     listeners,
@@ -52,47 +55,105 @@ const SortableActivity = ({ activity, day, onEdit }: SortableActivityProps) => {
     zIndex: isDragging ? 50 : 0,
   };
 
+  // Find relevant tasks for this activity
+  const relevantTasks = activity.type === 'study' ? tasks.filter(t => {
+    if (t.completed) return false;
+    if (!t.subjectId) return false;
+    const subject = subjects.find(s => s.id === t.subjectId);
+    return subject && activity.description.toLowerCase().includes(subject.name.toLowerCase());
+  }).sort((a, b) => (b.impact / b.effort) - (a.impact / a.effort)).slice(0, 2) : [];
+
   return (
     <div 
       ref={setNodeRef}
       style={style}
       className={cn(
-        "p-3 rounded-xl border border-white/5 transition-all group hover:bg-white/5 flex items-center gap-3",
+        "p-3 rounded-xl border border-white/5 transition-all group hover:bg-white/5 flex flex-col gap-2",
         activity.type === 'study' ? "bg-white/5 border-[#1DB954]/20" : "opacity-60",
         isDragging && "bg-[#282828] border-[#1DB954] shadow-2xl scale-105"
       )}
     >
-      <div {...attributes} {...listeners} className="cursor-grab active:cursor-grabbing text-gray-600 hover:text-gray-400">
-        <GripVertical className="w-4 h-4" />
-      </div>
-      
-      <div className="flex-1 min-w-0">
-        <div className="flex items-center justify-between mb-1">
-          <span className="text-[10px] font-bold text-gray-500 tabular-nums">{activity.time.split(' – ')[0]}</span>
-          <div className="flex items-center gap-2">
-            {activity.type === 'study' && <BookOpen className="w-3 h-3 text-[#1DB954]" />}
-            {activity.type === 'tuition' && <Zap className="w-3 h-3 text-blue-500" />}
-            {activity.type === 'break' && <Clock className="w-3 h-3 text-yellow-500" />}
-            <button 
-              onClick={() => onEdit(activity)}
-              className="opacity-0 group-hover:opacity-100 p-1 hover:bg-white/10 rounded transition-all"
-            >
-              <Edit2 className="w-3 h-3 text-gray-400" />
-            </button>
-          </div>
+      <div className="flex items-center gap-3">
+        <div {...attributes} {...listeners} className="cursor-grab active:cursor-grabbing text-gray-600 hover:text-gray-400">
+          <GripVertical className="w-4 h-4" />
         </div>
-        <h4 className="text-sm font-bold truncate group-hover:text-white transition-colors">{activity.description}</h4>
-        <p className="text-[10px] text-gray-500 capitalize">{activity.type}</p>
+        
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center justify-between mb-1">
+            <span className="text-[10px] font-bold text-gray-500 tabular-nums">{activity.time.split(' – ')[0]}</span>
+            <div className="flex items-center gap-2">
+              {activity.type === 'study' && <BookOpen className="w-3 h-3 text-[#1DB954]" />}
+              {activity.type === 'tuition' && <Zap className="w-3 h-3 text-blue-500" />}
+              {activity.type === 'break' && <Clock className="w-3 h-3 text-yellow-500" />}
+              <button 
+                onClick={() => onEdit(activity)}
+                className="opacity-0 group-hover:opacity-100 p-1 hover:bg-white/10 rounded transition-all"
+              >
+                <Edit2 className="w-3 h-3 text-gray-400" />
+              </button>
+            </div>
+          </div>
+          <h4 className="text-sm font-bold truncate group-hover:text-white transition-colors">{activity.description}</h4>
+          <p className="text-[10px] text-gray-500 capitalize">{activity.type}</p>
+        </div>
       </div>
+
+      {relevantTasks.length > 0 && (
+        <div className="mt-1 pl-7 space-y-1">
+          <div className="flex items-center gap-1 text-[8px] font-black text-brand/60 uppercase tracking-widest mb-1">
+            <Sparkles className="w-2 h-2" />
+            Suggested_Objectives
+          </div>
+          {relevantTasks.map(task => (
+            <button
+              key={task.id}
+              onClick={() => onToggleTask(task.id)}
+              className="w-full text-left p-1.5 bg-brand/5 border border-brand/10 hover:border-brand/30 transition-all flex items-center gap-2 group/task"
+            >
+              <Circle className="w-2 h-2 text-brand/40 group-hover/task:text-brand" />
+              <span className="text-[9px] font-black uppercase tracking-tight truncate flex-1">{task.title}</span>
+              <span className="text-[7px] font-black text-brand/40">SNR: {((task.impact || 5) / (task.effort || 5)).toFixed(1)}</span>
+            </button>
+          ))}
+        </div>
+      )}
     </div>
   );
 };
 
 export default function WeeklyScheduleView({ schedule, onManageSchedule }: WeeklyScheduleViewProps) {
-  const { reorderSchedule, updateActivity, resetToDefault, user, addToast } = useAppStore();
+  const { reorderSchedule, updateActivity, resetToDefault, user, addToast, tasks, setTasks, toggleTask, subjects, optimizeDaySchedule } = useAppStore();
   const [editingActivity, setEditingActivity] = useState<{ day: keyof WeeklySchedule, activity: Activity } | null>(null);
   const [isSaving, setIsSaving] = useState(false);
   const isInitialMount = React.useRef(true);
+
+  const dailyTasks = tasks
+    .filter(t => t.frequency === 'Daily')
+    .sort((a, b) => {
+      if (a.completed !== b.completed) return a.completed ? 1 : -1;
+      const snrA = (a.impact || 5) / (a.effort || 5);
+      const snrB = (b.impact || 5) / (b.effort || 5);
+      return snrB - snrA;
+    });
+
+  const completedDaily = dailyTasks.filter(t => t.completed).length;
+  const dailyProgress = dailyTasks.length > 0 ? (completedDaily / dailyTasks.length) * 100 : 0;
+
+  const handleToggleTask = async (id: string) => {
+    const task = tasks.find(t => t.id === id);
+    if (!task) return;
+
+    const newCompleted = !task.completed;
+    toggleTask(id);
+
+    if (user) {
+      try {
+        await updateDoc(doc(db, 'users', user.uid, 'tasks', id), { completed: newCompleted });
+      } catch (error) {
+        handleFirestoreError(error, OperationType.WRITE, `users/${user.uid}/tasks/${id}`);
+      }
+    }
+  };
 
   const days: (keyof WeeklySchedule)[] = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 
@@ -147,6 +208,7 @@ export default function WeeklyScheduleView({ schedule, onManageSchedule }: Weekl
   const handleResetSchedule = async () => {
     if (confirm('Are you sure you want to reset your schedule to the default intensive plan? This will overwrite your current changes.')) {
       resetToDefault();
+      setTasks(INITIAL_TASKS as Task[]);
       // The useEffect will handle the save to Firestore for the schedule
       addToast('System reset to defaults', 'success');
     }
@@ -191,6 +253,77 @@ export default function WeeklyScheduleView({ schedule, onManageSchedule }: Weekl
         </div>
       </div>
 
+      {/* Daily Tasks Section */}
+      <div className="scifi-panel p-6 space-y-6">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="p-2 bg-brand/10 border border-brand/20 text-brand">
+              <ListTodo className="w-5 h-5" />
+            </div>
+            <div>
+              <h3 className="text-sm font-black uppercase tracking-tighter">DAILY_MISSION_OBJECTIVES</h3>
+              <p className="hud-label !text-gray-600">CRITICAL_TASKS_FOR_CURRENT_CYCLE</p>
+            </div>
+          </div>
+          <div className="text-right">
+            <p className="hud-label !text-gray-600">SYNC_STATUS</p>
+            <p className="text-xs font-black tabular-nums text-brand">{completedDaily}/{dailyTasks.length} COMPLETED</p>
+          </div>
+        </div>
+
+        <div className="h-1 w-full bg-black border border-white/5 overflow-hidden">
+          <motion.div 
+            initial={{ width: 0 }}
+            animate={{ width: `${dailyProgress}%` }}
+            className="h-full bg-brand shadow-[0_0_10px_var(--color-brand-glow)] transition-all"
+          />
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+          {dailyTasks.length > 0 ? (
+            dailyTasks.map((task) => (
+              <div 
+                key={task.id}
+                className={cn(
+                  "p-3 border transition-all flex items-center gap-3",
+                  task.completed ? "bg-brand/5 border-brand/10 opacity-60" : "bg-white/5 border-border-dim hover:border-brand/30"
+                )}
+              >
+                <button 
+                  onClick={() => handleToggleTask(task.id)}
+                  className={cn(
+                    "shrink-0 transition-colors",
+                    task.completed ? "text-brand" : "text-gray-700 hover:text-brand"
+                  )}
+                >
+                  {task.completed ? <CheckCircle2 className="w-4 h-4" /> : <Circle className="w-4 h-4" />}
+                </button>
+                <div className="min-w-0 flex-1">
+                  <p className={cn(
+                    "text-[10px] font-black uppercase tracking-tight truncate",
+                    task.completed ? "line-through text-gray-600" : "text-white"
+                  )}>
+                    {task.title}
+                  </p>
+                  {task.subjectId && (
+                    <p className="text-[7px] font-black text-gray-600 uppercase tracking-widest">
+                      {subjects.find(s => s.id === task.subjectId)?.name}
+                    </p>
+                  )}
+                </div>
+                <div className="shrink-0 text-[8px] font-black text-gray-700">
+                  SNR: {((task.impact || 5) / (task.effort || 5)).toFixed(1)}
+                </div>
+              </div>
+            ))
+          ) : (
+            <div className="col-span-full py-8 flex flex-col items-center justify-center border border-dashed border-border-dim opacity-40">
+              <p className="hud-label">NO_DAILY_TASKS_INITIALIZED</p>
+            </div>
+          )}
+        </div>
+      </div>
+
       {/* Tuition Summary */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {days.map(day => {
@@ -225,7 +358,19 @@ export default function WeeklyScheduleView({ schedule, onManageSchedule }: Weekl
             className="min-w-[280px] lg:min-w-0 flex flex-col gap-4 snap-start"
           >
             <div className="sticky top-0 z-10 bg-black/90 backdrop-blur-md py-4 border-b border-white/10 mb-2">
-              <h3 className="text-xl font-bold text-[#1DB954]">{day}</h3>
+              <div className="flex items-center justify-between mb-1">
+                <h3 className="text-xl font-bold text-[#1DB954]">{day}</h3>
+                <button 
+                  onClick={() => {
+                    optimizeDaySchedule(day);
+                    addToast(`${day} schedule optimized`, 'success');
+                  }}
+                  className="p-1.5 hover:bg-brand/10 text-brand rounded-md transition-colors"
+                  title="Optimize Day"
+                >
+                  <Sparkles className="w-4 h-4" />
+                </button>
+              </div>
               <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">
                 {schedule[day].filter(a => a.type === 'study').length} Study Blocks
               </p>
@@ -247,6 +392,9 @@ export default function WeeklyScheduleView({ schedule, onManageSchedule }: Weekl
                       activity={activity} 
                       day={day}
                       onEdit={(a) => setEditingActivity({ day, activity: a })}
+                      tasks={tasks}
+                      subjects={subjects}
+                      onToggleTask={handleToggleTask}
                     />
                   ))}
                 </div>

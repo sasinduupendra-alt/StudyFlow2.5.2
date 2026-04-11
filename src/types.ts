@@ -13,12 +13,33 @@ export interface Topic {
   mastery: number;
   image?: string;
   resources?: Resource[];
+  // SRS Fields
+  lastReviewed?: string; // ISO Date
+  nextReview?: string;   // ISO Date
+  interval?: number;     // Days
+  easeFactor?: number;   // Default 2.5
+  reviewCount?: number;
 }
 
 export interface WeeklyTask {
   id: string;
   title: string;
   completed: boolean;
+}
+
+export type TaskFrequency = 'Daily' | 'Weekly' | 'Monthly';
+
+export interface Task {
+  id: string;
+  title: string;
+  description?: string;
+  frequency: TaskFrequency;
+  completed: boolean;
+  subjectId?: string;
+  dueDate?: string;
+  createdAt: string;
+  impact: number; // 1-10 (Signal)
+  effort: number; // 1-10 (Noise)
 }
 
 export interface Subject {
