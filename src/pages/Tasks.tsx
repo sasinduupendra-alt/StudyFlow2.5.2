@@ -20,6 +20,12 @@ export default function Tasks() {
   const [newTaskSubject, setNewTaskSubject] = useState('');
   const [newTaskImpact, setNewTaskImpact] = useState(5);
   const [newTaskEffort, setNewTaskEffort] = useState(5);
+  const [isForTomorrow, setIsForTomorrow] = useState(false);
+
+  const todayStr = new Date().toISOString().split('T')[0];
+  const tomorrow = new Date();
+  tomorrow.setDate(tomorrow.getDate() + 1);
+  const tomorrowStr = tomorrow.toISOString().split('T')[0];
 
   const filteredTasks = tasks
     .filter(t => t.frequency === activeTab)
@@ -49,6 +55,7 @@ export default function Tasks() {
       subjectId: newTaskSubject || undefined,
       completed: false,
       createdAt,
+      dueDate: isForTomorrow ? tomorrowStr : todayStr,
       impact: newTaskImpact,
       effort: newTaskEffort,
     };
@@ -70,6 +77,7 @@ export default function Tasks() {
     setNewTaskSubject('');
     setNewTaskImpact(5);
     setNewTaskEffort(5);
+    setIsForTomorrow(false);
     setIsAddingTask(false);
   };
 
@@ -222,6 +230,11 @@ export default function Tasks() {
                         {task.title}
                       </h4>
                       <div className="flex items-center gap-3">
+                        {task.dueDate === tomorrowStr && (
+                          <span className="badge bg-white/10 text-white border-white/20">
+                            Tomorrow
+                          </span>
+                        )}
                         {task.subjectId && (
                           <span className="badge badge-zinc">
                             {subjects.find(s => s.id === task.subjectId)?.name}
@@ -352,7 +365,34 @@ export default function Tasks() {
                     </select>
                   </div>
 
-                  <div className="p-8 bg-white/[0.02] border border-white/10 flex flex-col justify-center">
+                  <div className="space-y-4">
+                    <label className="text-[10px] font-mono text-zinc-600 uppercase tracking-[0.3em] font-bold">Execution Timing</label>
+                    <div className="flex gap-4">
+                      <button
+                        type="button"
+                        onClick={() => setIsForTomorrow(false)}
+                        className={cn(
+                          "flex-1 py-4 text-[10px] font-bold uppercase tracking-[0.2em] border transition-all",
+                          !isForTomorrow ? "bg-white text-black border-white" : "bg-transparent text-zinc-500 border-white/10 hover:border-white/30"
+                        )}
+                      >
+                        Today
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setIsForTomorrow(true)}
+                        className={cn(
+                          "flex-1 py-4 text-[10px] font-bold uppercase tracking-[0.2em] border transition-all",
+                          isForTomorrow ? "bg-white text-black border-white" : "bg-transparent text-zinc-500 border-white/10 hover:border-white/30"
+                        )}
+                      >
+                        Tomorrow
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="p-8 bg-white/[0.02] border border-white/10 flex flex-col justify-center">
                     <div className="flex justify-between items-center mb-4">
                       <span className="text-[10px] font-mono text-zinc-500 uppercase tracking-[0.3em]">Priority SNR</span>
                       <span className={cn(
@@ -369,7 +409,6 @@ export default function Tasks() {
                       />
                     </div>
                   </div>
-                </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-16">
                   <div className="space-y-8">
