@@ -16,9 +16,11 @@ export const TopicCard = React.memo(({ topic, subjectName, onStartFocus }: Topic
     <motion.div 
       whileHover={{ y: -4 }}
       whileTap={{ scale: 0.98 }}
-      className="bg-transparent border border-white/10 p-4 group cursor-pointer transition-all duration-300 hover:bg-white/5 rounded-none"
+      className="enterprise-card p-4 group cursor-pointer relative overflow-hidden"
       onClick={onStartFocus}
     >
+      <div className="scan-line opacity-0 group-hover:opacity-100 transition-opacity duration-1000" />
+      
       <div className="relative aspect-video mb-4 overflow-hidden rounded-none bg-transparent border border-white/10 group-hover:border-white/30 transition-colors">
         <ImageWithFallback
           src={topic.image}
@@ -55,16 +57,16 @@ export const TopicCard = React.memo(({ topic, subjectName, onStartFocus }: Topic
       </div>
 
       <div className="min-h-[48px] mb-4">
-        <h4 className="font-mono text-sm text-white mb-1 line-clamp-1 uppercase tracking-widest group-hover:text-white transition-colors">{topic.title}</h4>
-        <p className="text-[10px] font-mono text-zinc-500 uppercase tracking-widest line-clamp-1">{subjectName}</p>
+        <h4 className="font-mono text-xs text-white mb-1 line-clamp-1 uppercase tracking-[0.15em] group-hover:text-white transition-colors">{topic.title}</h4>
+        <p className="text-[9px] font-mono text-zinc-600 uppercase tracking-[0.2em] line-clamp-1">{subjectName}</p>
       </div>
 
-      <div className="space-y-2">
+      <div className="space-y-3">
         <div className="flex items-center justify-between">
-          <span className="text-[10px] font-mono text-zinc-500 uppercase tracking-widest">Mastery</span>
-          <span className="text-[10px] font-mono text-white tabular-nums">{topic.mastery}%</span>
+          <span className="text-[9px] font-mono text-zinc-600 uppercase tracking-[0.2em]">Mastery</span>
+          <span className="text-[9px] font-mono text-white tabular-nums tracking-tighter">{topic.mastery}%</span>
         </div>
-        <div className="h-1 bg-white/10 rounded-none overflow-hidden">
+        <div className="h-[2px] bg-white/5 rounded-none overflow-hidden">
           <motion.div 
             initial={{ width: 0 }}
             whileInView={{ width: `${topic.mastery}%` }}

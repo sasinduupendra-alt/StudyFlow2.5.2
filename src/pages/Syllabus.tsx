@@ -13,7 +13,8 @@ export default function Syllabus() {
     const subject = subjects.find(s => s.id === subjectId);
     if (!subject) return;
 
-    const updatedTopics = subject.topics.map(t => t.id === topicId ? { ...t, mastery } : t);
+    const topics = subject.topics || [];
+    const updatedTopics = topics.map(t => t.id === topicId ? { ...t, mastery } : t);
     const updatedSubjects = subjects.map(s => s.id === subjectId ? { ...s, topics: updatedTopics } : s);
 
     // Update local store immediately

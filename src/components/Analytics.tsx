@@ -86,32 +86,52 @@ export default function Analytics({ subjects, studyLogs, exams }: AnalyticsProps
     return data;
   });
 
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    show: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.1
+      }
+    }
+  };
+
+  const itemVariants = {
+    hidden: { opacity: 0, y: 20 },
+    show: { opacity: 1, y: 0 }
+  };
+
   return (
-    <div className="space-y-10 p-6 md:p-10 animate-in fade-in slide-in-from-bottom-8 duration-700">
+    <motion.div 
+      variants={containerVariants}
+      initial="hidden"
+      animate="show"
+      className="space-y-10 p-6 md:p-10 max-w-7xl mx-auto"
+    >
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <div className="bg-transparent border border-white/10 p-8 group rounded-none">
+        <motion.div variants={itemVariants} className="enterprise-card p-8 group">
           <div className="flex items-center gap-4 mb-6">
-            <div className="w-10 h-10 bg-transparent border border-white/20 flex items-center justify-center text-zinc-500 group-hover:text-white transition-colors rounded-none">
+            <div className="w-10 h-10 bg-transparent border border-white/20 flex items-center justify-center text-zinc-500 group-hover:text-white transition-colors">
               <Clock className="w-5 h-5" />
             </div>
             <span className="text-[10px] font-mono text-zinc-500 uppercase tracking-widest">Total Study Time</span>
           </div>
           <p className="text-4xl font-mono text-white tabular-nums uppercase tracking-[0.15em]">{Math.floor(totalStudyTime / 60)}h {totalStudyTime % 60}m</p>
-        </div>
+        </motion.div>
 
-        <div className="bg-transparent border border-white/10 p-8 group rounded-none">
+        <motion.div variants={itemVariants} className="enterprise-card p-8 group">
           <div className="flex items-center gap-4 mb-6">
-            <div className="w-10 h-10 bg-transparent border border-white/20 flex items-center justify-center text-zinc-500 group-hover:text-white transition-colors rounded-none">
+            <div className="w-10 h-10 bg-transparent border border-white/20 flex items-center justify-center text-zinc-500 group-hover:text-white transition-colors">
               <Star className="w-5 h-5" />
             </div>
             <span className="text-[10px] font-mono text-zinc-500 uppercase tracking-widest">Avg Focus Level</span>
           </div>
           <p className="text-4xl font-mono text-white tabular-nums uppercase tracking-[0.15em]">{avgFocus}/5.0</p>
-        </div>
+        </motion.div>
 
-        <div className="bg-transparent border border-white/10 p-8 group rounded-none">
+        <motion.div variants={itemVariants} className="enterprise-card p-8 group">
           <div className="flex items-center gap-4 mb-6">
-            <div className="w-10 h-10 bg-transparent border border-white/20 flex items-center justify-center text-zinc-500 group-hover:text-white transition-colors rounded-none">
+            <div className="w-10 h-10 bg-transparent border border-white/20 flex items-center justify-center text-zinc-500 group-hover:text-white transition-colors">
               <Target className="w-5 h-5" />
             </div>
             <span className="text-[10px] font-mono text-zinc-500 uppercase tracking-widest">Readiness Avg</span>
@@ -119,25 +139,23 @@ export default function Analytics({ subjects, studyLogs, exams }: AnalyticsProps
           <p className="text-4xl font-mono text-white tabular-nums uppercase tracking-[0.15em]">
             {subjects.length > 0 ? Math.round(subjects.reduce((acc, s) => acc + s.readiness, 0) / subjects.length) : 0}%
           </p>
-        </div>
+        </motion.div>
 
-        <div className="bg-transparent border border-white/10 p-8 group rounded-none">
+        <motion.div variants={itemVariants} className="enterprise-card p-8 group">
           <div className="flex items-center gap-4 mb-6">
-            <div className="w-10 h-10 bg-transparent border border-white/20 flex items-center justify-center text-zinc-500 group-hover:text-white transition-colors rounded-none">
+            <div className="w-10 h-10 bg-transparent border border-white/20 flex items-center justify-center text-zinc-500 group-hover:text-white transition-colors">
               <Zap className="w-5 h-5" />
             </div>
             <span className="text-[10px] font-mono text-zinc-500 uppercase tracking-widest">Sessions Logged</span>
           </div>
           <p className="text-4xl font-mono text-white tabular-nums uppercase tracking-[0.15em]">{studyLogs.length}</p>
-        </div>
+        </motion.div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
         <motion.div 
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
-          className="bg-transparent border border-white/10 p-10 rounded-none"
+          variants={itemVariants}
+          className="enterprise-card p-10"
         >
           <h3 className="text-sm font-mono text-white uppercase tracking-widest mb-12 flex items-center gap-4">
             <TrendingUp className="w-5 h-5 text-white" />
@@ -152,8 +170,8 @@ export default function Analytics({ subjects, studyLogs, exams }: AnalyticsProps
                 <Radar name="Performance" dataKey="Score" stroke="#fff" fill="#fff" fillOpacity={0.03} strokeWidth={1} />
                 <Radar name="Readiness" dataKey="Readiness" stroke="#3b82f6" fill="#3b82f6" fillOpacity={0.15} strokeWidth={2} />
                 <Tooltip 
-                  contentStyle={{ backgroundColor: '#09090b', border: '1px solid #27272a', borderRadius: '16px', padding: '12px' }}
-                  itemStyle={{ color: '#fff', fontSize: '12px', fontWeight: 600 }}
+                  contentStyle={{ backgroundColor: '#09090b', border: '1px solid #27272a', borderRadius: '0px', padding: '12px' }}
+                  itemStyle={{ color: '#fff', fontSize: '12px', fontWeight: 600, fontFamily: 'monospace' }}
                 />
               </RadarChart>
             </ResponsiveContainer>
@@ -161,10 +179,8 @@ export default function Analytics({ subjects, studyLogs, exams }: AnalyticsProps
         </motion.div>
 
         <motion.div 
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
-          className="bg-transparent border border-white/10 p-10 rounded-none"
+          variants={itemVariants}
+          className="enterprise-card p-10"
         >
           <h3 className="text-sm font-mono text-white uppercase tracking-widest mb-12 flex items-center gap-4">
             <CheckCircle2 className="w-5 h-5 text-white" />
@@ -209,10 +225,8 @@ export default function Analytics({ subjects, studyLogs, exams }: AnalyticsProps
       </div>
 
       <motion.div 
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.3 }}
-        className="bg-transparent border border-white/10 p-10 rounded-none"
+        variants={itemVariants}
+        className="enterprise-card p-10"
       >
         <h3 className="text-sm font-mono text-white uppercase tracking-widest mb-12 flex items-center gap-4">
           <Star className="w-5 h-5 text-white" />
@@ -241,10 +255,8 @@ export default function Analytics({ subjects, studyLogs, exams }: AnalyticsProps
       </motion.div>
 
       <motion.div 
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.4 }}
-        className="bg-transparent border border-white/10 p-8 rounded-none"
+        variants={itemVariants}
+        className="enterprise-card p-8"
       >
         <h3 className="text-sm font-mono text-white uppercase tracking-widest mb-10 flex items-center gap-3">
           <TrendingUp className="w-5 h-5 text-white" />
@@ -284,7 +296,7 @@ export default function Analytics({ subjects, studyLogs, exams }: AnalyticsProps
         </div>
       </motion.div>
 
-      <div className="bg-transparent border border-white/10 p-8 rounded-none">
+      <motion.div variants={itemVariants} className="enterprise-card p-8">
         <h3 className="text-sm font-mono text-white uppercase tracking-widest mb-10 flex items-center gap-3">
           <Trophy className="w-5 h-5 text-white" />
           Exam Performance Metrics
@@ -310,9 +322,9 @@ export default function Analytics({ subjects, studyLogs, exams }: AnalyticsProps
             <p className="text-[10px] font-mono uppercase tracking-widest text-zinc-700">No Data Detected</p>
           </div>
         )}
-      </div>
+      </motion.div>
 
-      <div className="bg-transparent border border-white/10 p-8 rounded-none">
+      <motion.div variants={itemVariants} className="enterprise-card p-8">
         <h3 className="text-sm font-mono text-white uppercase tracking-widest mb-10 flex items-center gap-3">
           <BarChart2 className="w-5 h-5 text-white" />
           Subject Performance Per Exam
@@ -354,9 +366,9 @@ export default function Analytics({ subjects, studyLogs, exams }: AnalyticsProps
             </div>
           ))}
         </div>
-      </div>
+      </motion.div>
 
-      <div className="bg-transparent border border-white/20 p-10 rounded-none">
+      <motion.div variants={itemVariants} className="enterprise-card p-10">
         <h3 className="text-sm font-mono text-white uppercase tracking-widest mb-10 flex items-center gap-4">
           <AlertTriangle className="w-5 h-5 text-white" />
           Mission Protocol Rules
@@ -375,7 +387,7 @@ export default function Analytics({ subjects, studyLogs, exams }: AnalyticsProps
             <p className="text-[10px] font-mono text-zinc-500 uppercase tracking-widest leading-relaxed">20m error-log + formula recall before sleep cycle initialization.</p>
           </div>
         </div>
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
   );
 }

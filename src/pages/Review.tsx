@@ -80,130 +80,163 @@ export default function Review() {
   };
 
   return (
-    <div className="p-4 md:p-8 space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
+    <div className="p-4 md:p-8 space-y-8 max-w-7xl mx-auto">
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
+      <motion.div 
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="flex flex-col md:flex-row md:items-end justify-between gap-6"
+      >
         <div>
-          <div className="flex items-center gap-3 mb-2">
-            <div className="p-2 bg-brand/10 border border-brand/20 text-brand">
-              <Brain className="w-5 h-5" />
+          <div className="flex items-center gap-3 mb-6">
+            <div className="w-10 h-10 bg-white flex items-center justify-center text-black shadow-[0_0_20px_rgba(255,255,255,0.2)]">
+              <Brain className="w-4 h-4" />
             </div>
-            <span className="hud-label">NEURAL_RETENTION_SYSTEM</span>
+            <span className="text-[9px] font-mono text-white uppercase tracking-[0.4em]">Neural Retention System</span>
           </div>
-          <h2 className="text-3xl font-black uppercase tracking-tighter">Spaced_Repetition</h2>
+          <h1 className="text-5xl md:text-7xl font-black text-white uppercase tracking-tighter leading-none">
+            Spaced_Repetition
+          </h1>
+          <p className="text-zinc-600 text-[10px] font-mono uppercase tracking-[0.3em] mt-8 flex items-center gap-3">
+            <span className="w-2 h-2 bg-white animate-pulse" />
+            Recalibration Protocol: Active
+          </p>
         </div>
 
         <div className="flex items-center gap-4">
-          <div className="text-right">
-            <p className="hud-label !text-gray-600">DUE_FOR_RECALIBRATION</p>
-            <p className="text-xl font-black tabular-nums text-brand">{dueTopics.length} TOPICS</p>
+          <div className="px-10 py-6 bg-white/5 border border-white/10 flex flex-col items-end backdrop-blur-xl">
+            <p className="text-[9px] font-mono text-zinc-500 uppercase tracking-[0.2em] leading-none mb-2">Due for Recalibration</p>
+            <p className="text-3xl font-black text-white tabular-nums leading-none tracking-tighter">{dueTopics.length} Topics</p>
           </div>
         </div>
-      </div>
+      </motion.div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Due Topics List */}
-        <div className="lg:col-span-2 space-y-4">
+        <div className="lg:col-span-2 space-y-6">
           <div className="flex items-center justify-between">
-            <h3 className="hud-label">PRIORITY_QUEUE</h3>
-            <span className="text-[10px] font-black text-gray-600 uppercase">SORTED_BY_MASTERY_CRITICALITY</span>
+            <h3 className="text-[10px] font-mono text-zinc-500 uppercase tracking-[0.3em]">Priority Queue</h3>
+            <span className="text-[9px] font-mono text-zinc-700 uppercase tracking-[0.2em]">Sorted by Mastery Criticality</span>
           </div>
 
-          <div className="grid grid-cols-1 gap-3">
+          <motion.div 
+            initial="hidden"
+            animate="show"
+            variants={{
+              hidden: { opacity: 0 },
+              show: {
+                opacity: 1,
+                transition: {
+                  staggerChildren: 0.05
+                }
+              }
+            }}
+            className="grid grid-cols-1 gap-4"
+          >
             {dueTopics.length > 0 ? (
               dueTopics.map((item) => (
                 <motion.div
                   key={`${item.subjectId}-${item.topic.id}`}
-                  layout
-                  className="scifi-panel p-4 hover:border-brand/30 transition-all group cursor-pointer"
+                  variants={{
+                    hidden: { opacity: 0, x: -20 },
+                    show: { opacity: 1, x: 0 }
+                  }}
+                  whileHover={{ x: 5, transition: { duration: 0.2 } }}
+                  className="enterprise-card p-6 group cursor-pointer relative overflow-hidden"
                   onClick={() => {
                     setSelectedTopic(item);
                     setIsReviewing(true);
                   }}
                 >
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-4">
-                      <div className="w-12 h-12 bg-white/5 border border-border-dim overflow-hidden shrink-0">
+                  <div className="scan-line opacity-0 group-hover:opacity-100 transition-opacity duration-1000" />
+                  
+                  <div className="flex items-center justify-between relative z-10">
+                    <div className="flex items-center gap-6">
+                      <div className="w-16 h-16 bg-white/5 border border-white/10 overflow-hidden shrink-0">
                         {item.topic.image ? (
-                          <img src={item.topic.image} alt="" className="w-full h-full object-cover opacity-50 group-hover:opacity-100 transition-opacity" referrerPolicy="no-referrer" />
+                          <img src={item.topic.image} alt="" className="w-full h-full object-cover opacity-40 group-hover:opacity-100 transition-opacity" referrerPolicy="no-referrer" />
                         ) : (
-                          <div className="w-full h-full flex items-center justify-center text-gray-700">
+                          <div className="w-full h-full flex items-center justify-center text-zinc-700">
                             <BookOpen className="w-6 h-6" />
                           </div>
                         )}
                       </div>
                       <div>
-                        <p className="text-[8px] font-black text-brand uppercase tracking-widest mb-1">{item.subjectName}</p>
-                        <h4 className="text-sm font-black uppercase tracking-tight">{item.topic.title}</h4>
-                        <div className="flex items-center gap-3 mt-1">
-                          <div className="flex items-center gap-1">
-                            <Zap className="w-3 h-3 text-yellow-500" />
-                            <span className="text-[10px] font-black tabular-nums">{item.topic.mastery}%</span>
+                        <p className="text-[9px] font-mono text-zinc-500 uppercase tracking-[0.2em] mb-2">{item.subjectName}</p>
+                        <h4 className="text-lg font-black text-white uppercase tracking-tight leading-none">{item.topic.title}</h4>
+                        <div className="flex items-center gap-6 mt-4">
+                          <div className="flex items-center gap-2">
+                            <Zap className="w-3 h-3 text-white" />
+                            <span className="text-[10px] font-mono text-white tabular-nums tracking-tighter">{item.topic.mastery}% Mastery</span>
                           </div>
                           {item.topic.lastReviewed && (
-                            <div className="flex items-center gap-1 text-gray-600">
+                            <div className="flex items-center gap-2 text-zinc-600">
                               <Clock className="w-3 h-3" />
-                              <span className="text-[10px] font-black uppercase">Last: {new Date(item.topic.lastReviewed).toLocaleDateString()}</span>
+                              <span className="text-[10px] font-mono uppercase tracking-widest">Last: {new Date(item.topic.lastReviewed).toLocaleDateString()}</span>
                             </div>
                           )}
                         </div>
                       </div>
                     </div>
-                    <ChevronRight className="w-5 h-5 text-gray-700 group-hover:text-brand transition-colors" />
+                    <ChevronRight className="w-5 h-5 text-zinc-700 group-hover:text-white transition-colors" />
                   </div>
                 </motion.div>
               ))
             ) : (
-              <div className="h-48 flex flex-col items-center justify-center border border-dashed border-border-dim opacity-40">
-                <CheckCircle2 className="w-8 h-8 mb-4 text-brand" />
-                <p className="hud-label">ALL_SYSTEMS_CALIBRATED</p>
-                <p className="text-[10px] font-black uppercase tracking-widest mt-2">NO_TOPICS_DUE_FOR_REVIEW</p>
+              <div className="h-64 flex flex-col items-center justify-center enterprise-card border-dashed border-white/10 opacity-40">
+                <CheckCircle2 className="w-12 h-12 mb-6 text-white" />
+                <p className="text-[10px] font-mono text-white uppercase tracking-[0.4em]">All Systems Calibrated</p>
+                <p className="text-[9px] font-mono text-zinc-600 uppercase tracking-[0.2em] mt-4">No topics due for review</p>
               </div>
             )}
-          </div>
+          </motion.div>
         </div>
 
         {/* Upcoming Reviews */}
-        <div className="space-y-4">
-          <h3 className="hud-label">FUTURE_PROJECTIONS</h3>
-          <div className="scifi-panel p-6 space-y-6">
+        <div className="space-y-8">
+          <h3 className="text-[10px] font-mono text-zinc-500 uppercase tracking-[0.3em]">Future Projections</h3>
+          <div className="enterprise-card p-8 space-y-6">
             {upcomingTopics.slice(0, 5).map((item) => (
-              <div key={`${item.subjectId}-${item.topic.id}`} className="flex items-center justify-between border-b border-white/5 pb-4 last:border-0 last:pb-0">
+              <div key={`${item.subjectId}-${item.topic.id}`} className="flex items-center justify-between border-b border-white/5 pb-6 last:border-0 last:pb-0">
                 <div>
-                  <p className="text-[10px] font-black uppercase tracking-tight truncate max-w-[150px]">{item.topic.title}</p>
-                  <p className="text-[8px] font-black text-gray-600 uppercase tracking-widest">{item.subjectName}</p>
+                  <p className="text-[10px] font-mono text-white uppercase tracking-tight truncate max-w-[150px] font-bold">{item.topic.title}</p>
+                  <p className="text-[9px] font-mono text-zinc-600 uppercase tracking-widest mt-1">{item.subjectName}</p>
                 </div>
                 <div className="text-right">
-                  <p className="text-[10px] font-black text-brand tabular-nums">
+                  <p className="text-xl font-black text-white tabular-nums leading-none tracking-tighter">
                     {Math.ceil((new Date(item.topic.nextReview!).getTime() - now.getTime()) / (1000 * 60 * 60 * 24))}d
                   </p>
-                  <p className="text-[8px] font-black text-gray-700 uppercase">REMAINING</p>
+                  <p className="text-[9px] font-mono text-zinc-700 uppercase tracking-widest mt-2">Remaining</p>
                 </div>
               </div>
             ))}
             {upcomingTopics.length === 0 && (
-              <p className="text-[10px] text-gray-700 font-black uppercase text-center py-4">NO_UPCOMING_REVIEWS</p>
+              <p className="text-[10px] text-zinc-700 font-mono uppercase tracking-widest text-center py-8">No upcoming reviews</p>
             )}
           </div>
 
           {/* Stats Card */}
-          <div className="scifi-panel p-6 bg-brand/5 border-brand/20">
-            <div className="flex items-center gap-3 mb-4">
-              <Timer className="w-5 h-5 text-brand" />
-              <h3 className="text-xs font-black uppercase tracking-widest">RETENTION_METRICS</h3>
+          <div className="enterprise-card-premium p-8">
+            <div className="flex items-center gap-4 mb-8">
+              <div className="w-10 h-10 bg-white flex items-center justify-center text-black shadow-[0_0_20px_rgba(255,255,255,0.2)]">
+                <Timer className="w-5 h-5" />
+              </div>
+              <h3 className="text-[10px] font-mono text-white uppercase tracking-[0.2em] font-bold">Retention Metrics</h3>
             </div>
-            <div className="space-y-4">
+            <div className="space-y-6">
               <div>
-                <div className="flex justify-between text-[10px] font-black uppercase mb-1">
-                  <span className="text-gray-500">AVG_MASTERY</span>
-                  <span className="text-brand">
+                <div className="flex justify-between text-[10px] font-mono uppercase tracking-widest mb-4">
+                  <span className="text-zinc-500">Avg Mastery</span>
+                  <span className="text-white">
                     {Math.round(allTopics.reduce((acc, curr) => acc + curr.topic.mastery, 0) / (allTopics.length || 1))}%
                   </span>
                 </div>
-                <div className="h-1 bg-black border border-white/5">
-                  <div 
-                    className="h-full bg-brand shadow-[0_0_10px_var(--color-brand-glow)]"
-                    style={{ width: `${allTopics.reduce((acc, curr) => acc + curr.topic.mastery, 0) / (allTopics.length || 1)}%` }}
+                <div className="h-1 bg-white/5 overflow-hidden">
+                  <motion.div 
+                    initial={{ width: 0 }}
+                    animate={{ width: `${allTopics.reduce((acc, curr) => acc + curr.topic.mastery, 0) / (allTopics.length || 1)}%` }}
+                    transition={{ duration: 1.5, ease: "circOut" }}
+                    className="h-full bg-white shadow-[0_0_15px_rgba(255,255,255,0.5)]"
                   />
                 </div>
               </div>

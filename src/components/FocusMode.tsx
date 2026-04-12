@@ -45,7 +45,7 @@ export default function FocusMode({ subject, session, isPaused, onTogglePause, o
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="fixed inset-0 z-[100] bg-black flex flex-col items-center justify-center p-8 overflow-hidden"
+      className="fixed inset-0 z-[100] bg-black flex flex-col items-center justify-center p-8 overflow-y-auto"
     >
       {/* Visual Confirmation Flash */}
       <AnimatePresence>

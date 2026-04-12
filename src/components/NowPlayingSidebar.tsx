@@ -15,21 +15,38 @@ interface NowPlayingSidebarProps {
   onTogglePlay?: () => void;
 }
 
+import { useAppStore } from '../store/useAppStore';
+
 export default function NowPlayingSidebar({ 
-  currentSubject, 
-  currentSubjectImage,
-  progress, 
-  timeElapsed, 
-  totalTime = '90:00',
   onClose,
   onToggleFocus,
-  isPlaying = false,
-  onTogglePlay
-}: NowPlayingSidebarProps) {
+}: { 
+  onClose?: () => void;
+  onToggleFocus?: () => void;
+}) {
+  const { activeSession, subjects, isPaused, setIsPaused } = useAppStore();
   const [isLiked, setIsLiked] = useState(false);
   const [volume, setVolume] = useState(70);
   const [isMuted, setIsMuted] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
+
+  if (!activeSession) return null;
+
+  const activeSubject = subjects.find(s => s.id === activeSession.subjectId);
+  const currentSubject = activeSubject?.name || '';
+  const currentSubjectImage = activeSubject?.image;
+  const progress = (activeSession.elapsedSeconds / activeSession.totalSeconds) * 100;
+  const isPlaying = !isPaused;
+  const onTogglePlay = () => setIsPaused(!isPaused);
+
+  const formatTime = (seconds: number) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
+  };
+
+  const timeElapsed = formatTime(activeSession.elapsedSeconds);
+  const totalTime = formatTime(activeSession.totalSeconds);
 
   const VolumeIcon = isMuted || volume === 0 ? VolumeX : volume < 50 ? Volume1 : Volume2;
 

@@ -364,6 +364,7 @@ export const createStudySlice: StateCreator<AppState, [], [], StudySlice> = (set
   resetToDefault: () => set({ 
     subjects: INITIAL_SUBJECTS, 
     schedule: WEEKLY_BASE_SCHEDULE,
+    tasks: INITIAL_TASKS as Task[],
     aiPlan: null,
     studyLogs: [],
     exams: []

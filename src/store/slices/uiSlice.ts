@@ -42,7 +42,7 @@ export const createUISlice: StateCreator<UISlice> = (set) => ({
   activeSession: null,
   setActiveSession: (activeSession) => set({ activeSession }),
   tickActiveSession: () => set((state) => {
-    if (!state.activeSession || state.isPaused) return state;
+    if (!state.activeSession || state.isPaused) return {};
     return {
       activeSession: {
         ...state.activeSession,

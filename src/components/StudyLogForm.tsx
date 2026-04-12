@@ -58,7 +58,12 @@ export default function StudyLogForm({ subjects, initialData, onSave, onClose }:
   };
 
   return (
-    <div className="fixed inset-0 z-[60] bg-black/90 backdrop-blur-md flex items-center justify-center p-4">
+    <motion.div 
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      className="fixed inset-0 z-[60] bg-black/90 backdrop-blur-md flex items-center justify-center p-4 overflow-y-auto"
+    >
       <motion.div 
         initial={{ opacity: 0, scale: 0.95, y: 10 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -168,7 +173,7 @@ export default function StudyLogForm({ subjects, initialData, onSave, onClose }:
           </button>
         </form>
       </motion.div>
-    </div>
+    </motion.div>
   );
 }
 

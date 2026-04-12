@@ -20,6 +20,33 @@
   --color-success: #10b981;
   --color-warning: #f59e0b;
   --color-danger: #ef4444;
+
+  --backdrop-blur-3xl: blur(24px); /* Reduced from 64px to 24px for massive performance gain */
+
+  --animate-neural-pulse: neural-pulse 8s ease-in-out infinite;
+  --animate-scan: scan 4s linear infinite;
+  --animate-float: float 6s ease-in-out infinite;
+  --ease-expo: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes neural-pulse {
+  0%, 100% { opacity: 0.1; transform: scale(1) translateZ(0); }
+  50% { opacity: 0.2; transform: scale(1.1) translateZ(0); }
+}
+
+@keyframes scan {
+  0% { transform: translateY(-100%) translateZ(0); }
+  100% { transform: translateY(100%) translateZ(0); }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0) translateZ(0); }
+  50% { transform: translateY(-10px) translateZ(0); }
+}
+
+@keyframes grid-move {
+  0% { transform: translateY(0) translateZ(0); }
+  100% { transform: translateY(40px) translateZ(0); }
 }
 
 @layer base {
@@ -56,37 +83,80 @@
 
 @layer components {
   .enterprise-card {
-    @apply bg-black border border-white/10 rounded-none overflow-hidden transition-all duration-500 hover:border-white/30;
+    @apply bg-[#1c1c1e]/80 backdrop-blur-2xl border border-white/10 rounded-3xl overflow-hidden transition-all duration-500 hover:border-white/20 hover:bg-[#2c2c2e]/80 shadow-lg;
+  }
+
+  .enterprise-card-premium {
+    @apply bg-black/50 backdrop-blur-3xl border border-white/10 rounded-3xl overflow-hidden transition-all duration-500 hover:border-white/20 shadow-[0_8px_30px_rgb(0,0,0,0.5)];
   }
 
   .enterprise-button {
-    @apply px-8 py-4 bg-transparent border border-white/20 text-white uppercase tracking-[0.2em] text-xs font-bold rounded-none transition-all duration-300 active:scale-[0.98] disabled:opacity-50 disabled:pointer-events-none flex items-center justify-center gap-3 hover:bg-white hover:text-black;
+    @apply px-6 py-3 bg-white/10 border border-white/10 text-white font-medium rounded-full transition-all duration-300 active:scale-95 disabled:opacity-50 disabled:pointer-events-none flex items-center justify-center gap-2 hover:bg-white/20;
   }
 
   .enterprise-button-primary {
-    @apply px-8 py-4 bg-white text-black uppercase tracking-[0.2em] text-xs font-bold rounded-none transition-all duration-300 active:scale-[0.98] disabled:opacity-50 disabled:pointer-events-none flex items-center justify-center gap-3 hover:bg-zinc-200;
+    @apply px-6 py-3 bg-white text-black font-semibold rounded-full transition-all duration-300 active:scale-95 disabled:opacity-50 disabled:pointer-events-none flex items-center justify-center gap-2 hover:bg-zinc-200 shadow-md;
   }
 
   .enterprise-button-secondary {
-    @apply px-8 py-4 bg-transparent border border-white/10 text-zinc-400 uppercase tracking-[0.2em] text-xs font-bold rounded-none transition-all duration-500 hover:border-white/30 hover:text-white active:scale-[0.98] flex items-center justify-center gap-3;
+    @apply px-6 py-3 bg-transparent border border-white/10 text-zinc-400 font-medium rounded-full transition-all duration-500 hover:border-white/30 hover:text-white active:scale-95 flex items-center justify-center gap-2;
   }
 
   .enterprise-button-ghost {
-    @apply px-6 py-3 text-zinc-500 uppercase tracking-[0.2em] text-xs font-bold rounded-none transition-all duration-300 hover:text-white flex items-center justify-center gap-3;
+    @apply px-6 py-3 text-zinc-500 font-medium rounded-full transition-all duration-300 hover:text-white hover:bg-white/5 flex items-center justify-center gap-2;
   }
 
   .enterprise-input {
-    @apply w-full bg-transparent border border-white/10 rounded-none px-6 py-4 text-sm text-white focus:outline-none focus:border-white/50 transition-all placeholder:text-zinc-700 font-mono uppercase tracking-wider;
+    @apply w-full bg-[#1c1c1e]/80 backdrop-blur-xl border border-white/10 rounded-2xl px-5 py-4 text-base text-white focus:outline-none focus:border-white/30 focus:ring-4 focus:ring-white/5 transition-all placeholder:text-zinc-500;
   }
 
   .badge {
-    @apply px-3 py-1 rounded-none text-[10px] font-mono uppercase tracking-widest border;
+    @apply px-3 py-1 rounded-full text-xs font-medium border backdrop-blur-md;
   }
 
-  .badge-brand { @apply bg-transparent text-white border-white/30; }
-  .badge-zinc { @apply bg-transparent text-zinc-500 border-zinc-800; }
-  .badge-success { @apply bg-transparent text-success border-success/30; }
-  .badge-danger { @apply bg-transparent text-danger border-danger/30; }
+  .badge-brand { @apply bg-white/5 text-white border-white/30 shadow-[0_0_10px_rgba(255,255,255,0.1)]; }
+  .badge-zinc { @apply bg-zinc-900/50 text-zinc-500 border-zinc-800; }
+  .badge-success { @apply bg-success/5 text-success border-success/30 shadow-[0_0_10px_rgba(16,185,129,0.1)]; }
+  .badge-danger { @apply bg-danger/5 text-danger border-danger/30 shadow-[0_0_10px_rgba(239,68,68,0.1)]; }
+
+  .brand-glow {
+    @apply shadow-[0_0_20px_rgba(255,255,255,0.1)];
+  }
+
+  .brand-glow-strong {
+    @apply shadow-[0_0_30px_rgba(255,255,255,0.2)];
+  }
+
+  .neural-field {
+    @apply fixed inset-0 -z-10 overflow-hidden pointer-events-none bg-[#050505];
+    background-image: radial-gradient(circle at 50% 0%, #111111 0%, #000000 70%);
+  }
+
+  .neural-grid {
+    @apply absolute inset-0 opacity-[0.015];
+    background-image: 
+      linear-gradient(to right, #ffffff 1px, transparent 1px),
+      linear-gradient(to bottom, #ffffff 1px, transparent 1px);
+    background-size: 40px 40px;
+    /* Removed expensive grid-move animation, keeping it static for performance */
+  }
+
+  .neural-orb {
+    @apply absolute rounded-full blur-[80px] opacity-20 animate-neural-pulse;
+  }
+
+  .scan-line {
+    @apply absolute inset-0 pointer-events-none overflow-hidden;
+  }
+
+  .scan-line::after {
+    content: "";
+    @apply absolute inset-x-0 h-[2px] bg-gradient-to-r from-transparent via-white/20 to-transparent animate-scan;
+  }
+
+  .glass-panel {
+    @apply bg-white/[0.02] backdrop-blur-3xl border border-white/10;
+  }
 }
 
 @layer utilities {

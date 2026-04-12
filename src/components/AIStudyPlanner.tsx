@@ -216,15 +216,16 @@ export default function AIStudyPlanner() {
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
-            className="bg-transparent border border-white/10 p-12 flex flex-col items-center justify-center text-center space-y-4 rounded-none"
+            className="bg-transparent border border-white/5 p-16 flex flex-col items-center justify-center text-center space-y-6 rounded-none relative overflow-hidden"
           >
+            <div className="absolute inset-0 bg-white/[0.02] animate-pulse" />
             <div className="relative">
-              <div className="w-12 h-12 border-2 border-white/10 border-t-white rounded-full animate-spin" />
-              <Sparkles className="absolute inset-0 m-auto w-4 h-4 text-white animate-pulse" />
+              <div className="w-16 h-16 border border-white/10 border-t-white rounded-none animate-spin" />
+              <Sparkles className="absolute inset-0 m-auto w-5 h-5 text-white animate-pulse" />
             </div>
-            <div>
-              <h3 className="text-sm font-mono uppercase tracking-widest text-white">Analyzing Progress...</h3>
-              <p className="text-xs text-zinc-500 max-w-xs mx-auto mt-1 font-mono uppercase tracking-widest">Gemini is processing your mastery metrics and deadlines to create an optimal path.</p>
+            <div className="relative z-10">
+              <h3 className="text-xs font-mono uppercase tracking-[0.3em] text-white">Neural Analysis in Progress</h3>
+              <p className="text-[10px] text-zinc-600 max-w-xs mx-auto mt-2 font-mono uppercase tracking-[0.2em] leading-relaxed">Gemini is synthesizing mastery metrics and temporal constraints to optimize your study trajectory.</p>
             </div>
           </motion.div>
         ) : aiPlan ? (
@@ -363,22 +364,22 @@ export default function AIStudyPlanner() {
             key="empty"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            className="bg-transparent border border-white/10 p-12 text-center space-y-6 rounded-none"
+            className="bg-transparent border border-white/5 p-16 text-center space-y-8 rounded-none"
           >
-            <div className="w-16 h-16 bg-transparent border border-white/20 rounded-none flex items-center justify-center mx-auto">
-              <Calendar className="w-8 h-8 text-zinc-500" />
+            <div className="w-20 h-20 bg-transparent border border-white/10 rounded-none flex items-center justify-center mx-auto">
+              <Calendar className="w-10 h-10 text-zinc-700" />
             </div>
-            <div className="space-y-2">
-              <h3 className="text-lg font-mono uppercase tracking-widest text-white">No Plan Generated</h3>
-              <p className="text-xs text-zinc-500 max-w-sm mx-auto font-mono uppercase tracking-widest">
-                Generate an optimized study path for today based on your current progress and goals.
+            <div className="space-y-3">
+              <h3 className="text-sm font-mono uppercase tracking-[0.3em] text-white">No Active Trajectory</h3>
+              <p className="text-[10px] text-zinc-600 max-w-sm mx-auto font-mono uppercase tracking-[0.2em] leading-relaxed">
+                Initialize the neural planner to generate an optimized study path based on your current mission parameters.
               </p>
             </div>
             <button
               onClick={generatePlan}
-              className="px-8 py-3 bg-white text-black font-mono uppercase tracking-widest hover:bg-zinc-200 transition-colors rounded-none"
+              className="px-10 py-4 bg-white text-black font-mono uppercase tracking-[0.2em] hover:bg-zinc-200 transition-colors rounded-none text-xs font-bold"
             >
-              Generate Today's Plan
+              Initialize Planner
             </button>
           </motion.div>
         )}

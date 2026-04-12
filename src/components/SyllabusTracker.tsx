@@ -19,12 +19,13 @@ interface TopicItemProps {
 
 const TopicItem = React.memo(({ subject, topic, onUpdateMastery, onViewResources }: TopicItemProps) => {
   return (
-    <div className="group bg-transparent hover:bg-white/5 p-6 rounded-none border border-white/10 hover:border-white/30 transition-all duration-300">
-      <div className="flex items-start justify-between mb-6">
+    <div className="group enterprise-card p-6 relative overflow-hidden">
+      <div className="scan-line opacity-0 group-hover:opacity-100 transition-opacity duration-1000" />
+      <div className="flex items-start justify-between mb-6 relative z-10">
         <h4 className="font-mono text-sm text-white flex-1 pr-4 uppercase tracking-widest group-hover:text-white transition-colors">{topic.title}</h4>
         <div className="flex items-center gap-3">
           {topic.resources && topic.resources.length > 0 && (
-            <div className="flex items-center gap-2 px-2 py-1 bg-transparent rounded-none border border-white/20 text-[9px] font-mono text-zinc-500 uppercase tracking-widest">
+            <div className="flex items-center gap-2 px-2 py-1 bg-white/5 rounded-none border border-white/10 text-[9px] font-mono text-zinc-500 uppercase tracking-widest">
               <div className="flex items-center -space-x-1">
                 {Array.from(new Set(topic.resources.map(r => r.type))).map(type => (
                   <div key={type} className="p-0.5">
@@ -47,7 +48,7 @@ const TopicItem = React.memo(({ subject, topic, onUpdateMastery, onViewResources
         </div>
       </div>
 
-      <div className="space-y-4">
+      <div className="space-y-4 relative z-10">
         <div className="flex items-center justify-between text-[10px] font-mono text-zinc-500 uppercase tracking-widest">
           <span>Mastery Level</span>
           <span className={cn(
@@ -55,7 +56,7 @@ const TopicItem = React.memo(({ subject, topic, onUpdateMastery, onViewResources
             topic.mastery >= 80 ? "text-white" : topic.mastery >= 50 ? "text-zinc-400" : "text-zinc-600"
           )}>{topic.mastery}%</span>
         </div>
-        <div className="h-1 bg-white/10 rounded-none relative overflow-hidden">
+        <div className="h-1 bg-white/5 rounded-none relative overflow-hidden">
           <motion.div 
             initial={{ width: 0 }}
             animate={{ width: `${topic.mastery}%` }}
@@ -75,7 +76,7 @@ const TopicItem = React.memo(({ subject, topic, onUpdateMastery, onViewResources
         />
       </div>
 
-      <div className="mt-6 flex items-center gap-4 opacity-0 group-hover:opacity-100 transition-opacity">
+      <div className="mt-6 flex items-center gap-4 opacity-0 group-hover:opacity-100 transition-opacity relative z-10">
         <button 
           onClick={() => onViewResources(subject, topic)}
           className="text-[10px] font-mono text-zinc-400 hover:text-white uppercase tracking-widest transition-colors"
@@ -108,18 +109,18 @@ const SubjectBlock = React.memo(({ subject, onUpdateMastery, onViewResources, is
       variants={itemVariants}
       ref={innerRef}
       className={cn(
-        "bg-transparent border border-white/10 transition-all duration-500 overflow-hidden rounded-none",
+        "enterprise-card transition-all duration-500 overflow-hidden",
         isHighlighted ? "border-white/50 ring-1 ring-white/20 scale-[1.01] z-10" : ""
       )}
     >
-      <div className={cn("p-10 flex flex-col md:flex-row md:items-center justify-between gap-8 bg-white/5 border-b border-white/10")}>
+      <div className={cn("p-10 flex flex-col md:flex-row md:items-center justify-between gap-8 bg-white/[0.02] border-b border-white/10")}>
         <div className="flex items-center gap-8">
-          <div className="w-16 h-16 rounded-none bg-transparent flex items-center justify-center border border-white/20">
-            <BookOpen className="w-8 h-8 text-white" />
+          <div className="w-16 h-16 rounded-none bg-white flex items-center justify-center text-black shadow-[0_0_20px_rgba(255,255,255,0.2)]">
+            <BookOpen className="w-8 h-8" />
           </div>
           <div>
-            <h3 className="text-3xl font-bold text-white tracking-widest uppercase">{subject.name}</h3>
-            <p className="text-[10px] font-mono text-zinc-500 uppercase tracking-widest mt-1">{subject.topics.length} Topics Total</p>
+            <h3 className="text-3xl font-black text-white tracking-widest uppercase leading-none">{subject.name}</h3>
+            <p className="text-[10px] font-mono text-zinc-500 uppercase tracking-widest mt-4">{subject.topics.length} Topics Total</p>
           </div>
         </div>
         <div className="flex items-center gap-10">
@@ -129,8 +130,8 @@ const SubjectBlock = React.memo(({ subject, onUpdateMastery, onViewResources, is
             </div>
           )}
           <div className="text-right">
-            <p className="text-4xl font-mono text-white tabular-nums tracking-widest">{Math.round(subject.readiness)}%</p>
-            <p className="text-[10px] font-mono text-zinc-500 uppercase tracking-widest">Subject Mastery</p>
+            <p className="text-4xl font-black text-white tabular-nums tracking-tighter leading-none">{Math.round(subject.readiness)}%</p>
+            <p className="text-[10px] font-mono text-zinc-500 uppercase tracking-widest mt-4">Subject Mastery</p>
           </div>
         </div>
       </div>

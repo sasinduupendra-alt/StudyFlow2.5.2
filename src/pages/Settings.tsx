@@ -45,50 +45,55 @@ export default function Settings() {
       className="p-6 md:p-12 max-w-5xl mx-auto space-y-16"
     >
       <div className="space-y-4">
-        <div className="flex items-center gap-3 mb-4">
-          <div className="w-10 h-10 bg-transparent border border-white/20 flex items-center justify-center text-white">
-            <SettingsIcon className="w-5 h-5" />
+        <div className="flex items-center gap-4 mb-6">
+          <div className="w-12 h-12 bg-white flex items-center justify-center text-black shadow-[0_0_20px_rgba(255,255,255,0.2)]">
+            <SettingsIcon className="w-6 h-6" />
           </div>
-          <span className="text-[10px] font-mono text-white uppercase tracking-[0.3em]">System Configuration</span>
+          <span className="text-[10px] font-mono text-white uppercase tracking-[0.4em]">System Configuration</span>
         </div>
-        <h1 className="text-4xl md:text-6xl font-bold text-white uppercase tracking-[0.15em]">System <span className="text-white">Settings</span></h1>
-        <p className="text-zinc-500 text-sm font-mono uppercase tracking-widest leading-relaxed max-w-2xl">Manage your account preferences, data telemetry, and system configuration for the optimal StudyFlow experience.</p>
+        <h1 className="text-5xl md:text-8xl font-black text-white uppercase tracking-tighter leading-none">Neural <span className="text-white">Settings</span></h1>
+        <p className="text-zinc-600 text-[10px] font-mono uppercase tracking-[0.3em] mt-8 flex items-center gap-3">
+          <span className="w-2 h-2 bg-white animate-pulse" />
+          Core Parameters: Accessible // Root Access
+        </p>
       </div>
 
-      <div className="space-y-12">
+      <div className="grid grid-cols-1 gap-12">
         {/* Profile Section */}
         <section className="enterprise-card p-12 relative overflow-hidden">
           <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 blur-[100px] -mr-32 -mt-32" />
           
           <div className="flex flex-col md:flex-row md:items-center gap-10 mb-16">
-            <div className="w-32 h-32 rounded-none bg-transparent border border-white/20 flex items-center justify-center relative group overflow-hidden shadow-2xl">
+            <div className="w-32 h-32 bg-white flex items-center justify-center relative group overflow-hidden shadow-2xl">
               {user?.photoURL ? (
-                <img src={user.photoURL} alt="Profile" className="w-full h-full object-cover opacity-90 group-hover:opacity-100 transition-all duration-700 group-hover:scale-110 grayscale" referrerPolicy="no-referrer" />
+                <img src={user.photoURL} alt="Profile" className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700 group-hover:scale-110" referrerPolicy="no-referrer" />
               ) : (
-                <div className="text-4xl font-bold text-white">
+                <div className="text-4xl font-black text-black">
                   {user?.displayName?.[0] || user?.email?.[0] || 'U'}
                 </div>
               )}
-              <div className="absolute bottom-3 right-3 w-5 h-5 bg-white rounded-none border-4 border-black shadow-[0_0_15px_rgba(255,255,255,0.5)]" />
             </div>
             <div>
-              <h2 className="text-3xl font-bold text-white uppercase tracking-widest">{user?.displayName || 'StudyFlow User'}</h2>
-              <div className="flex items-center gap-3 mt-2">
-                <p className="text-sm font-mono text-zinc-500 uppercase tracking-widest">{user?.email}</p>
-                <div className="w-1 h-1 bg-zinc-800 rounded-none" />
-                <span className="text-[10px] font-mono text-white uppercase tracking-widest">Pro Member</span>
+              <h2 className="text-4xl font-black text-white uppercase tracking-tighter leading-none mb-4">{user?.displayName || 'StudyFlow User'}</h2>
+              <div className="flex items-center gap-4">
+                <p className="text-[10px] font-mono text-zinc-500 uppercase tracking-[0.3em]">{user?.email}</p>
+                <span className="badge badge-brand">Pro Member</span>
               </div>
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <div className="bg-transparent p-8 rounded-none border border-white/10 hover:border-white/30 transition-colors group">
-              <p className="text-[10px] font-mono text-zinc-500 uppercase tracking-widest mb-3">Total Points</p>
-              <p className="text-5xl font-bold text-white tabular-nums tracking-tighter group-hover:text-white transition-colors">{userProfile.points}</p>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div className="p-8 bg-white/5 border border-white/10 group hover:border-white/30 transition-all">
+              <p className="text-[9px] font-mono text-zinc-500 uppercase tracking-[0.2em] mb-4">Neural Level</p>
+              <p className="text-5xl font-black text-white tabular-nums tracking-tighter leading-none">{userProfile?.level || 1}</p>
             </div>
-            <div className="bg-transparent p-8 rounded-none border border-white/10 hover:border-white/30 transition-colors group">
-              <p className="text-[10px] font-mono text-zinc-500 uppercase tracking-widest mb-3">Current Streak</p>
-              <p className="text-5xl font-bold text-white tabular-nums tracking-tighter group-hover:text-white transition-colors">{userProfile.streak} <span className="text-lg text-zinc-600 font-bold uppercase tracking-widest ml-1">Days</span></p>
+            <div className="p-8 bg-white/5 border border-white/10 group hover:border-white/30 transition-all">
+              <p className="text-[9px] font-mono text-zinc-500 uppercase tracking-[0.2em] mb-4">Total XP</p>
+              <p className="text-5xl font-black text-white tabular-nums tracking-tighter leading-none">{userProfile?.xp || 0}</p>
+            </div>
+            <div className="p-8 bg-white/5 border border-white/10 group hover:border-white/30 transition-all">
+              <p className="text-[9px] font-mono text-zinc-500 uppercase tracking-[0.2em] mb-4">Study Streak</p>
+              <p className="text-5xl font-black text-white tabular-nums tracking-tighter leading-none">{userProfile?.streak || 0}</p>
             </div>
           </div>
         </section>
@@ -140,38 +145,42 @@ export default function Settings() {
         </section>
 
         {/* Data Management Section */}
-        <section className="enterprise-card p-12">
-          <div className="flex items-center gap-4 mb-12">
-            <div className="w-10 h-10 bg-transparent border border-white/20 flex items-center justify-center text-white">
-              <Download className="w-5 h-5" />
-            </div>
-            <h3 className="text-sm font-bold tracking-widest text-white uppercase">Data Management</h3>
+        <section className="space-y-8">
+          <div className="flex items-center gap-4 px-2">
+            <div className="w-2 h-8 bg-white" />
+            <h3 className="text-xl font-black text-white uppercase tracking-widest">Data Protocols</h3>
           </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div className="enterprise-card p-10 group hover:border-white/30 transition-all">
+              <div className="flex items-center gap-6 mb-8">
+                <div className="p-4 bg-white/5 border border-white/10 text-white group-hover:bg-white group-hover:text-black transition-all">
+                  <Download className="w-6 h-6" />
+                </div>
+                <div>
+                  <h4 className="text-lg font-black text-white uppercase tracking-tighter">Export Archive</h4>
+                  <p className="text-[10px] font-mono text-zinc-600 uppercase tracking-[0.2em] mt-2">Download your neural history</p>
+                </div>
+              </div>
+              <button onClick={handleDownloadData} className="enterprise-button-secondary w-full py-4">Initialize Export</button>
+            </div>
 
-          <div className="space-y-4">
-            <div className="flex items-center justify-between p-8 bg-transparent rounded-none border border-white/10 hover:border-white/20 transition-all">
-              <div>
-                <p className="text-base font-bold text-white uppercase tracking-widest">Export Core Data</p>
-                <p className="text-sm font-mono text-zinc-500 uppercase tracking-widest mt-1">Download complete JSON telemetry log for external analysis.</p>
+            <div className="enterprise-card p-10 group hover:border-red-500/30 transition-all">
+              <div className="flex items-center gap-6 mb-8">
+                <div className="p-4 bg-red-500/10 border border-red-500/20 text-red-500 group-hover:bg-red-500 group-hover:text-white transition-all">
+                  <Trash2 className="w-6 h-6" />
+                </div>
+                <div>
+                  <h4 className="text-lg font-black text-white uppercase tracking-tighter">Purge Database</h4>
+                  <p className="text-[10px] font-mono text-zinc-600 uppercase tracking-[0.2em] mt-2">Irreversible data deletion</p>
+                </div>
               </div>
               <button 
-                onClick={handleDownloadData}
-                className="enterprise-button px-8 py-4"
+                onClick={() => addToast("This action is restricted in the neural preview.", "info")}
+                className="w-full py-4 border border-red-500/20 text-red-500 text-[10px] font-bold uppercase tracking-[0.3em] hover:bg-red-500 hover:text-white transition-all"
               >
-                <Download className="w-4 h-4" />
-                Export JSON
+                Execute Purge
               </button>
-            </div>
-
-            <div className="flex items-center justify-between p-8 bg-transparent rounded-none border border-white/10 hover:border-white/20 transition-all">
-              <div>
-                <p className="text-base font-bold text-white uppercase tracking-widest">Source Code Pull</p>
-                <p className="text-sm font-mono text-zinc-500 uppercase tracking-widest mt-1">Local deployment package and system source files.</p>
-              </div>
-              <div className="text-right">
-                <p className="text-[10px] font-mono text-white uppercase tracking-widest mb-1">AI Studio Override</p>
-                <p className="text-[9px] font-mono text-zinc-600 uppercase tracking-widest max-w-[200px] leading-relaxed">Use 'Export to ZIP' in AI Studio settings menu for full source access.</p>
-              </div>
             </div>
           </div>
         </section>

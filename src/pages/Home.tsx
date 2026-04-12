@@ -14,26 +14,25 @@ import { CardSkeleton } from '../components/ui/Skeleton';
 
 export default function Home() {
   const navigate = useNavigate();
-  const { 
-    subjects, 
-    schedule, 
-    recentlyStudied, 
-    searchQuery, 
-    setIsFocusMode, 
-    setIsPaused, 
-    setActiveSession,
-    addToast,
-    isAuthReady,
-    user,
-    userProfile,
-    studyLogs,
-    startFocusSession
-  } = useAppStore();
+  const subjects = useAppStore(state => state.subjects);
+  const schedule = useAppStore(state => state.schedule);
+  const recentlyStudied = useAppStore(state => state.recentlyStudied);
+  const searchQuery = useAppStore(state => state.searchQuery);
+  const setIsFocusMode = useAppStore(state => state.setIsFocusMode);
+  const setIsPaused = useAppStore(state => state.setIsPaused);
+  const setActiveSession = useAppStore(state => state.setActiveSession);
+  const addToast = useAppStore(state => state.addToast);
+  const isAuthReady = useAppStore(state => state.isAuthReady);
+  const user = useAppStore(state => state.user);
+  const userProfile = useAppStore(state => state.userProfile);
+  const studyLogs = useAppStore(state => state.studyLogs);
+  const startFocusSession = useAppStore(state => state.startFocusSession);
 
   const processedSubjects = useMemo(() => {
     return subjects.map(s => {
-      const avgMastery = s.topics.length > 0 
-        ? s.topics.reduce((acc, t) => acc + t.mastery, 0) / s.topics.length
+      const topics = s.topics || [];
+      const avgMastery = topics.length > 0 
+        ? topics.reduce((acc, t) => acc + t.mastery, 0) / topics.length
         : 0;
       const readiness = (s.score * 0.4) + (avgMastery * 0.6);
       const priorityScore = (100 - readiness) * (s.focus / 5) * (s.weakCount + 1);
@@ -46,13 +45,13 @@ export default function Home() {
     if (!searchQuery) return processedSubjects;
     return processedSubjects.filter(s => 
       s.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      s.topics.some(t => t.title.toLowerCase().includes(searchQuery.toLowerCase()))
+      s.topics?.some(t => t.title.toLowerCase().includes(searchQuery.toLowerCase()))
     );
   }, [processedSubjects, searchQuery]);
 
   const dueTopicsCount = useMemo(() => {
     const now = new Date();
-    return subjects.flatMap(s => s.topics).filter(t => {
+    return subjects.flatMap(s => s.topics || []).filter(t => {
       if (!t.nextReview) return true;
       return new Date(t.nextReview) <= now;
     }).length;
@@ -109,71 +108,48 @@ export default function Home() {
 
   return (
     <motion.div 
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: -20 }}
+      variants={containerVariants}
+      initial="hidden"
+      animate="show"
       className="p-8 space-y-10 max-w-7xl mx-auto"
     >
       {/* Welcome Header */}
-      <header className="flex flex-col md:flex-row md:items-end justify-between gap-8">
+      <motion.header variants={itemVariants} className="flex flex-col md:flex-row md:items-end justify-between gap-12 pb-8 border-b border-white/10">
         <div>
-          <div className="flex items-center gap-3 mb-4">
-            <div className="w-10 h-10 bg-transparent border border-white/20 flex items-center justify-center text-white">
-              <Sparkles className="w-5 h-5" />
-            </div>
-            <span className="text-[10px] font-mono text-white uppercase tracking-[0.3em]">Cognitive Dashboard</span>
-          </div>
-          <h1 className="text-4xl md:text-6xl font-bold text-white uppercase tracking-[0.15em]">Welcome back, <span className="text-white">{user?.displayName?.split(' ')[0] || 'Scholar'}</span></h1>
-          <p className="text-zinc-500 text-sm font-mono uppercase tracking-widest mt-4">System Status: Nominal. Ready for study flow.</p>
+          <h1 className="text-4xl md:text-6xl font-black text-white uppercase tracking-tighter leading-none">
+            Welcome, <span className="text-white">{user?.displayName?.split(' ')[0] || 'Scholar'}</span>
+          </h1>
+          <p className="text-zinc-500 text-[10px] font-mono uppercase tracking-[0.3em] mt-4 flex items-center gap-3">
+            <span className="w-1.5 h-1.5 bg-white animate-pulse" />
+            Neural Link: Established // Protocol 01
+          </p>
         </div>
-        <div className="flex items-center gap-4">
-          <div className="px-6 py-3 bg-transparent border border-white/10 flex items-center gap-4 group hover:border-white/30 transition-all">
-            <Flame className="w-5 h-5 text-white group-hover:scale-110 transition-transform" />
-            <div className="text-left">
-              <p className="text-[10px] font-mono text-zinc-500 uppercase tracking-[0.2em] leading-none mb-1">Current Streak</p>
-              <p className="text-xl font-bold text-white tabular-nums leading-none">{userProfile?.streak || 0} Days</p>
-            </div>
+        <div className="flex items-center gap-12">
+          <div className="text-right">
+            <p className="text-[9px] font-mono text-zinc-500 uppercase tracking-[0.3em] leading-none mb-2">Streak</p>
+            <p className="text-3xl font-black text-white tabular-nums leading-none tracking-tighter flex items-center justify-end gap-2">
+              {userProfile?.streak || 0} <Flame className="w-5 h-5 text-zinc-600" />
+            </p>
           </div>
-          <div className="px-6 py-3 bg-transparent border border-white/10 flex items-center gap-4 group hover:border-white/30 transition-all">
-            <Trophy className="w-5 h-5 text-white group-hover:scale-110 transition-transform" />
-            <div className="text-left">
-              <p className="text-[10px] font-mono text-zinc-500 uppercase tracking-[0.2em] leading-none mb-1">Current Level</p>
-              <p className="text-xl font-bold text-white tabular-nums leading-none">{userProfile?.level || 1}</p>
-            </div>
+          <div className="w-[1px] h-12 bg-white/10" />
+          <div className="text-right">
+            <p className="text-[9px] font-mono text-zinc-500 uppercase tracking-[0.3em] leading-none mb-2">Level</p>
+            <p className="text-3xl font-black text-white tabular-nums leading-none tracking-tighter flex items-center justify-end gap-2">
+              {userProfile?.level || 1} <Trophy className="w-5 h-5 text-zinc-600" />
+            </p>
           </div>
         </div>
-      </header>
+      </motion.header>
 
       {/* Bento Grid Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <motion.div 
-          variants={itemVariants}
-          className="enterprise-card p-6 bg-transparent border-white/10 flex flex-col justify-between group cursor-pointer"
-          onClick={() => navigate('/review')}
-        >
-          <div className="flex items-center justify-between">
-            <div className="p-2 bg-transparent border border-white/20">
-              <Brain className="w-5 h-5 text-white" />
-            </div>
-            <span className="badge badge-brand">Review Due</span>
-          </div>
-          <div className="mt-4">
-            <h3 className="text-lg font-bold text-white uppercase tracking-widest">{dueTopicsCount} Topics</h3>
-            <p className="text-[10px] font-mono text-zinc-500 uppercase tracking-widest mt-2">Ready for neural recalibration</p>
-          </div>
-          <div className="mt-8 flex items-center gap-2 text-white text-xs font-bold uppercase tracking-widest group-hover:gap-4 transition-all">
-            Start Review Session
-            <ChevronRight className="w-4 h-4" />
-          </div>
-        </motion.div>
-
-        <motion.div variants={itemVariants} className="md:col-span-2">
-          <CurrentScheduleBlock 
-            schedule={schedule} 
-            onViewFullSchedule={() => navigate('/schedule')} 
-          />
-        </motion.div>
-      </div>
+      <motion.div variants={itemVariants} className="w-full">
+        <CurrentScheduleBlock 
+          schedule={schedule} 
+          onViewFullSchedule={() => navigate('/schedule')} 
+          reviewCount={dueTopicsCount}
+          onReviewClick={() => navigate('/review')}
+        />
+      </motion.div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
         <div className="lg:col-span-2 space-y-10">
@@ -198,8 +174,8 @@ export default function Home() {
               </div>
               <div className="flex gap-6 overflow-x-auto pb-4 scrollbar-hide">
                 {recentlyStudied.map(topicId => {
-                  const subject = subjects.find(s => s.topics.some(t => t.id === topicId));
-                  const topic = subject?.topics.find(t => t.id === topicId);
+                  const subject = subjects.find(s => s.topics?.some(t => t.id === topicId));
+                  const topic = subject?.topics?.find(t => t.id === topicId);
                   if (!topic || !subject) return null;
                   return (
                     <div key={topicId} className="min-w-[280px]">
@@ -216,22 +192,20 @@ export default function Home() {
           )}
         </div>
 
-        <div className="space-y-10">
+        <div className="space-y-12">
           {!searchQuery && (
             <motion.section variants={itemVariants}>
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-xl font-bold text-white uppercase tracking-widest">AI Mixes</h2>
-                <Sparkles className="w-4 h-4 text-white" />
+              <div className="flex items-center justify-between mb-6 pb-4 border-b border-white/5">
+                <h2 className="text-sm font-bold text-white uppercase tracking-[0.2em]">AI Mixes</h2>
+                <Sparkles className="w-3 h-3 text-zinc-500" />
               </div>
-              <div className="space-y-4">
+              <div className="space-y-2">
                 {[
                   {
                     id: 'mix-1',
                     title: 'Focus Mix',
                     description: `Master ${processedSubjects[0]?.name || 'weak areas'}`,
                     icon: Zap,
-                    color: 'text-white',
-                    bg: 'bg-transparent border border-white/20',
                     action: () => startFocusSession(processedSubjects[0]?.id || '', processedSubjects[0]?.topics[0]?.id || ''),
                   },
                   {
@@ -239,8 +213,6 @@ export default function Home() {
                     title: 'Review Mix',
                     description: 'Spaced repetition session',
                     icon: Brain,
-                    color: 'text-white',
-                    bg: 'bg-transparent border border-white/20',
                     action: () => navigate('/review'),
                   },
                   {
@@ -248,24 +220,20 @@ export default function Home() {
                     title: 'The Grind',
                     description: 'High-intensity practice',
                     icon: Flame,
-                    color: 'text-white',
-                    bg: 'bg-transparent border border-white/20',
                     action: () => {},
                   }
                 ].map((mix) => (
                   <button 
                     key={mix.id}
                     onClick={mix.action}
-                    className="w-full enterprise-card p-4 flex items-center gap-4 hover:bg-white/5 group transition-all"
+                    className="w-full p-4 flex items-center gap-5 hover:bg-white/[0.02] group transition-all border border-transparent hover:border-white/10"
                   >
-                    <div className={cn("w-10 h-10 flex items-center justify-center shrink-0", mix.bg)}>
-                      <mix.icon className={cn("w-5 h-5", mix.color)} />
-                    </div>
+                    <mix.icon className="w-4 h-4 text-zinc-500 group-hover:text-white transition-colors" />
                     <div className="text-left flex-1">
-                      <h4 className="text-sm font-bold text-white uppercase tracking-widest group-hover:text-zinc-300 transition-colors">{mix.title}</h4>
-                      <p className="text-[10px] font-mono text-zinc-500 uppercase tracking-widest mt-1">{mix.description}</p>
+                      <h4 className="text-xs font-bold text-white uppercase tracking-widest group-hover:text-zinc-300 transition-colors">{mix.title}</h4>
+                      <p className="text-[9px] font-mono text-zinc-600 uppercase tracking-widest mt-1">{mix.description}</p>
                     </div>
-                    <Play className="w-4 h-4 text-zinc-700 group-hover:text-white fill-current" />
+                    <Play className="w-3 h-3 text-zinc-700 group-hover:text-white fill-current opacity-0 group-hover:opacity-100 transition-all" />
                   </button>
                 ))}
               </div>
@@ -274,30 +242,28 @@ export default function Home() {
 
           {studyLogs.length > 0 && !searchQuery && (
             <motion.section variants={itemVariants}>
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-xl font-bold text-white uppercase tracking-widest">Recent Activity</h2>
-                <button onClick={() => navigate('/analytics')} className="text-xs font-mono text-zinc-500 hover:text-white uppercase tracking-widest transition-colors">History</button>
+              <div className="flex items-center justify-between mb-6 pb-4 border-b border-white/5">
+                <h2 className="text-sm font-bold text-white uppercase tracking-[0.2em]">Recent Activity</h2>
+                <button onClick={() => navigate('/analytics')} className="text-[9px] font-mono text-zinc-500 hover:text-white uppercase tracking-widest transition-colors">History</button>
               </div>
-              <div className="space-y-3">
+              <div className="space-y-1">
                 {studyLogs.slice(0, 4).map((log) => {
                   const subject = subjects.find(s => s.id === log.subjectId);
-                  const topic = subject?.topics.find(t => t.id === log.topicId);
+                  const topic = subject?.topics?.find(t => t.id === log.topicId);
                   return (
                     <div
                       key={log.id}
                       onClick={() => navigate(`/session/${log.id}`)}
-                      className="flex items-center gap-4 p-3 rounded-none hover:bg-white/5 cursor-pointer group transition-all border border-transparent hover:border-white/10"
+                      className="flex items-center gap-5 p-4 hover:bg-white/[0.02] cursor-pointer group transition-all border border-transparent hover:border-white/10"
                     >
-                      <div className="w-8 h-8 rounded-none bg-transparent border border-white/20 flex items-center justify-center shrink-0">
-                        <Clock className="w-4 h-4 text-zinc-500 group-hover:text-white" />
-                      </div>
+                      <Clock className="w-4 h-4 text-zinc-600 group-hover:text-white transition-colors" />
                       <div className="flex-1 min-w-0">
-                        <h4 className="text-xs font-bold text-white uppercase tracking-widest truncate">{topic?.title || 'Study Session'}</h4>
-                        <p className="text-[10px] font-mono text-zinc-500 uppercase tracking-widest truncate">{subject?.name}</p>
+                        <h4 className="text-[11px] font-bold text-zinc-300 group-hover:text-white uppercase tracking-[0.15em] truncate transition-colors">{topic?.title || 'Study Session'}</h4>
+                        <p className="text-[9px] font-mono text-zinc-600 uppercase tracking-widest truncate mt-1">{subject?.name}</p>
                       </div>
                       <div className="text-right">
-                        <p className="text-xs font-mono text-white">{log.duration}m</p>
-                        <p className="text-[9px] text-zinc-600 font-mono uppercase tracking-widest">{new Date(log.timestamp).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}</p>
+                        <p className="text-[10px] font-mono text-white tracking-widest">{log.duration}m</p>
+                        <p className="text-[8px] text-zinc-600 font-mono uppercase tracking-[0.2em] mt-1">{new Date(log.timestamp).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}</p>
                       </div>
                     </div>
                   );
