@@ -27,7 +27,8 @@ export default function App() {
   // Also ensure new daily tasks are added
   useEffect(() => {
     if (isAuthReady) {
-      if (schedule.Monday?.[0]?.time === '04:30 AM – 06:30 AM') {
+      const isOldSchedule = schedule.Monday?.[0]?.description === 'Deep Work: Pure Maths (core practice)';
+      if (isOldSchedule) {
         resetToDefault();
       }
 

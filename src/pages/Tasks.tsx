@@ -6,8 +6,8 @@ import {
   LayoutGrid, List, MoreVertical, Edit2
 } from 'lucide-react';
 import { useAppStore } from '../store/useAppStore';
-import { Task, TaskFrequency } from '../types';
-import { cn } from '../lib/utils';
+import { Task, TaskFrequency, Subject } from '../types';
+import { cn, calculateSNR } from '../lib/utils';
 import { db, handleFirestoreError, OperationType } from '../firebase';
 import { doc, setDoc, deleteDoc, updateDoc, collection } from 'firebase/firestore';
 
@@ -25,8 +25,10 @@ export default function Tasks() {
     .filter(t => t.frequency === activeTab)
     .sort((a, b) => {
       if (a.completed !== b.completed) return a.completed ? 1 : -1;
-      const snrA = (a.impact || 5) / (a.effort || 5);
-      const snrB = (b.impact || 5) / (b.effort || 5);
+      const subjectA = subjects.find(s => s.id === a.subjectId);
+      const subjectB = subjects.find(s => s.id === b.subjectId);
+      const snrA = calculateSNR(a, subjectA);
+      const snrB = calculateSNR(b, subjectB);
       return snrB - snrA;
     });
 
@@ -104,58 +106,54 @@ export default function Tasks() {
   return (
     <div className="p-4 md:p-8 space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
       {/* Header Section */}
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-8">
         <div>
-          <div className="flex items-center gap-3 mb-2">
-            <div className="p-2 bg-brand/10 border border-brand/20 text-brand">
+          <div className="flex items-center gap-3 mb-4">
+            <div className="w-10 h-10 bg-transparent border border-white/20 flex items-center justify-center text-white">
               <ListTodo className="w-5 h-5" />
             </div>
-            <span className="hud-label">TASK_COMMAND_CENTER</span>
+            <span className="text-[10px] font-mono text-white uppercase tracking-[0.3em]">Task Management</span>
           </div>
-          <h2 className="text-3xl font-black uppercase tracking-tighter">Strategic_Objectives</h2>
+          <h2 className="text-4xl md:text-5xl font-bold text-white uppercase tracking-[0.15em]">Strategic <span className="text-white">Objectives</span></h2>
+          <p className="text-zinc-500 text-sm font-mono uppercase tracking-widest mt-4">Manage and prioritize your study tasks with AI-driven SNR analysis.</p>
         </div>
 
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-6">
           <div className="text-right hidden sm:block">
-            <p className="hud-label !text-gray-600">COMPLETION_RATE</p>
-            <p className="text-xl font-black tabular-nums">{Math.round(progress)}%</p>
+            <p className="text-[10px] font-mono text-zinc-500 uppercase tracking-[0.2em] mb-1">Completion Rate</p>
+            <p className="text-2xl font-bold text-white tabular-nums">{Math.round(progress)}%</p>
           </div>
           <button 
             onClick={() => setIsAddingTask(true)}
-            className="scifi-button px-6"
+            className="enterprise-button px-8 py-3"
           >
             <Plus className="w-4 h-4" />
-            INITIALIZE_TASK
+            Add New Task
           </button>
         </div>
       </div>
 
       {/* Progress Bar */}
-      <div className="scifi-panel-sm p-1 overflow-hidden">
-        <div 
-          className="h-1 bg-brand shadow-[0_0_15px_var(--color-brand-glow)] transition-all duration-1000"
-          style={{ width: `${progress}%` }}
+      <div className="h-1 w-full bg-zinc-900 overflow-hidden border border-white/10">
+        <motion.div 
+          initial={{ width: 0 }}
+          animate={{ width: `${progress}%` }}
+          className="h-full bg-white shadow-[0_0_15px_rgba(255,255,255,0.3)] transition-all duration-1000"
         />
       </div>
 
       {/* Tabs */}
-      <div className="flex gap-2 p-1 bg-black/40 border border-border-dim w-fit">
+      <div className="flex gap-2 p-1 bg-transparent border border-white/10 rounded-none w-fit">
         {tabs.map((tab) => (
           <button
             key={tab}
             onClick={() => setActiveTab(tab)}
             className={cn(
-              "px-6 py-2 text-[10px] font-black uppercase tracking-widest transition-all relative",
-              activeTab === tab ? "text-brand bg-brand/5" : "text-gray-600 hover:text-white hover:bg-white/5"
+              "px-6 py-2.5 text-[11px] font-bold uppercase tracking-[0.2em] transition-all relative rounded-none",
+              activeTab === tab ? "text-black bg-white" : "text-zinc-500 hover:text-white hover:bg-white/5"
             )}
           >
-            {activeTab === tab && (
-              <motion.div 
-                layoutId="activeTaskTab"
-                className="absolute inset-0 border border-brand/30"
-              />
-            )}
-            {tab}_CYCLE
+            {tab} Cycle
           </button>
         ))}
       </div>
@@ -168,67 +166,69 @@ export default function Tasks() {
               <motion.div
                 key={task.id}
                 layout
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, scale: 0.95 }}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.98 }}
                 className={cn(
-                  "scifi-panel group transition-all duration-300",
-                  task.completed ? "opacity-50 border-border-dim" : "hover:border-brand/30"
+                  "enterprise-card group transition-all duration-300",
+                  task.completed ? "opacity-60 border-zinc-900" : "hover:border-brand/30"
                 )}
               >
-                <div className="p-4 flex items-start gap-4">
+                <div className="p-5 flex items-start gap-5">
                   <button 
                     onClick={() => handleToggleTask(task.id)}
                     className={cn(
-                      "mt-1 p-1 transition-colors",
-                      task.completed ? "text-brand" : "text-gray-700 hover:text-brand"
+                      "mt-1 p-1 transition-all transform hover:scale-110",
+                      task.completed ? "text-brand" : "text-zinc-700 hover:text-brand"
                     )}
                   >
-                    {task.completed ? <CheckCircle2 className="w-5 h-5" /> : <Circle className="w-5 h-5" />}
+                    {task.completed ? <CheckCircle2 className="w-6 h-6" /> : <Circle className="w-6 h-6" />}
                   </button>
 
                   <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-3 mb-1">
+                    <div className="flex flex-wrap items-center gap-3 mb-2">
                       <h4 className={cn(
-                        "text-sm font-black uppercase tracking-tight truncate",
-                        task.completed && "line-through text-gray-600"
+                        "text-base font-bold uppercase tracking-widest truncate",
+                        task.completed ? "line-through text-zinc-600" : "text-white"
                       )}>
                         {task.title}
                       </h4>
                       <div className="flex items-center gap-2">
                         {task.subjectId && (
-                          <span className="px-2 py-0.5 bg-white/5 border border-border-dim text-[8px] font-black text-gray-500 uppercase tracking-widest">
+                          <span className="px-2.5 py-0.5 bg-transparent border border-white/20 rounded-none text-[9px] font-mono text-zinc-400 uppercase tracking-widest">
                             {subjects.find(s => s.id === task.subjectId)?.name}
                           </span>
                         )}
                         <span className={cn(
-                          "px-2 py-0.5 border text-[8px] font-black uppercase tracking-widest",
-                          (task.impact / task.effort) >= 2 ? "bg-brand/10 border-brand/30 text-brand" : "bg-white/5 border-border-dim text-gray-500"
+                          "px-2.5 py-0.5 rounded-none text-[9px] font-mono uppercase tracking-widest border",
+                          calculateSNR(task, subjects.find(s => s.id === task.subjectId)) >= 2 
+                            ? "bg-transparent border-white/30 text-white" 
+                            : "bg-transparent border-white/10 text-zinc-500"
                         )}>
-                          SNR: {((task.impact || 5) / (task.effort || 5)).toFixed(1)}
+                          SNR: {calculateSNR(task, subjects.find(s => s.id === task.subjectId)).toFixed(1)}
                         </span>
                       </div>
                     </div>
-                    <div className="flex items-center gap-4">
+                    <div className="flex items-center gap-6">
                       {task.description && (
-                        <p className="text-[10px] text-gray-600 font-black uppercase tracking-tighter line-clamp-1 flex-1">
+                        <p className="text-xs text-zinc-500 font-mono uppercase tracking-widest line-clamp-1 flex-1">
                           {task.description}
                         </p>
                       )}
-                      <div className="flex items-center gap-3 shrink-0">
-                        <div className="flex items-center gap-1">
-                          <span className="hud-label !text-[7px]">SIG</span>
-                          <div className="flex gap-0.5">
+                      <div className="flex items-center gap-4 shrink-0">
+                        <div className="flex items-center gap-2">
+                          <span className="text-[9px] font-mono text-zinc-600 uppercase tracking-widest">Impact</span>
+                          <div className="flex gap-1">
                             {[...Array(5)].map((_, i) => (
-                              <div key={i} className={cn("w-1 h-2", i < (task.impact / 2) ? "bg-brand" : "bg-white/10")} />
+                              <div key={i} className={cn("w-1.5 h-3 rounded-none", i < (task.impact / 2) ? "bg-white" : "bg-zinc-800")} />
                             ))}
                           </div>
                         </div>
-                        <div className="flex items-center gap-1">
-                          <span className="hud-label !text-[7px]">NSE</span>
-                          <div className="flex gap-0.5">
+                        <div className="flex items-center gap-2">
+                          <span className="text-[9px] font-mono text-zinc-600 uppercase tracking-widest">Effort</span>
+                          <div className="flex gap-1">
                             {[...Array(5)].map((_, i) => (
-                              <div key={i} className={cn("w-1 h-2", i < (task.effort / 2) ? "bg-red-500/50" : "bg-white/10")} />
+                              <div key={i} className={cn("w-1.5 h-3 rounded-none", i < (task.effort / 2) ? "bg-zinc-400" : "bg-zinc-800")} />
                             ))}
                           </div>
                         </div>
@@ -239,7 +239,7 @@ export default function Tasks() {
                   <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                     <button 
                       onClick={() => handleDeleteTask(task.id)}
-                      className="p-2 text-gray-700 hover:text-red-500 transition-colors"
+                      className="p-2 text-zinc-700 hover:text-red-500 hover:bg-red-500/10 rounded-none transition-all"
                     >
                       <Trash2 className="w-4 h-4" />
                     </button>
@@ -248,10 +248,12 @@ export default function Tasks() {
               </motion.div>
             ))
           ) : (
-            <div className="h-64 flex flex-col items-center justify-center text-gray-700 border border-dashed border-border-dim">
-              <AlertCircle className="w-8 h-8 mb-4 opacity-20" />
-              <p className="hud-label !text-gray-800 uppercase">NO_OBJECTIVES_ACTIVE</p>
-              <p className="text-[10px] font-black uppercase tracking-widest mt-2">INITIALIZE NEW TASK TO BEGIN CYCLE</p>
+            <div className="h-80 flex flex-col items-center justify-center text-zinc-800 border border-dashed border-white/10 rounded-none">
+              <div className="p-6 bg-transparent border border-white/5 rounded-none mb-6">
+                <AlertCircle className="w-10 h-10 opacity-20 text-white" />
+              </div>
+              <p className="text-sm font-bold text-white uppercase tracking-[0.2em]">No Active Objectives</p>
+              <p className="text-xs font-mono text-zinc-600 uppercase tracking-widest mt-2">Initialize a new task to begin your study cycle.</p>
             </div>
           )}
         </AnimatePresence>
@@ -266,64 +268,64 @@ export default function Tasks() {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={() => setIsAddingTask(false)}
-              className="absolute inset-0 bg-black/90 backdrop-blur-md"
+              className="absolute inset-0 bg-black/80 backdrop-blur-md"
             />
             <motion.div
               initial={{ opacity: 0, scale: 0.95, y: 10 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 10 }}
-              className="relative w-full max-w-md scifi-panel p-6 md:p-8 border-brand/30"
+              className="relative w-full max-w-lg enterprise-card p-10 border-white/20 bg-black shadow-2xl"
             >
-              <div className="flex items-center gap-3 mb-8">
-                <div className="p-2 bg-brand/10 border border-brand/20 text-brand">
-                  <Plus className="w-4 h-4" />
+              <div className="flex items-center gap-4 mb-10">
+                <div className="w-12 h-12 bg-transparent border border-white/20 flex items-center justify-center text-white">
+                  <Plus className="w-6 h-6" />
                 </div>
                 <div>
-                  <label className="hud-label !text-gray-600">OBJECTIVE_INITIALIZATION</label>
-                  <h3 className="text-sm font-black uppercase tracking-tighter">New_{activeTab}_Task</h3>
+                  <p className="text-[10px] font-mono text-white uppercase tracking-[0.3em] mb-1">Task Initialization</p>
+                  <h3 className="text-2xl font-bold text-white uppercase tracking-[0.15em]">New {activeTab} Objective</h3>
                 </div>
               </div>
 
-              <form onSubmit={handleAddTask} className="space-y-6">
+              <form onSubmit={handleAddTask} className="space-y-8">
                 <div className="space-y-2">
-                  <label className="hud-label !text-gray-600">TASK_IDENTIFIER</label>
+                  <label className="text-[10px] font-mono text-zinc-500 uppercase tracking-widest">Task Title</label>
                   <input 
                     autoFocus
                     type="text"
                     value={newTaskTitle}
                     onChange={(e) => setNewTaskTitle(e.target.value)}
-                    placeholder="ENTER MISSION OBJECTIVE..."
-                    className="w-full bg-black/40 border border-border-dim px-4 py-3 text-[10px] font-black uppercase outline-none focus:border-brand transition-colors"
+                    placeholder="What needs to be done?"
+                    className="enterprise-input"
                   />
                 </div>
 
                 <div className="space-y-2">
-                  <label className="hud-label !text-gray-600">DETAILED_INTEL</label>
+                  <label className="text-[10px] font-mono text-zinc-500 uppercase tracking-widest">Detailed Description</label>
                   <textarea 
                     value={newTaskDesc}
                     onChange={(e) => setNewTaskDesc(e.target.value)}
-                    placeholder="ADDITIONAL PARAMETERS..."
-                    className="w-full bg-black/40 border border-border-dim px-4 py-3 h-24 text-[10px] font-black uppercase outline-none focus:border-brand transition-colors resize-none"
+                    placeholder="Add more details about this task..."
+                    className="enterprise-input h-32 resize-none"
                   />
                 </div>
 
                 <div className="space-y-2">
-                  <label className="hud-label !text-gray-600">SUBJECT_LINKAGE</label>
+                  <label className="text-[10px] font-mono text-zinc-500 uppercase tracking-widest">Subject Association</label>
                   <select 
                     value={newTaskSubject}
                     onChange={(e) => setNewTaskSubject(e.target.value)}
-                    className="w-full bg-black/40 border border-border-dim px-4 py-3 text-[10px] font-black uppercase outline-none focus:border-brand transition-colors"
+                    className="enterprise-input appearance-none"
                   >
-                    <option value="">NONE</option>
+                    <option value="">No Subject</option>
                     {subjects.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
                   </select>
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
+                <div className="grid grid-cols-2 gap-8">
+                  <div className="space-y-4">
                     <div className="flex justify-between items-center">
-                      <label className="hud-label !text-gray-600">SIGNAL (IMPACT)</label>
-                      <span className="text-[10px] font-black text-brand">{newTaskImpact}</span>
+                      <label className="text-[10px] font-mono text-zinc-500 uppercase tracking-widest">Impact</label>
+                      <span className="text-xs font-bold text-white">{newTaskImpact}</span>
                     </div>
                     <input 
                       type="range"
@@ -331,13 +333,13 @@ export default function Tasks() {
                       max="10"
                       value={newTaskImpact}
                       onChange={(e) => setNewTaskImpact(parseInt(e.target.value))}
-                      className="w-full accent-brand bg-white/5"
+                      className="w-full h-1 bg-zinc-900 rounded-none appearance-none cursor-pointer accent-white"
                     />
                   </div>
-                  <div className="space-y-2">
+                  <div className="space-y-4">
                     <div className="flex justify-between items-center">
-                      <label className="hud-label !text-gray-600">NOISE (EFFORT)</label>
-                      <span className="text-[10px] font-black text-red-500">{newTaskEffort}</span>
+                      <label className="text-[10px] font-mono text-zinc-500 uppercase tracking-widest">Effort</label>
+                      <span className="text-xs font-bold text-zinc-400">{newTaskEffort}</span>
                     </div>
                     <input 
                       type="range"
@@ -345,39 +347,39 @@ export default function Tasks() {
                       max="10"
                       value={newTaskEffort}
                       onChange={(e) => setNewTaskEffort(parseInt(e.target.value))}
-                      className="w-full accent-red-500 bg-white/5"
+                      className="w-full h-1 bg-zinc-900 rounded-none appearance-none cursor-pointer accent-zinc-400"
                     />
                   </div>
                 </div>
 
-                <div className="p-3 bg-brand/5 border border-brand/10">
+                <div className="p-5 bg-transparent border border-white/10 rounded-none">
                   <div className="flex justify-between items-center">
-                    <span className="hud-label !text-gray-500">PRIORITY_SNR_INDEX</span>
+                    <span className="text-[10px] font-mono text-zinc-500 uppercase tracking-widest">Priority SNR Index</span>
                     <span className={cn(
-                      "text-sm font-black",
-                      (newTaskImpact / newTaskEffort) >= 2 ? "text-brand" : "text-white"
+                      "text-lg font-bold tabular-nums",
+                      calculateSNR({ impact: newTaskImpact, effort: newTaskEffort, frequency: activeTab, subjectId: newTaskSubject } as Task, subjects.find(s => s.id === newTaskSubject)) >= 2 ? "text-white" : "text-zinc-500"
                     )}>
-                      {(newTaskImpact / newTaskEffort).toFixed(2)}
+                      {calculateSNR({ impact: newTaskImpact, effort: newTaskEffort, frequency: activeTab, subjectId: newTaskSubject } as Task, subjects.find(s => s.id === newTaskSubject)).toFixed(2)}
                     </span>
                   </div>
-                  <p className="text-[8px] text-gray-600 font-black uppercase mt-1">
-                    High Signal / Low Noise = Strategic Must-Do
+                  <p className="text-[10px] font-mono text-zinc-600 uppercase tracking-widest mt-2">
+                    High Signal / Low Noise ratio indicates a strategic must-do task.
                   </p>
                 </div>
 
-                <div className="flex gap-3 pt-4">
+                <div className="flex gap-4 pt-6">
                   <button
                     type="button"
                     onClick={() => setIsAddingTask(false)}
-                    className="flex-1 py-3 text-[10px] font-black uppercase tracking-widest text-gray-700 hover:text-white transition-colors"
+                    className="flex-1 py-4 text-xs font-bold uppercase tracking-widest text-zinc-500 hover:text-white transition-colors"
                   >
-                    ABORT
+                    Cancel
                   </button>
                   <button
                     type="submit"
-                    className="scifi-button flex-1 py-3"
+                    className="enterprise-button flex-1 py-4"
                   >
-                    COMMIT_TASK
+                    Commit Task
                   </button>
                 </div>
               </form>

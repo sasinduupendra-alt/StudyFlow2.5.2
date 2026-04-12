@@ -69,28 +69,26 @@ export const CurrentScheduleBlock = React.memo(({ schedule, onViewFullSchedule }
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-      {/* Current Activity */}
       <motion.div 
         initial={{ opacity: 0, scale: 0.98 }}
         animate={{ opacity: 1, scale: 1 }}
-        className="lg:col-span-2 scifi-panel p-8 md:p-10 group"
+        className={cn(
+          "lg:col-span-2 bg-transparent border border-white/10 p-8 md:p-10 group relative overflow-hidden rounded-none",
+          activeActivity?.description.toLowerCase().includes('deep work') && "border-white/30 bg-white/[0.02]"
+        )}
       >
-        <div className="absolute top-0 right-0 p-10 opacity-5 group-hover:opacity-10 transition-all duration-1000 group-hover:scale-110 group-hover:rotate-12">
+        <div className="absolute top-0 right-0 p-10 opacity-5 group-hover:opacity-10 transition-all duration-1000 group-hover:scale-110">
           <Clock className="w-48 h-48 -translate-y-1/4 translate-x-1/4" />
         </div>
         
-        {activeActivity && (
-          <div className={cn("absolute top-0 left-0 w-full h-full opacity-5 blur-[100px] pointer-events-none transition-colors duration-1000", getActivityColor(activeActivity.type).split(' ')[1])} />
-        )}
-
-        <div className="relative z-10">
+        <div className="relative z-10 h-full flex flex-col">
           <div className="flex items-center justify-between mb-10">
-            <div className="flex items-center gap-3 bg-white/5 px-4 py-1.5 border border-border-dim">
-              <div className="w-2 h-2 bg-red-500 animate-pulse shadow-[0_0_10px_rgba(239,68,68,0.8)]" />
-              <span className="text-[9px] font-black uppercase tracking-[0.3em] text-gray-400">LIVE_STATUS: ACTIVE</span>
+            <div className="flex items-center gap-3">
+              <div className={cn("w-2 h-2 rounded-none", activeActivity ? "bg-white animate-pulse" : "bg-zinc-700")} />
+              <span className="text-[10px] font-mono uppercase tracking-widest text-zinc-500">Current Session</span>
             </div>
-            <span className="text-[10px] font-black text-gray-500 tabular-nums bg-white/5 px-4 py-1.5 border border-border-dim">
-              {currentTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false })}_UTC
+            <span className="text-xs font-mono text-zinc-500 tabular-nums">
+              {currentTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false })}
             </span>
           </div>
 
@@ -101,28 +99,39 @@ export const CurrentScheduleBlock = React.memo(({ schedule, onViewFullSchedule }
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -10 }}
-                className="space-y-8"
+                className="flex-1 flex flex-col justify-center"
               >
-                <div className="flex items-center gap-8">
-                  <div className={cn("p-5 border shadow-[0_0_20px_rgba(0,0,0,0.5)]", getActivityColor(activeActivity.type))}>
-                    {React.createElement(getActivityIcon(activeActivity.type), { className: "w-10 h-10" })}
+                <div className="flex flex-col md:flex-row md:items-center gap-8">
+                  <div className={cn(
+                    "w-16 h-16 rounded-none flex items-center justify-center shrink-0 transition-all duration-500",
+                    getActivityColor(activeActivity.type).split(' ')[1],
+                    "border border-white/20"
+                  )}>
+                    {React.createElement(getActivityIcon(activeActivity.type), { className: cn("w-8 h-8", getActivityColor(activeActivity.type).split(' ')[0]) })}
                   </div>
                   <div>
-                    <h3 className="text-3xl md:text-5xl font-black tracking-tighter mb-2 uppercase leading-none">{activeActivity.description}</h3>
-                    <p className="hud-label !text-gray-600">{activeActivity.time}</p>
+                    <div className="flex items-center gap-2 mb-2">
+                      <span className={cn("text-[10px] font-mono uppercase tracking-widest", getActivityColor(activeActivity.type).split(' ')[0])}>
+                        {activeActivity.type}
+                      </span>
+                      <span className="text-zinc-700">•</span>
+                      <span className="text-[10px] font-mono text-zinc-500 uppercase tracking-widest">
+                        {activeActivity.time}
+                      </span>
+                    </div>
+                    <h3 className="text-3xl md:text-5xl font-mono uppercase tracking-widest text-white group-hover:text-zinc-300 transition-colors duration-500">
+                      {activeActivity.description}
+                    </h3>
                   </div>
                 </div>
                 
-                <div className="flex items-center gap-3 pt-4">
-                  <span className={cn(
-                    "px-4 py-1 text-[9px] font-black uppercase tracking-[0.2em] border",
-                    getActivityColor(activeActivity.type)
-                  )}>
-                    {activeActivity.type}_MODULE
-                  </span>
+                <div className="flex items-center gap-3 mt-8">
+                  <button className="px-6 py-2 text-xs font-mono uppercase tracking-widest bg-white text-black hover:bg-zinc-200 transition-colors rounded-none border border-transparent">
+                    Start Session
+                  </button>
                   {activeActivity.type === 'tuition' && (
-                    <span className="px-4 py-1 bg-blue-500/10 text-blue-500 border border-blue-500/30 text-[9px] font-black uppercase tracking-[0.2em] shadow-[0_0_15px_rgba(59,130,246,0.2)]">
-                      REMOTE_SYNC
+                    <span className="px-3 py-1 bg-transparent text-blue-500 border border-blue-500/30 rounded-none text-[10px] font-mono uppercase tracking-widest">
+                      External Sync
                     </span>
                   )}
                 </div>
@@ -132,62 +141,68 @@ export const CurrentScheduleBlock = React.memo(({ schedule, onViewFullSchedule }
                 key="no-activity"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                className="py-12 text-center lg:text-left"
+                className="py-12 flex flex-col items-center justify-center text-center"
               >
-                <h3 className="text-2xl font-black text-gray-700 mb-2 uppercase tracking-tighter">System_Idle</h3>
-                <p className="text-[10px] text-gray-600 font-black uppercase tracking-widest">No scheduled tasks detected. Standby mode active.</p>
+                <div className="w-16 h-16 rounded-none bg-transparent border border-white/20 flex items-center justify-center mb-4">
+                  <Moon className="w-8 h-8 text-zinc-500" />
+                </div>
+                <h3 className="text-xl font-mono uppercase tracking-widest text-zinc-400">System Idle</h3>
+                <p className="text-xs font-mono text-zinc-600 mt-1 uppercase tracking-widest">No scheduled activities for this time block.</p>
               </motion.div>
             )}
           </AnimatePresence>
         </div>
       </motion.div>
 
-      {/* Next Activity / Quick View */}
+      {/* Next Activity */}
       <motion.div 
         initial={{ opacity: 0, x: 10 }}
         animate={{ opacity: 1, x: 0 }}
-        className="scifi-panel p-8 flex flex-col"
+        className="bg-transparent border border-white/10 p-8 flex flex-col rounded-none"
       >
-        <div className="flex items-center justify-between mb-8 relative z-10">
-          <h4 className="hud-label">UP_NEXT</h4>
+        <div className="flex items-center justify-between mb-8">
+          <h4 className="text-[10px] font-mono uppercase tracking-widest text-zinc-500">Upcoming</h4>
           <button 
             onClick={onViewFullSchedule}
-            className="hud-label hover:text-brand transition-colors"
+            className="text-[10px] font-mono uppercase tracking-widest text-zinc-600 hover:text-white transition-colors flex items-center gap-1"
           >
-            FULL_LOG <ChevronRight className="w-3 h-3 inline" />
+            Full Schedule <ChevronRight className="w-3 h-3" />
           </button>
         </div>
 
-        <div className="flex-1 relative z-10">
+        <div className="flex-1">
           {nextActivity ? (
-            <div className="flex items-start gap-4 p-4 bg-white/5 border border-border-dim hover:border-brand/30 transition-all cursor-pointer group">
-              <div className={cn("p-2 border", getActivityColor(nextActivity.type))}>
-                {React.createElement(getActivityIcon(nextActivity.type), { className: "w-4 h-4" })}
-              </div>
-              <div className="min-w-0">
-                <p className="hud-label !text-gray-600 mb-1">{nextActivity.time.split(' – ')[0]}</p>
-                <h5 className="font-black text-[11px] uppercase truncate group-hover:text-brand transition-colors tracking-tight">{nextActivity.description}</h5>
-                <p className="hud-label !text-gray-700 mt-0.5">{nextActivity.type}</p>
+            <div className="p-5 bg-transparent border border-white/10 rounded-none hover:border-white/30 transition-all cursor-pointer group">
+              <div className="flex items-center gap-4">
+                <div className={cn("w-10 h-10 rounded-none flex items-center justify-center shrink-0 border border-white/20", getActivityColor(nextActivity.type).split(' ')[1])}>
+                  {React.createElement(getActivityIcon(nextActivity.type), { className: cn("w-5 h-5", getActivityColor(nextActivity.type).split(' ')[0]) })}
+                </div>
+                <div className="min-w-0">
+                  <p className="text-[10px] font-mono text-zinc-500 uppercase tracking-widest mb-1">{nextActivity.time.split(' – ')[0]}</p>
+                  <h5 className="font-mono uppercase tracking-widest text-sm text-white truncate group-hover:text-zinc-300 transition-colors">{nextActivity.description}</h5>
+                </div>
               </div>
             </div>
           ) : (
-            <div className="h-full flex flex-col items-center justify-center text-center p-4">
-              <Calendar className="w-8 h-8 text-gray-800 mb-3" />
-              <p className="hud-label !text-gray-700">END_OF_QUEUE</p>
+            <div className="h-full flex flex-col items-center justify-center text-center p-6 bg-transparent border border-dashed border-white/20 rounded-none">
+              <Calendar className="w-8 h-8 text-zinc-600 mb-3" />
+              <p className="text-[10px] font-mono text-zinc-500 uppercase tracking-widest">End of Queue</p>
             </div>
           )}
         </div>
 
-        <div className="mt-8 pt-6 border-t border-border-dim relative z-10">
+        <div className="mt-8 pt-6 border-t border-white/10">
           <div className="flex items-center justify-between mb-3">
-            <span className="hud-label">DAILY_QUOTA</span>
-            <span className="text-[10px] font-black tabular-nums">{Math.round((todaySchedule.filter(a => parseTimeStr(a.time.split(' – ')[0]) < (currentTime.getHours() * 60 + currentTime.getMinutes())).length / todaySchedule.length) * 100)}%</span>
+            <span className="text-[10px] font-mono uppercase tracking-widest text-zinc-500">Daily Progress</span>
+            <span className="text-xs font-mono text-white tabular-nums">
+              {Math.round((todaySchedule.filter(a => parseTimeStr(a.time.split(' – ')[0]) < (currentTime.getHours() * 60 + currentTime.getMinutes())).length / todaySchedule.length) * 100)}%
+            </span>
           </div>
-          <div className="h-[2px] bg-white/5 overflow-hidden">
+          <div className="h-1.5 bg-zinc-900 rounded-none overflow-hidden border border-white/10">
             <motion.div 
               initial={{ width: 0 }}
               animate={{ width: `${(todaySchedule.filter(a => parseTimeStr(a.time.split(' – ')[0]) < (currentTime.getHours() * 60 + currentTime.getMinutes())).length / todaySchedule.length) * 100}%` }}
-              className="h-full bg-brand shadow-[0_0_5px_var(--color-brand-glow)]"
+              className="h-full bg-white rounded-none"
             />
           </div>
         </div>

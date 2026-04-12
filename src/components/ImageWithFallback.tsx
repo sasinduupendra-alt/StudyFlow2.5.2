@@ -36,9 +36,9 @@ export default function ImageWithFallback({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="absolute inset-0 z-10 bg-white/5 animate-pulse flex items-center justify-center"
+            className="absolute inset-0 z-10 bg-transparent border border-white/10 animate-pulse flex items-center justify-center rounded-none"
           >
-            <div className="w-6 h-6 border-2 border-white/10 border-t-white/30 rounded-full animate-spin" />
+            <div className="w-6 h-6 border-2 border-white/10 border-t-white rounded-full animate-spin" />
           </motion.div>
         )}
 
@@ -48,12 +48,12 @@ export default function ImageWithFallback({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             className={cn(
-              "absolute inset-0 flex items-center justify-center bg-gradient-to-br",
+              "absolute inset-0 flex items-center justify-center bg-transparent border border-white/10 rounded-none",
               fallbackGradient
             )}
           >
             {fallbackText ? (
-              <span className="text-xl font-black text-white/20 select-none uppercase tracking-tighter">
+              <span className="text-xl font-mono text-white/20 select-none uppercase tracking-widest">
                 {fallbackText}
               </span>
             ) : (

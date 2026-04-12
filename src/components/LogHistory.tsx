@@ -25,8 +25,8 @@ export default function LogHistory({
   return (
     <div className="space-y-6">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <h3 className="text-sm font-black flex items-center gap-2 uppercase tracking-tighter">
-          <History className="w-4 h-4 text-brand" />
+        <h3 className="text-sm font-mono uppercase tracking-widest flex items-center gap-2 text-white">
+          <History className="w-4 h-4 text-white" />
           CHRONO_LOG_HISTORY_INTERFACE
         </h3>
         <div className="flex items-center gap-4">
@@ -37,7 +37,7 @@ export default function LogHistory({
               placeholder="SEARCH_LOGS..." 
               value={logsSearch} 
               onChange={(e) => setLogsSearch(e.target.value)} 
-              className="w-full bg-black/40 border border-border-dim pl-10 pr-4 py-2 text-[10px] font-black uppercase outline-none focus:border-brand transition-colors" 
+              className="w-full bg-transparent border border-white/20 pl-10 pr-4 py-2 text-[10px] font-mono uppercase tracking-widest text-white outline-none focus:border-white transition-colors rounded-none" 
             />
           </div>
           <button 
@@ -47,7 +47,7 @@ export default function LogHistory({
               message: 'Clear all history?', 
               onConfirm: onClearLogs 
             })} 
-            className="text-[9px] font-black text-red-500 uppercase tracking-widest hover:underline"
+            className="text-[9px] font-mono text-red-500 uppercase tracking-widest hover:underline"
           >
             PURGE_ALL
           </button>
@@ -63,18 +63,18 @@ export default function LogHistory({
           const subject = subjects.find(s => s.id === log.subjectId);
           const topic = subject?.topics.find(t => t.id === log.topicId);
           return (
-            <div key={log.id} className="scifi-panel p-6 flex items-center justify-between group">
+            <div key={log.id} className="bg-transparent border border-white/10 p-6 flex items-center justify-between group rounded-none">
               <div className="flex items-center gap-6">
-                <div className="w-12 h-12 border border-border-dim flex items-center justify-center text-[10px] font-black text-gray-700">
+                <div className="w-12 h-12 border border-white/20 flex items-center justify-center text-[10px] font-mono text-zinc-500 rounded-none">
                   {subject?.name[0] || '?'}
                 </div>
                 <div>
-                  <h4 className="text-sm font-black uppercase tracking-tighter">{subject?.name} <span className="text-gray-700 mx-1">•</span> {topic?.title || 'GENERAL'}</h4>
+                  <h4 className="text-sm font-mono uppercase tracking-widest text-white">{subject?.name} <span className="text-zinc-600 mx-1">•</span> {topic?.title || 'GENERAL'}</h4>
                   <div className="flex items-center gap-4 mt-1">
-                    <span className="text-[10px] font-black text-gray-600 flex items-center gap-1 uppercase tracking-widest">
+                    <span className="text-[10px] font-mono text-zinc-500 flex items-center gap-1 uppercase tracking-widest">
                       <Clock className="w-3 h-3" /> {log.duration}_MIN
                     </span>
-                    <span className="text-[10px] font-black text-gray-600 uppercase tracking-widest tabular-nums">
+                    <span className="text-[10px] font-mono text-zinc-500 uppercase tracking-widest tabular-nums">
                       {new Date(log.timestamp).toLocaleDateString()}
                     </span>
                   </div>
@@ -87,7 +87,7 @@ export default function LogHistory({
                   message: 'Delete log?', 
                   onConfirm: () => onDeleteLog(log.id) 
                 })} 
-                className="p-3 text-gray-700 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-all"
+                className="p-3 text-zinc-600 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-all rounded-none"
               >
                 <Trash2 className="w-4 h-4" />
               </button>

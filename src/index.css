@@ -5,13 +5,21 @@
   --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
   
-  --color-brand: #1DB954;
-  --color-brand-glow: rgba(29, 185, 84, 0.5);
-  --color-surface: #050505;
-  --color-surface-raised: #0A0A0A;
-  --color-surface-elevated: #111111;
-  --color-border-dim: rgba(255, 255, 255, 0.05);
-  --color-border-bright: rgba(255, 255, 255, 0.15);
+  --color-brand: #ffffff;
+  --color-brand-glow: rgba(255, 255, 255, 0.1);
+  --color-brand-dim: rgba(255, 255, 255, 0.05);
+  --color-brand-bright: #ffffff;
+  
+  --color-surface: #000000;
+  --color-surface-raised: #050505;
+  --color-surface-elevated: #0a0a0a;
+  
+  --color-border-dim: #1a1a1a;
+  --color-border-bright: #333333;
+  
+  --color-success: #10b981;
+  --color-warning: #f59e0b;
+  --color-danger: #ef4444;
 }
 
 @layer base {
@@ -20,13 +28,12 @@
   }
 
   body {
-    @apply bg-surface text-white font-mono selection:bg-brand selection:text-black antialiased overflow-x-hidden;
-    letter-spacing: -0.02em;
-    font-feature-settings: "tnum";
+    @apply bg-surface text-zinc-50 font-sans selection:bg-white selection:text-black antialiased overflow-x-hidden;
+    font-feature-settings: "cv02", "cv03", "cv04", "tnum";
   }
 
   h1, h2, h3, h4, h5, h6 {
-    @apply font-sans font-black tracking-tighter uppercase;
+    @apply font-sans font-bold tracking-[0.15em] uppercase;
   }
 
   ::-webkit-scrollbar {
@@ -35,75 +42,51 @@
   }
 
   ::-webkit-scrollbar-track {
-    background: transparent;
+    @apply bg-transparent;
   }
 
   ::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.1);
-    border-radius: 0;
+    @apply bg-zinc-800 rounded-none;
   }
 
   ::-webkit-scrollbar-thumb:hover {
-    background: var(--color-brand);
+    @apply bg-zinc-600;
   }
 }
 
 @layer components {
-  .scifi-panel {
-    @apply bg-surface-raised border border-border-dim relative overflow-hidden;
-    clip-path: polygon(
-      0 0, 
-      calc(100% - 15px) 0, 100% 15px, 
-      100% 100%, 
-      15px 100%, 0 calc(100% - 15px)
-    );
+  .enterprise-card {
+    @apply bg-black border border-white/10 rounded-none overflow-hidden transition-all duration-500 hover:border-white/30;
   }
 
-  .scifi-panel-sm {
-    @apply bg-surface-raised border border-border-dim relative overflow-hidden;
-    clip-path: polygon(
-      0 0, 
-      calc(100% - 8px) 0, 100% 8px, 
-      100% 100%, 
-      8px 100%, 0 calc(100% - 8px)
-    );
+  .enterprise-button {
+    @apply px-8 py-4 bg-transparent border border-white/20 text-white uppercase tracking-[0.2em] text-xs font-bold rounded-none transition-all duration-300 active:scale-[0.98] disabled:opacity-50 disabled:pointer-events-none flex items-center justify-center gap-3 hover:bg-white hover:text-black;
   }
 
-  .scifi-button {
-    @apply relative px-6 py-3 bg-white text-black font-black uppercase tracking-widest text-[10px] transition-all duration-300 hover:bg-brand hover:shadow-[0_0_20px_var(--color-brand-glow)] active:scale-95 flex items-center justify-center gap-2;
-    clip-path: polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px);
+  .enterprise-button-primary {
+    @apply px-8 py-4 bg-white text-black uppercase tracking-[0.2em] text-xs font-bold rounded-none transition-all duration-300 active:scale-[0.98] disabled:opacity-50 disabled:pointer-events-none flex items-center justify-center gap-3 hover:bg-zinc-200;
   }
 
-  .scifi-button-outline {
-    @apply relative px-6 py-3 border border-border-bright text-white font-black uppercase tracking-widest text-[10px] transition-all duration-300 hover:border-brand hover:text-brand hover:bg-brand/5 active:scale-95 flex items-center justify-center gap-2;
-    clip-path: polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px);
+  .enterprise-button-secondary {
+    @apply px-8 py-4 bg-transparent border border-white/10 text-zinc-400 uppercase tracking-[0.2em] text-xs font-bold rounded-none transition-all duration-500 hover:border-white/30 hover:text-white active:scale-[0.98] flex items-center justify-center gap-3;
   }
 
-  .hud-label {
-    @apply text-[9px] font-black uppercase tracking-[0.3em] text-gray-600;
+  .enterprise-button-ghost {
+    @apply px-6 py-3 text-zinc-500 uppercase tracking-[0.2em] text-xs font-bold rounded-none transition-all duration-300 hover:text-white flex items-center justify-center gap-3;
   }
 
-  .hud-value {
-    @apply text-sm font-black tabular-nums tracking-tight;
+  .enterprise-input {
+    @apply w-full bg-transparent border border-white/10 rounded-none px-6 py-4 text-sm text-white focus:outline-none focus:border-white/50 transition-all placeholder:text-zinc-700 font-mono uppercase tracking-wider;
   }
 
-  .tech-grid {
-    background-image: 
-      linear-gradient(to right, rgba(255,255,255,0.03) 1px, transparent 1px),
-      linear-gradient(to bottom, rgba(255,255,255,0.03) 1px, transparent 1px);
-    background-size: 40px 40px;
+  .badge {
+    @apply px-3 py-1 rounded-none text-[10px] font-mono uppercase tracking-widest border;
   }
 
-  .tech-grid-fine {
-    background-image: 
-      linear-gradient(to right, rgba(255,255,255,0.02) 1px, transparent 1px),
-      linear-gradient(to bottom, rgba(255,255,255,0.02) 1px, transparent 1px);
-    background-size: 10px 10px;
-  }
-
-  .glass-panel {
-    @apply bg-white/5 backdrop-blur-xl border border-white/10 shadow-2xl;
-  }
+  .badge-brand { @apply bg-transparent text-white border-white/30; }
+  .badge-zinc { @apply bg-transparent text-zinc-500 border-zinc-800; }
+  .badge-success { @apply bg-transparent text-success border-success/30; }
+  .badge-danger { @apply bg-transparent text-danger border-danger/30; }
 }
 
 @layer utilities {
@@ -116,22 +99,11 @@
   }
 }
 
-@keyframes scanline {
-  0% { transform: translateY(-100%); }
-  100% { transform: translateY(100%); }
+@keyframes fade-in-up {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
-.scanline {
-  @apply absolute inset-0 pointer-events-none overflow-hidden;
-}
-
-.scanline::after {
-  content: '';
-  @apply absolute top-0 left-0 w-full h-20 bg-gradient-to-b from-transparent via-brand/5 to-transparent;
-  animation: scanline 8s linear infinite;
-}
-
-@keyframes shimmer {
-  0% { transform: translateX(-100%); }
-  100% { transform: translateX(100%); }
+.animate-fade-in-up {
+  animation: fade-in-up 0.4s ease-out forwards;
 }

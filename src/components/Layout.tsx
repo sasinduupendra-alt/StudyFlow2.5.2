@@ -5,7 +5,7 @@ import {
   LayoutDashboard, Calendar, BarChart2, Settings, 
   Menu, X, Zap, LogIn, LogOut, User, Trophy, Sparkles,
   ChevronLeft, ChevronRight, Bell, Users, Clock, ListTodo,
-  Shuffle, SkipBack, SkipForward, Repeat, Pause, Play, ListMusic, Volume2, Brain
+  Shuffle, SkipBack, SkipForward, Repeat, Pause, Play, ListMusic, Volume2, Brain, Square
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useAppStore } from '../store/useAppStore';
@@ -235,185 +235,170 @@ export default function Layout() {
   };
 
   return (
-    <div className="flex h-screen bg-surface text-white overflow-hidden font-mono selection:bg-brand selection:text-black">
+    <div className="flex h-screen bg-surface text-zinc-50 overflow-hidden font-sans selection:bg-brand selection:text-white">
       {/* Sidebar Navigation */}
       <aside className={cn(
-        "fixed inset-y-0 left-0 z-50 w-64 bg-surface flex flex-col transition-transform duration-500 md:relative md:translate-x-0 border-r border-border-dim",
+        "fixed inset-y-0 left-0 z-50 w-72 bg-black flex flex-col transition-transform duration-500 md:relative md:translate-x-0 border-r border-white/10",
         isMobileMenuOpen ? "translate-x-0" : "-translate-x-full"
       )}>
-        <div className="p-8 flex items-center gap-3">
-          <Logo className="text-brand" size={32} />
-          <h1 className="text-xl font-black tracking-tighter font-sans">StudyFlow</h1>
+        <div className="p-10 flex items-center gap-4">
+          <div className="w-10 h-10 bg-transparent border border-white/30 flex items-center justify-center">
+            <Brain className="text-white w-5 h-5" />
+          </div>
+          <h1 className="text-2xl font-bold tracking-[0.2em] uppercase text-white">StudyFlow</h1>
         </div>
 
-        <nav className="flex-1 px-4 py-4 space-y-1 overflow-y-auto scrollbar-hide">
-          {navItems.map((item) => (
+        <nav className="flex-1 px-6 py-4 space-y-2 overflow-y-auto scrollbar-hide">
+          <div className="px-4 py-3">
+            <p className="text-[10px] font-mono uppercase tracking-[0.3em] text-zinc-600">Main Menu</p>
+          </div>
+          {navItems.slice(0, 6).map((item) => (
             <NavLink
               key={item.path}
               to={item.path}
               onClick={() => setIsMobileMenuOpen(false)}
               className={({ isActive }) => cn(
-                "flex items-center gap-4 px-4 py-3 font-black transition-all group relative overflow-hidden uppercase text-[10px] tracking-[0.2em]",
-                isActive ? "text-brand bg-brand/5" : "text-gray-600 hover:text-white hover:bg-white/5"
+                "flex items-center gap-4 px-4 py-3.5 text-xs font-bold uppercase tracking-widest transition-all group relative overflow-hidden",
+                isActive 
+                  ? "text-black bg-white" 
+                  : "text-zinc-500 hover:text-white hover:bg-white/5"
               )}
             >
               {({ isActive }) => (
                 <>
-                  {isActive && (
-                    <motion.div 
-                      layoutId="activeNavIndicator"
-                      className="absolute left-0 top-0 bottom-0 w-[2px] bg-brand shadow-[0_0_10px_var(--color-brand-glow)]" 
-                    />
-                  )}
-                  <item.icon className={cn("w-4 h-4 transition-transform group-hover:scale-110", isActive && "text-brand")} />
-                  <span>{item.label}</span>
+                  <item.icon className={cn("w-4 h-4 transition-colors relative z-10", isActive ? "text-black" : "text-zinc-600 group-hover:text-white")} />
+                  <span className="relative z-10">{item.label}</span>
                 </>
               )}
             </NavLink>
           ))}
           
-          <div className="pt-8 pb-3 px-4">
-            <p className="hud-label">System</p>
+          <div className="px-4 py-8">
+            <p className="text-[10px] font-mono uppercase tracking-[0.3em] text-zinc-600">Insights & Tools</p>
           </div>
-          
-          <button 
-            onClick={() => {
-              setIsMobileMenuOpen(false);
-              navigate('/manage');
-            }}
-            className="w-full flex items-center gap-4 px-4 py-3 text-gray-600 font-black hover:text-white hover:bg-white/5 transition-all group uppercase text-[10px] tracking-[0.2em]"
-          >
-            <PlusSquare className="w-4 h-4 group-hover:text-brand transition-colors" />
-            <span>Create Session</span>
-          </button>
-          
-          <button 
-            onClick={() => {
-              setIsMobileMenuOpen(false);
-              navigate('/syllabus');
-            }}
-            className="w-full flex items-center gap-4 px-4 py-3 text-gray-600 font-black hover:text-white hover:bg-white/5 transition-all group uppercase text-[10px] tracking-[0.2em]"
-          >
-            <Heart className="w-4 h-4 group-hover:text-brand transition-colors" />
-            <span>Liked Topics</span>
-          </button>
-
-          <button 
-            onClick={deferredPrompt ? handleInstallClick : () => addToast("To install, open the app in a new tab and use your browser's 'Add to Home Screen' option.", "info")}
-            className="w-full flex items-center gap-4 px-4 py-3 text-brand font-black hover:bg-brand/10 transition-all group mt-4 border border-brand/10 uppercase text-[10px] tracking-[0.2em]"
-          >
-            <PlusSquare className="w-4 h-4" />
-            <span>{deferredPrompt ? "Install App" : "How to Install"}</span>
-          </button>
+          {navItems.slice(6).map((item) => (
+            <NavLink
+              key={item.path}
+              to={item.path}
+              onClick={() => setIsMobileMenuOpen(false)}
+              className={({ isActive }) => cn(
+                "flex items-center gap-4 px-4 py-3.5 text-xs font-bold uppercase tracking-widest transition-all group relative overflow-hidden",
+                isActive 
+                  ? "text-black bg-white" 
+                  : "text-zinc-500 hover:text-white hover:bg-white/5"
+              )}
+            >
+              {({ isActive }) => (
+                <>
+                  <item.icon className={cn("w-4 h-4 transition-colors relative z-10", isActive ? "text-black" : "text-zinc-600 group-hover:text-white")} />
+                  <span className="relative z-10">{item.label}</span>
+                </>
+              )}
+            </NavLink>
+          ))}
         </nav>
 
-        <div className="p-4 border-t border-border-dim">
+        <div className="p-6 border-t border-white/10 space-y-6">
           {user ? (
-            <div className="flex flex-col gap-4 p-5 bg-white/5 border border-border-dim relative group overflow-hidden">
-              <div className="absolute top-0 right-0 w-8 h-8 border-t border-r border-brand/20" />
-              <div className="absolute bottom-0 left-0 w-8 h-8 border-b border-l border-brand/20" />
-              
-              <div className="flex items-center justify-between relative z-10">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-brand/10 border border-brand/30 flex items-center justify-center text-brand font-black shadow-[0_0_15px_rgba(29,185,84,0.1)]">
-                    {user.displayName?.[0] || user.email?.[0] || 'U'}
+            <div className="space-y-6">
+              <div className="flex items-center justify-between px-2">
+                <div className="flex items-center gap-4 min-w-0">
+                  <div className="w-10 h-10 bg-transparent border border-white/20 flex items-center justify-center text-xs font-bold text-zinc-300 shrink-0 overflow-hidden">
+                    {user.photoURL ? (
+                      <img src={user.photoURL} alt="" className="w-full h-full object-cover grayscale" />
+                    ) : (
+                      user.displayName?.[0] || user.email?.[0] || 'U'
+                    )}
                   </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-[11px] font-black truncate group-hover:text-brand transition-colors uppercase tracking-tight">{user.displayName || 'User'}</p>
-                    <p className="hud-label !text-gray-500">LVL {userProfile?.level || 1}</p>
+                  <div className="min-w-0">
+                    <p className="text-xs font-bold text-white uppercase tracking-widest truncate">{user.displayName || 'User'}</p>
+                    <p className="text-[10px] text-zinc-500 font-mono uppercase tracking-widest">Level {userProfile?.level || 1}</p>
                   </div>
                 </div>
-                <button onClick={handleLogout} className="p-2 text-gray-600 hover:text-red-500 transition-colors">
+                <button onClick={handleLogout} className="p-2 text-zinc-600 hover:text-white transition-colors hover:bg-white/10">
                   <LogOut className="w-4 h-4" />
                 </button>
               </div>
               
-              {/* XP Progress Bar */}
-              <div className="space-y-2 relative z-10">
-                <div className="flex justify-between text-[8px] font-black text-gray-600 uppercase tracking-widest">
-                  <span>{userProfile?.xp || 0} XP</span>
-                  <span>{userProfile?.xpToNextLevel || 1000} XP</span>
+              <div className="px-2 space-y-2">
+                <div className="flex justify-between text-[9px] font-mono text-zinc-600 uppercase tracking-[0.2em]">
+                  <span>XP Progress</span>
+                  <span className="text-zinc-400">{Math.round(((userProfile?.xp || 0) / (userProfile?.xpToNextLevel || 1000)) * 100)}%</span>
                 </div>
-                <div className="h-1 w-full bg-black border border-white/5 overflow-hidden">
-                  <div 
-                    className="h-full bg-brand shadow-[0_0_10px_var(--color-brand-glow)] transition-all duration-1000"
-                    style={{ width: `${((userProfile?.xp || 0) / (userProfile?.xpToNextLevel || 1000)) * 100}%` }}
+                <div className="h-1 w-full bg-zinc-900 overflow-hidden border border-white/10">
+                  <motion.div 
+                    initial={{ width: 0 }}
+                    animate={{ width: `${((userProfile?.xp || 0) / (userProfile?.xpToNextLevel || 1000)) * 100}%` }}
+                    className="h-full bg-white"
                   />
                 </div>
               </div>
             </div>
           ) : (
-            <div className="flex flex-col gap-3">
-              <button 
-                onClick={handleLogin}
-                className="scifi-button w-full"
-              >
-                <LogIn className="w-4 h-4" />
-                LINK ACCOUNT
-              </button>
-            </div>
+            <button 
+              onClick={handleLogin}
+              className="w-full py-3.5 bg-transparent border border-white/20 text-white font-mono uppercase tracking-widest hover:bg-white/10 hover:border-white transition-all flex items-center justify-center gap-2"
+            >
+              <LogIn className="w-4 h-4" />
+              Sign In
+            </button>
           )}
         </div>
       </aside>
 
       {/* Main Content Area */}
-      <main className="flex-1 flex flex-col min-w-0 bg-surface relative overflow-hidden">
-        {/* Technical Grid Background */}
-        <div className="absolute inset-0 pointer-events-none tech-grid opacity-40" />
-        <div className="absolute inset-0 pointer-events-none tech-grid-fine opacity-20" />
-        <div className="scanline" />
-        
+      <main className="flex-1 flex flex-col min-w-0 bg-black relative overflow-hidden">
         {/* Top Navigation Bar */}
-        <header className="h-16 flex items-center justify-between px-4 md:px-8 sticky top-0 z-40 bg-surface/80 backdrop-blur-xl border-b border-border-dim">
-          <div className="flex items-center gap-6">
-            <div className="flex items-center gap-1">
-              <button onClick={() => navigate(-1)} className="p-2 text-gray-500 hover:text-white transition-all border border-transparent hover:border-border-bright">
-                <ChevronLeft className="w-4 h-4" />
+        <header className="h-24 flex items-center justify-between px-10 sticky top-0 z-40 bg-black/80 backdrop-blur-xl border-b border-white/10">
+          <div className="flex items-center gap-8 flex-1">
+            <div className="flex items-center gap-2">
+              <button onClick={() => navigate(-1)} className="p-3 text-zinc-500 hover:text-white transition-all hover:bg-white/5 border border-transparent hover:border-white/10">
+                <ChevronLeft className="w-5 h-5" />
               </button>
-              <button onClick={() => navigate(1)} className="p-2 text-gray-500 hover:text-white transition-all border border-transparent hover:border-border-bright">
-                <ChevronRight className="w-4 h-4" />
+              <button onClick={() => navigate(1)} className="p-3 text-zinc-500 hover:text-white transition-all hover:bg-white/5 border border-transparent hover:border-white/10">
+                <ChevronRight className="w-5 h-5" />
               </button>
             </div>
             
-            <div className="relative hidden lg:block">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-600" />
+            <div className="relative hidden lg:block group">
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-600 group-focus-within:text-white transition-colors" />
               <input 
                 type="text" 
-                placeholder="SYSTEM_SEARCH_INIT..."
+                placeholder="Search resources, topics, tasks..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-80 bg-white/5 border border-border-dim focus:border-brand/50 py-2 pl-10 pr-4 text-[10px] font-black uppercase tracking-widest outline-none transition-all focus:bg-white/10"
+                className="w-[480px] bg-transparent border border-white/10 focus:border-white/50 py-3.5 pl-12 pr-6 text-sm text-white outline-none transition-all focus:bg-white/5 placeholder:text-zinc-700 font-mono uppercase tracking-wider"
               />
             </div>
           </div>
 
-          <div className="flex items-center gap-3 md:gap-6">
-            <div className="flex items-center gap-1">
-              <button className="p-2 text-gray-600 hover:text-brand transition-colors relative">
-                <Bell className="w-4 h-4" />
-                <span className="absolute top-2 right-2 w-1.5 h-1.5 bg-brand shadow-[0_0_5px_var(--color-brand-glow)]" />
+          <div className="flex items-center gap-6">
+            <div className="flex items-center gap-2">
+              <button className="p-3 text-zinc-500 hover:text-white transition-colors relative hover:bg-white/5 border border-transparent hover:border-white/10 group">
+                <Bell className="w-5 h-5 group-hover:scale-110 transition-transform" />
+                <span className="absolute top-3 right-3 w-2 h-2 bg-white border-2 border-black" />
               </button>
-              <button className="p-2 text-gray-600 hover:text-brand transition-colors">
-                <Users className="w-4 h-4" />
+              <button className="p-3 text-zinc-500 hover:text-white transition-colors hover:bg-white/5 border border-transparent hover:border-white/10 group">
+                <Users className="w-5 h-5 group-hover:scale-110 transition-transform" />
               </button>
             </div>
             <button 
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className="md:hidden p-2 text-gray-600 hover:text-white transition-colors border border-border-dim"
+              className="md:hidden p-3 text-zinc-500 hover:text-white transition-colors border border-white/10 bg-transparent"
             >
-              {isMobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+              {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
             </button>
-            <div className="w-[1px] h-6 bg-border-dim mx-2 hidden md:block" />
+            <div className="w-[1px] h-8 bg-white/10 mx-2 hidden md:block" />
             <div className="hidden md:flex items-center gap-4 pl-2 group cursor-pointer" onClick={() => navigate('/settings')}>
               <div className="text-right hidden xl:block">
-                <p className="text-[11px] font-black group-hover:text-brand transition-colors uppercase tracking-tight">{user?.displayName?.split(' ')[0] || 'GUEST_01'}</p>
-                <p className="hud-label !text-gray-600">AUTH_VERIFIED</p>
+                <p className="text-xs font-bold text-white uppercase tracking-widest group-hover:text-zinc-300 transition-colors">{user?.displayName?.split(' ')[0] || 'Guest'}</p>
+                <p className="text-[10px] text-zinc-600 font-mono uppercase tracking-widest">Pro Member</p>
               </div>
-              <div className="w-9 h-9 bg-white/5 border border-border-dim flex items-center justify-center overflow-hidden group-hover:border-brand/50 transition-all">
+              <div className="w-11 h-11 bg-transparent border border-white/20 flex items-center justify-center overflow-hidden group-hover:border-white/50 transition-all">
                 {user?.photoURL ? (
-                  <img src={user.photoURL} alt="" className="w-full h-full object-cover opacity-80 group-hover:opacity-100" />
+                  <img src={user.photoURL} alt="" className="w-full h-full object-cover grayscale" />
                 ) : (
-                  <User className="w-4 h-4 text-gray-600" />
+                  <User className="w-5 h-5 text-zinc-600" />
                 )}
               </div>
             </div>
@@ -434,69 +419,56 @@ export default function Layout() {
               initial={{ y: 100 }}
               animate={{ y: 0 }}
               exit={{ y: 100 }}
-              className="fixed bottom-0 left-0 right-0 z-[60] bg-surface border-t border-border-dim px-4 py-4 md:px-8"
+              className="fixed bottom-8 left-1/2 -translate-x-1/2 z-[60] w-[calc(100%-4rem)] max-w-6xl"
             >
-              <div className="max-w-7xl mx-auto flex items-center justify-between gap-6">
-                <div className="flex items-center gap-5 min-w-0 flex-1 md:flex-none">
-                  <div className="w-12 h-12 bg-white/5 border border-border-dim overflow-hidden shrink-0 relative group cursor-pointer" onClick={() => setIsNowPlayingOpen(!isNowPlayingOpen)}>
+              <div className="bg-black/90 backdrop-blur-3xl border border-white/10 rounded-none px-10 py-6 shadow-2xl shadow-black/80 flex items-center justify-between gap-12">
+                <div className="flex items-center gap-6 min-w-0">
+                  <div className="w-16 h-16 bg-transparent border border-white/20 overflow-hidden shrink-0 relative group cursor-pointer" onClick={() => setIsNowPlayingOpen(!isNowPlayingOpen)}>
                     <img 
                       src={activeSubject?.image || `https://picsum.photos/seed/${activeSubject?.id}/100/100`} 
                       alt="" 
-                      className="w-full h-full object-cover opacity-80 group-hover:opacity-100"
+                      className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-all duration-500 group-hover:scale-110 grayscale"
                       referrerPolicy="no-referrer"
                     />
-                    <div className="absolute inset-0 bg-brand/20 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
-                      <ChevronRight className={cn("w-5 h-5 text-white transition-transform", isNowPlayingOpen ? "rotate-90" : "-rotate-90")} />
+                    <div className="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
+                      <ChevronRight className={cn("w-6 h-6 text-white transition-transform duration-500", isNowPlayingOpen ? "rotate-90" : "-rotate-90")} />
                     </div>
                   </div>
                   <div className="min-w-0">
-                    <h4 className="font-black text-[11px] uppercase tracking-tight truncate hover:text-brand cursor-pointer">{activeSubject?.name}</h4>
-                    <p className="hud-label !text-gray-600">ACTIVE_SESSION</p>
+                    <h4 className="font-bold text-lg text-white uppercase tracking-widest truncate hover:text-zinc-300 cursor-pointer transition-colors">{activeSubject?.name}</h4>
+                    <div className="flex items-center gap-3 mt-1.5">
+                      <div className="flex items-center gap-2 px-2.5 py-0.5 border border-white/20 rounded-none">
+                        <div className="w-1.5 h-1.5 bg-white animate-pulse" />
+                        <span className="text-[10px] font-mono text-white uppercase tracking-widest">Active Session</span>
+                      </div>
+                      <span className="text-xs font-mono text-zinc-500 tabular-nums">{formatTime(activeSession.elapsedSeconds)} / {formatTime(activeSession.totalSeconds)}</span>
+                    </div>
                   </div>
                 </div>
 
-                <div className="flex flex-col items-center gap-2 flex-1 max-w-xl">
-                  <div className="flex items-center gap-8">
-                    <button className="text-gray-600 hover:text-white transition-colors hidden sm:block"><Shuffle className="w-3.5 h-3.5" /></button>
-                    <button className="text-gray-600 hover:text-white transition-colors"><SkipBack className="w-4 h-4 fill-current" /></button>
-                    <button 
-                      onClick={() => setIsPaused(!isPaused)}
-                      className="w-10 h-10 bg-white text-black flex items-center justify-center hover:bg-brand transition-all shadow-[0_0_15px_rgba(255,255,255,0.1)]"
-                      style={{ clipPath: 'polygon(20% 0%, 100% 0%, 100% 80%, 80% 100%, 0% 100%, 0% 20%)' }}
-                    >
-                      {!isPaused ? <Pause className="w-5 h-5 fill-current" /> : <Play className="w-5 h-5 fill-current ml-0.5" />}
-                    </button>
-                    <button className="text-gray-600 hover:text-white transition-colors"><SkipForward className="w-4 h-4 fill-current" /></button>
-                    <button className="text-gray-600 hover:text-white transition-colors hidden sm:block"><Repeat className="w-3.5 h-3.5" /></button>
-                  </div>
-                  <div className="w-full flex items-center gap-3">
-                    <span className="text-[9px] font-black text-gray-600 tabular-nums w-10 text-right tracking-widest">{formatTime(activeSession.elapsedSeconds)}</span>
-                    <div className="flex-1 h-[2px] bg-white/5 relative group cursor-pointer">
-                      <div className="absolute inset-0 bg-brand/10" />
-                      <div className="h-full bg-brand shadow-[0_0_10px_var(--color-brand-glow)] transition-all" style={{ width: `${progress}%` }} />
-                    </div>
-                    <span className="text-[9px] font-black text-gray-600 tabular-nums w-10 tracking-widest">{formatTime(activeSession.totalSeconds)}</span>
+                <div className="flex-1 max-w-xl px-10">
+                  <div className="h-1 w-full bg-zinc-900 overflow-hidden border border-white/10">
+                    <motion.div 
+                      className="h-full bg-white shadow-[0_0_15px_rgba(255,255,255,0.5)]"
+                      initial={{ width: 0 }}
+                      animate={{ width: `${progress}%` }}
+                      transition={{ type: "spring", bounce: 0, duration: 0.5 }}
+                    />
                   </div>
                 </div>
 
-                <div className="hidden md:flex items-center justify-end gap-4 min-w-[240px]">
-                  <button onClick={() => setIsFocusMode(true)} className="p-2 text-gray-600 hover:text-brand transition-colors group relative">
-                    <Zap className="w-4 h-4" />
-                    <span className="absolute -top-10 left-1/2 -translate-x-1/2 bg-brand text-black text-[8px] font-black px-2 py-1 opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap tracking-widest">HUD_FOCUS</span>
+                <div className="flex items-center gap-4 shrink-0">
+                  <button 
+                    onClick={() => setIsPaused(!isPaused)}
+                    className="w-14 h-14 rounded-none bg-white text-black flex items-center justify-center hover:bg-zinc-200 transition-all active:scale-95"
+                  >
+                    {isPaused ? <Play className="w-6 h-6 fill-current" /> : <Pause className="w-6 h-6 fill-current" />}
                   </button>
-                  <button onClick={finishSession} className="p-2 text-gray-600 hover:text-white transition-colors group relative">
-                    <Clock className="w-4 h-4" />
-                    <span className="absolute -top-10 left-1/2 -translate-x-1/2 bg-white text-black text-[8px] font-black px-2 py-1 opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap tracking-widest">TERM_SESSION</span>
-                  </button>
-                  <div className="w-[1px] h-4 bg-border-dim mx-1" />
-                  <div className="flex items-center gap-3 w-28">
-                    <Volume2 className="w-4 h-4 text-gray-600" />
-                    <div className="flex-1 h-[2px] bg-white/5">
-                      <div className="h-full bg-gray-500 w-2/3" />
-                    </div>
-                  </div>
-                  <button onClick={() => setIsNowPlayingOpen(!isNowPlayingOpen)} className="p-2 text-gray-600 hover:text-white transition-colors">
-                    <ChevronRight className={cn("w-4 h-4 transition-transform", isNowPlayingOpen ? "rotate-90" : "-rotate-90")} />
+                  <button 
+                    onClick={() => setActiveSession(null)}
+                    className="w-14 h-14 rounded-none bg-transparent border border-white/20 text-zinc-400 flex items-center justify-center hover:bg-red-500/10 hover:text-red-500 hover:border-red-500/30 transition-all group"
+                  >
+                    <Square className="w-5 h-5 group-hover:scale-110 transition-transform" />
                   </button>
                 </div>
               </div>
@@ -553,24 +525,30 @@ export default function Layout() {
       </AnimatePresence>
 
       {/* Toast Notifications */}
-      <div className="fixed top-20 right-8 z-[100] flex flex-col gap-2 pointer-events-none">
+      <div className="fixed bottom-10 right-10 z-[100] flex flex-col gap-4 pointer-events-none">
         <AnimatePresence>
           {toasts.map((toast) => (
             <motion.div
               key={toast.id}
-              initial={{ opacity: 0, x: 50, scale: 0.9 }}
+              initial={{ opacity: 0, x: 50, scale: 0.95 }}
               animate={{ opacity: 1, x: 0, scale: 1 }}
-              exit={{ opacity: 0, x: 20, scale: 0.9 }}
+              exit={{ opacity: 0, x: 20, scale: 0.95 }}
               className={cn(
-                "pointer-events-auto px-6 py-4 rounded-2xl shadow-2xl border flex items-center gap-4 min-w-[300px]",
-                toast.type === 'success' ? "bg-[#1DB954] text-black border-white/10" :
-                toast.type === 'error' ? "bg-red-500 text-white border-white/10" :
-                "bg-[#282828] text-white border-white/10"
+                "pointer-events-auto px-6 py-4 rounded-none shadow-2xl border flex items-center gap-5 min-w-[360px] backdrop-blur-xl",
+                toast.type === 'success' ? "bg-black/90 text-white border-white/20" :
+                toast.type === 'error' ? "bg-black/90 text-red-500 border-red-500/30" :
+                "bg-black/90 text-white border-white/20"
               )}
             >
-              <div className="flex-1 font-bold text-sm">{toast.message}</div>
-              <button onClick={() => removeToast(toast.id)} className="p-1 hover:bg-black/10 rounded-full transition-colors">
-                <X className="w-4 h-4" />
+              <div className={cn(
+                "w-2 h-2 rounded-none shrink-0 shadow-lg",
+                toast.type === 'success' ? "bg-white shadow-white/50" :
+                toast.type === 'error' ? "bg-red-500 shadow-red-500/50" :
+                "bg-white shadow-white/50"
+              )} />
+              <div className="flex-1 font-mono text-xs uppercase tracking-widest">{toast.message}</div>
+              <button onClick={() => removeToast(toast.id)} className="p-1.5 hover:bg-white/10 rounded-none transition-colors border border-transparent hover:border-white/20">
+                <X className="w-4 h-4 text-zinc-400" />
               </button>
             </motion.div>
           ))}

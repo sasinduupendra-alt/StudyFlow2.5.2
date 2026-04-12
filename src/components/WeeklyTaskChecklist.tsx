@@ -120,26 +120,26 @@ export default function WeeklyTaskChecklist() {
   };
 
   return (
-    <div className="p-4 md:p-8 space-y-8">
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div className="flex items-center gap-3">
-          <div className="p-2 bg-brand/10 border border-brand/20 text-brand">
-            <BookOpen className="w-5 h-5" />
+    <div className="p-6 md:p-12 space-y-12">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-8">
+        <div className="flex items-center gap-6">
+          <div className="p-4 bg-transparent border border-white/20 text-white rounded-none">
+            <BookOpen className="w-6 h-6" />
           </div>
           <div>
-            <h2 className="text-sm font-black uppercase tracking-tighter">WEEKLY_FOCUS_TASKS</h2>
-            <p className="hud-label !text-gray-600">CORE_REQUIREMENTS_PER_NODE</p>
+            <h2 className="text-xs font-mono uppercase tracking-widest text-white">WEEKLY_FOCUS_TASKS</h2>
+            <p className="text-[10px] font-mono text-zinc-500 uppercase tracking-widest mt-1">CORE_REQUIREMENTS_PER_NODE</p>
           </div>
         </div>
         <button 
           onClick={resetAllTasks}
-          className="scifi-button-sm px-4 py-2"
+          className="px-8 py-3 text-[10px] font-mono uppercase tracking-widest bg-white text-black hover:bg-zinc-200 transition-colors rounded-none"
         >
           RESET_CYCLE
         </button>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
         {subjects.map((subject, sIndex) => {
           const defaultTasks = INITIAL_SUBJECTS.find(s => s.id === subject.id)?.weeklyTasks || [];
           const tasks = subject.weeklyTasks || defaultTasks;
@@ -148,26 +148,25 @@ export default function WeeklyTaskChecklist() {
           return (
             <motion.div 
               key={subject.id}
-              initial={{ opacity: 0, y: 10 }}
+              initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: sIndex * 0.1 }}
-              className="scifi-panel overflow-hidden flex flex-col border-border-dim hover:border-brand/30 transition-colors"
+              className="bg-transparent border border-white/10 overflow-hidden flex flex-col group rounded-none"
             >
-              <div className="p-6 border-b border-border-dim relative overflow-hidden">
-                <div className={cn("absolute inset-0 opacity-10 bg-gradient-to-br", subject.gradient)} />
-                <div className="relative z-10 flex items-center justify-between">
-                  <h3 className="text-xs font-black uppercase tracking-widest">{subject.name}</h3>
-                  <span className="text-[10px] font-black text-gray-500 tabular-nums">{Math.round(progress)}%</span>
+              <div className="p-8 border-b border-white/10 relative overflow-hidden bg-white/5">
+                <div className="relative z-10 flex items-center justify-between mb-6">
+                  <h3 className="text-xs font-mono uppercase tracking-widest text-white">{subject.name}</h3>
+                  <span className="text-[10px] font-mono text-zinc-500 tabular-nums">{Math.round(progress)}%</span>
                 </div>
-                <div className="relative z-10 h-1 w-full bg-black border border-white/5 mt-3 overflow-hidden">
+                <div className="relative z-10 h-[2px] w-full bg-white/10 overflow-hidden">
                   <div 
-                    className="h-full bg-brand shadow-[0_0_10px_var(--color-brand-glow)] transition-all duration-500"
+                    className="h-full bg-white transition-all duration-1000"
                     style={{ width: `${progress}%` }}
                   />
                 </div>
               </div>
               
-              <div className="p-4 space-y-2 flex-1">
+              <div className="p-6 space-y-3 flex-1">
                 <AnimatePresence>
                   {tasks.map((task) => (
                     <motion.div
@@ -176,8 +175,8 @@ export default function WeeklyTaskChecklist() {
                       animate={{ opacity: 1, height: 'auto' }}
                       exit={{ opacity: 0, height: 0 }}
                       className={cn(
-                        "w-full flex items-center gap-3 p-3 transition-all group border border-transparent",
-                        task.completed ? "bg-brand/5 border-brand/10" : "bg-white/5 hover:bg-white/10"
+                        "w-full flex items-center gap-4 p-4 transition-all group/task border border-transparent rounded-none",
+                        task.completed ? "bg-white/5 border-white/10" : "bg-transparent hover:bg-white/5 border border-white/10"
                       )}
                     >
                       <button
@@ -185,48 +184,48 @@ export default function WeeklyTaskChecklist() {
                         className="shrink-0 focus:outline-none"
                       >
                         {task.completed ? (
-                          <CheckCircle2 className="w-4 h-4 text-brand" />
+                          <CheckCircle2 className="w-5 h-5 text-white" />
                         ) : (
-                          <Circle className="w-4 h-4 text-gray-700 group-hover:text-gray-500" />
+                          <Circle className="w-5 h-5 text-zinc-600 group-hover/task:text-zinc-400" />
                         )}
                       </button>
                       
                       {editingTaskId === task.id ? (
-                        <div className="flex-1 flex items-center gap-2">
+                        <div className="flex-1 flex items-center gap-3">
                           <input
                             type="text"
                             value={editTaskTitle}
                             onChange={(e) => setEditTaskTitle(e.target.value)}
                             onKeyDown={(e) => e.key === 'Enter' && saveEditTask(subject.id, task.id)}
-                            className="flex-1 bg-black/50 text-[10px] font-black uppercase px-2 py-1 outline-none border border-brand/30 focus:border-brand"
+                            className="flex-1 bg-black text-[10px] font-mono uppercase px-3 py-2 outline-none border border-white/50 focus:border-white transition-colors rounded-none"
                             autoFocus
                           />
-                          <button onClick={() => saveEditTask(subject.id, task.id)} className="text-brand hover:text-white"><Check className="w-4 h-4" /></button>
-                          <button onClick={() => setEditingTaskId(null)} className="text-red-500 hover:text-white"><X className="w-4 h-4" /></button>
+                          <button onClick={() => saveEditTask(subject.id, task.id)} className="text-white hover:text-zinc-300"><Check className="w-5 h-5" /></button>
+                          <button onClick={() => setEditingTaskId(null)} className="text-red-500 hover:text-red-400"><X className="w-5 h-5" /></button>
                         </div>
                       ) : (
                         <>
                           <span className={cn(
-                            "text-[10px] font-black uppercase tracking-tight flex-1 text-left",
-                            task.completed ? "text-gray-600 line-through" : "text-white"
+                            "text-[10px] font-mono uppercase tracking-widest flex-1 text-left leading-relaxed",
+                            task.completed ? "text-zinc-600 line-through" : "text-white"
                           )}>
                             {task.title}
                           </span>
-                          <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <div className="flex items-center gap-2 opacity-0 group-hover/task:opacity-100 transition-opacity">
                             <button 
                               onClick={() => {
                                 setEditingTaskId(task.id);
                                 setEditTaskTitle(task.title);
                               }}
-                              className="p-1.5 text-gray-700 hover:text-white transition-colors"
+                              className="p-2 text-zinc-500 hover:text-white transition-colors"
                             >
-                              <Edit2 className="w-3.5 h-3.5" />
+                              <Edit2 className="w-4 h-4" />
                             </button>
                             <button 
                               onClick={() => deleteTask(subject.id, task.id)}
-                              className="p-1.5 text-gray-700 hover:text-red-500 transition-colors"
+                              className="p-2 text-zinc-500 hover:text-red-500 transition-colors"
                             >
-                              <Trash2 className="w-3.5 h-3.5" />
+                              <Trash2 className="w-4 h-4" />
                             </button>
                           </div>
                         </>
@@ -236,38 +235,38 @@ export default function WeeklyTaskChecklist() {
                 </AnimatePresence>
 
                 {editingSubjectId === subject.id ? (
-                  <div className="flex items-center gap-2 p-2 mt-2">
+                  <div className="flex items-center gap-3 p-3 mt-4">
                     <input
                       type="text"
                       value={newTaskTitle}
                       onChange={(e) => setNewTaskTitle(e.target.value)}
                       onKeyDown={(e) => e.key === 'Enter' && addTask(subject.id)}
                       placeholder="NEW_OBJECTIVE..."
-                      className="flex-1 bg-white/5 border border-border-dim px-3 py-2 text-[10px] font-black uppercase focus:border-brand outline-none"
+                      className="flex-1 bg-black border border-white/10 px-4 py-3 text-[10px] font-mono uppercase focus:border-white/50 outline-none transition-colors rounded-none"
                       autoFocus
                     />
                     <button 
                       onClick={() => addTask(subject.id)}
-                      className="p-2 bg-brand text-black hover:scale-105 transition-transform"
+                      className="p-3 bg-white text-black hover:bg-zinc-200 transition-colors rounded-none"
                     >
-                      <Plus className="w-4 h-4" />
+                      <Plus className="w-5 h-5" />
                     </button>
                     <button 
                       onClick={() => {
                         setEditingSubjectId(null);
                         setNewTaskTitle('');
                       }}
-                      className="p-2 bg-white/5 text-gray-700 hover:bg-white/10 transition-colors"
+                      className="p-3 bg-transparent border border-white/20 text-zinc-500 hover:text-white hover:border-white/50 transition-colors rounded-none"
                     >
-                      <X className="w-4 h-4" />
+                      <X className="w-5 h-5" />
                     </button>
                   </div>
                 ) : (
                   <button
                     onClick={() => setEditingSubjectId(subject.id)}
-                    className="w-full flex items-center justify-center gap-2 p-3 mt-2 border border-dashed border-border-dim text-gray-700 hover:text-white hover:border-gray-500 transition-all text-[10px] font-black uppercase tracking-widest"
+                    className="w-full flex items-center justify-center gap-3 p-4 mt-4 border border-dashed border-white/20 text-zinc-500 hover:text-white hover:border-white/50 transition-all text-[10px] font-mono uppercase tracking-widest rounded-none bg-transparent"
                   >
-                    <Plus className="w-4 h-4" />
+                    <Plus className="w-5 h-5" />
                     INITIALIZE_TASK
                   </button>
                 )}

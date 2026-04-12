@@ -39,31 +39,31 @@ export default function ConfirmationModal({
             initial={{ opacity: 0, scale: 0.95, y: 10 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 10 }}
-            className="relative w-full max-w-md scifi-panel p-6 md:p-8 shadow-[0_0_50px_rgba(0,0,0,0.5)] border-border-dim"
+            className="relative w-full max-w-md bg-black border border-white/20 p-6 md:p-8 rounded-none"
           >
             <div className="flex items-center gap-4 mb-6">
               <div className={cn(
-                "w-10 h-10 md:w-12 md:h-12 border flex items-center justify-center shrink-0",
-                variant === 'danger' ? "border-red-500/30 text-red-500 bg-red-500/5" :
-                variant === 'warning' ? "border-yellow-500/30 text-yellow-500 bg-yellow-500/5" :
-                "border-brand/30 text-brand bg-brand/5"
+                "w-10 h-10 md:w-12 md:h-12 border flex items-center justify-center shrink-0 rounded-none",
+                variant === 'danger' ? "border-red-500/30 text-red-500 bg-transparent" :
+                variant === 'warning' ? "border-yellow-500/30 text-yellow-500 bg-transparent" :
+                "border-white/30 text-white bg-transparent"
               )}>
                 <AlertTriangle className="w-5 h-5 md:w-6 md:h-6" />
               </div>
               <div>
-                <label className="hud-label !text-gray-600 mb-1">SYSTEM_CONFIRMATION</label>
-                <h3 className="text-sm md:text-base font-black uppercase tracking-tighter">{title}</h3>
+                <label className="text-[10px] font-mono text-zinc-500 uppercase tracking-widest mb-1 block">SYSTEM_CONFIRMATION</label>
+                <h3 className="text-sm md:text-base font-mono uppercase tracking-widest text-white">{title}</h3>
               </div>
             </div>
             
-            <p className="text-[11px] font-black uppercase tracking-tight text-gray-500 mb-8 leading-relaxed">
+            <p className="text-[11px] font-mono uppercase tracking-widest text-zinc-400 mb-8 leading-relaxed">
               {message}
             </p>
             
             <div className="flex gap-3">
               <button
                 onClick={onCancel}
-                className="flex-1 py-3 text-[10px] font-black uppercase tracking-widest text-gray-700 hover:text-white transition-colors"
+                className="flex-1 py-3 text-[10px] font-mono uppercase tracking-widest text-zinc-500 hover:text-white border border-transparent hover:border-white/20 transition-colors rounded-none"
               >
                 {cancelText}
               </button>
@@ -73,10 +73,10 @@ export default function ConfirmationModal({
                   onCancel();
                 }}
                 className={cn(
-                  "flex-1 py-3 text-[10px] font-black uppercase tracking-widest transition-all",
-                  variant === 'danger' ? "bg-red-500/10 border border-red-500/30 text-red-500 hover:bg-red-500/20" :
-                  variant === 'warning' ? "bg-yellow-500/10 border border-yellow-500/30 text-yellow-500 hover:bg-yellow-500/20" :
-                  "scifi-button"
+                  "flex-1 py-3 text-[10px] font-mono uppercase tracking-widest transition-all rounded-none",
+                  variant === 'danger' ? "bg-transparent border border-red-500 text-red-500 hover:bg-red-500/10" :
+                  variant === 'warning' ? "bg-transparent border border-yellow-500 text-yellow-500 hover:bg-yellow-500/10" :
+                  "bg-white text-black hover:bg-zinc-200"
                 )}
               >
                 {confirmText}
@@ -85,7 +85,7 @@ export default function ConfirmationModal({
             
             <button
               onClick={onCancel}
-              className="absolute top-6 right-6 p-2 text-gray-700 hover:text-white transition-colors"
+              className="absolute top-6 right-6 p-2 text-zinc-500 hover:text-white transition-colors rounded-none"
             >
               <X className="w-4 h-4" />
             </button>

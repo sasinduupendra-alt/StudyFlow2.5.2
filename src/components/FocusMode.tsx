@@ -92,7 +92,7 @@ export default function FocusMode({ subject, session, isPaused, onTogglePause, o
               repeat: Infinity,
               ease: "easeInOut"
             }}
-            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[1200px] h-[1200px] bg-[#1DB954] rounded-full blur-[200px]" 
+            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[1200px] h-[1200px] bg-white rounded-none blur-[200px]" 
           />
         )}
         <div className="absolute top-0 left-0 w-full h-full bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-10" />
@@ -124,7 +124,7 @@ export default function FocusMode({ subject, session, isPaused, onTogglePause, o
                     repeat: Infinity,
                     ease: "linear"
                   }}
-                  className="absolute w-1 h-1 bg-white/30 rounded-full blur-[1px]"
+                  className="absolute w-1 h-1 bg-white/30 rounded-none blur-[1px]"
                 />
               ))}
             </motion.div>
@@ -135,17 +135,17 @@ export default function FocusMode({ subject, session, isPaused, onTogglePause, o
       <div className="absolute top-8 right-8 flex items-center gap-4 z-50">
         <button 
           onClick={toggleImmersive}
-          className="p-3 text-gray-500 hover:text-white hover:bg-white/10 rounded-full transition-all group relative"
+          className="p-3 text-zinc-500 hover:text-white hover:bg-white/10 rounded-none transition-all group relative border border-transparent hover:border-white/20"
           title={isImmersive ? "Exit Immersive Mode" : "Enter Immersive Mode"}
         >
           {isImmersive ? <Minimize2 className="w-8 h-8" /> : <Maximize2 className="w-8 h-8" />}
-          <span className="absolute right-full mr-4 top-1/2 -translate-y-1/2 px-2 py-1 bg-white/10 rounded text-[10px] font-bold uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+          <span className="absolute right-full mr-4 top-1/2 -translate-y-1/2 px-2 py-1 bg-white/10 rounded-none text-[10px] font-mono uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap border border-white/20">
             {isImmersive ? "Normal View" : "Immersive View"}
           </span>
         </button>
         <button 
           onClick={onExit}
-          className="p-3 text-gray-500 hover:text-white hover:bg-white/10 rounded-full transition-all"
+          className="p-3 text-zinc-500 hover:text-white hover:bg-white/10 rounded-none transition-all border border-transparent hover:border-white/20"
         >
           <X className="w-8 h-8" />
         </button>
@@ -165,10 +165,10 @@ export default function FocusMode({ subject, session, isPaused, onTogglePause, o
               className="flex flex-col items-center"
             >
               <div className="flex items-center gap-2 mb-4">
-                <Zap className="w-5 h-5 text-[#1DB954] animate-pulse" />
-                <span className="text-sm font-bold uppercase tracking-[0.3em] text-[#1DB954]">Deep Work Session</span>
+                <Zap className="w-5 h-5 text-white animate-pulse" />
+                <span className="text-sm font-mono uppercase tracking-[0.3em] text-white">Deep Work Session</span>
               </div>
-              <h2 className="text-4xl md:text-7xl font-black mb-8 md:mb-12 tracking-tight">{subject.name}</h2>
+              <h2 className="text-4xl md:text-7xl font-mono uppercase tracking-widest mb-8 md:mb-12 text-white">{subject.name}</h2>
             </motion.div>
           )}
         </AnimatePresence>
@@ -188,7 +188,7 @@ export default function FocusMode({ subject, session, isPaused, onTogglePause, o
                 repeat: Infinity,
                 ease: "easeInOut"
               }}
-              className="absolute inset-0 bg-[#1DB954] rounded-full blur-[50px] pointer-events-none"
+              className="absolute inset-0 bg-white rounded-none blur-[50px] pointer-events-none"
             />
           )}
           <svg className="absolute inset-0 w-full h-full -rotate-90">
@@ -211,21 +211,21 @@ export default function FocusMode({ subject, session, isPaused, onTogglePause, o
               strokeDasharray="100 100"
               strokeDashoffset={100 - progress}
               pathLength="100"
-              className={cn("text-[#1DB954] transition-all duration-1000", isImmersive && "drop-shadow-[0_0_15px_rgba(29,185,84,0.5)]")}
+              className={cn("text-white transition-all duration-1000", isImmersive && "drop-shadow-[0_0_15px_rgba(255,255,255,0.5)]")}
             />
           </svg>
           <div className="flex flex-col items-center justify-center z-10">
             <motion.span 
               layout
               className={cn(
-                "font-black tabular-nums tracking-tighter transition-all duration-1000 ease-in-out drop-shadow-2xl",
+                "font-mono tabular-nums tracking-widest transition-all duration-1000 ease-in-out drop-shadow-2xl",
                 isImmersive ? "text-8xl md:text-[180px] leading-none" : "text-5xl md:text-8xl"
               )}
             >
               {formatTime(timeLeft)}
             </motion.span>
             {!isImmersive && (
-              <span className="text-xs md:text-sm font-bold text-gray-500 uppercase tracking-widest mt-2">Remaining</span>
+              <span className="text-xs md:text-sm font-mono text-zinc-500 uppercase tracking-widest mt-2">Remaining</span>
             )}
           </div>
         </div>
@@ -237,7 +237,7 @@ export default function FocusMode({ subject, session, isPaused, onTogglePause, o
           <button 
             onClick={() => {}} // Reset logic would need to be in the hook
             className={cn(
-              "p-4 text-gray-400 hover:text-white transition-all",
+              "p-4 text-zinc-500 hover:text-white transition-all",
               isImmersive && "opacity-10 hover:opacity-100"
             )}
           >
@@ -247,7 +247,7 @@ export default function FocusMode({ subject, session, isPaused, onTogglePause, o
           <button 
             onClick={onTogglePause}
             className={cn(
-              "rounded-full flex items-center justify-center hover:scale-110 active:scale-90 transition-all shadow-[0_0_50px_rgba(255,255,255,0.1)]",
+              "rounded-none flex items-center justify-center hover:scale-110 active:scale-90 transition-all shadow-[0_0_50px_rgba(255,255,255,0.1)]",
               isImmersive ? "w-20 h-20 bg-white/5 text-white hover:bg-white hover:text-black" : "w-20 h-20 md:w-24 md:h-24 bg-white text-black"
             )}
           >
@@ -261,7 +261,7 @@ export default function FocusMode({ subject, session, isPaused, onTogglePause, o
           <button 
             onClick={() => setIsMuted(!isMuted)}
             className={cn(
-              "p-4 text-gray-400 hover:text-white transition-all",
+              "p-4 text-zinc-500 hover:text-white transition-all",
               isImmersive && "opacity-10 hover:opacity-100"
             )}
           >
@@ -274,7 +274,7 @@ export default function FocusMode({ subject, session, isPaused, onTogglePause, o
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             onClick={onFinish}
-            className="mt-8 px-8 py-3 bg-white/5 hover:bg-white/10 border border-white/10 rounded-full text-sm font-bold transition-all"
+            className="mt-8 px-8 py-3 bg-transparent hover:bg-white/5 border border-white/20 rounded-none text-[10px] font-mono uppercase tracking-widest transition-all"
           >
             Finish Session Early
           </motion.button>
@@ -289,16 +289,16 @@ export default function FocusMode({ subject, session, isPaused, onTogglePause, o
               className="mt-12 md:mt-16 grid grid-cols-3 gap-6 md:gap-12 w-full max-w-md overflow-hidden"
             >
               <div className="text-center">
-                <p className="text-xl md:text-2xl font-bold">{Math.floor(session.totalSeconds / 60)}m</p>
-                <p className="text-[8px] md:text-[10px] font-bold text-gray-500 uppercase tracking-widest">Goal</p>
+                <p className="text-xl md:text-2xl font-mono text-white">{Math.floor(session.totalSeconds / 60)}m</p>
+                <p className="text-[8px] md:text-[10px] font-mono text-zinc-500 uppercase tracking-widest">Goal</p>
               </div>
               <div className="text-center">
-                <p className="text-xl md:text-2xl font-bold">0</p>
-                <p className="text-[8px] md:text-[10px] font-bold text-gray-500 uppercase tracking-widest">Distractions</p>
+                <p className="text-xl md:text-2xl font-mono text-white">0</p>
+                <p className="text-[8px] md:text-[10px] font-mono text-zinc-500 uppercase tracking-widest">Distractions</p>
               </div>
               <div className="text-center">
-                <p className="text-xl md:text-2xl font-bold">High</p>
-                <p className="text-[8px] md:text-[10px] font-bold text-gray-500 uppercase tracking-widest">Intensity</p>
+                <p className="text-xl md:text-2xl font-mono text-white">High</p>
+                <p className="text-[8px] md:text-[10px] font-mono text-zinc-500 uppercase tracking-widest">Intensity</p>
               </div>
             </motion.div>
           )}
@@ -314,7 +314,7 @@ export default function FocusMode({ subject, session, isPaused, onTogglePause, o
             className="absolute bottom-12 left-1/2 -translate-x-1/2 flex items-center gap-4 text-white/20"
           >
             <Zap className="w-4 h-4 animate-pulse" />
-            <span className="text-[10px] font-bold uppercase tracking-[0.4em]">Immersive Focus Active</span>
+            <span className="text-[10px] font-mono uppercase tracking-[0.4em]">Immersive Focus Active</span>
           </motion.div>
         )}
       </AnimatePresence>

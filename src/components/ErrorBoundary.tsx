@@ -59,22 +59,22 @@ export default class ErrorBoundary extends Component<Props, State> {
       return (
         <div className={cn(
           "flex items-center justify-center p-6 text-white",
-          this.props.fullScreen !== false ? "min-h-screen bg-[#121212]" : "h-full w-full bg-transparent"
+          this.props.fullScreen !== false ? "min-h-screen bg-black" : "h-full w-full bg-transparent"
         )}>
-          <div className="max-w-md w-full bg-[#181818] border border-white/10 rounded-3xl p-8 text-center space-y-6 shadow-2xl">
-            <div className="w-16 h-16 bg-red-500/20 rounded-2xl flex items-center justify-center mx-auto">
+          <div className="max-w-md w-full bg-transparent border border-white/20 rounded-none p-8 text-center space-y-6 shadow-[0_0_50px_rgba(0,0,0,0.5)]">
+            <div className="w-16 h-16 bg-transparent border border-red-500/30 rounded-none flex items-center justify-center mx-auto">
               <AlertTriangle className="w-8 h-8 text-red-500" />
             </div>
-            <h2 className="text-2xl font-bold tracking-tight">Oops! Something went wrong</h2>
-            <p className="text-gray-400 leading-relaxed text-sm">
+            <h2 className="text-2xl font-mono uppercase tracking-widest text-white">System Failure</h2>
+            <p className="text-zinc-400 leading-relaxed text-xs font-mono uppercase tracking-widest">
               {errorMessage}
             </p>
             <button
               onClick={this.handleReset}
-              className="w-full py-4 bg-[#1DB954] text-black font-bold rounded-xl flex items-center justify-center gap-2 hover:scale-105 transition-transform"
+              className="w-full py-4 bg-transparent border border-white/20 text-white font-mono uppercase tracking-widest rounded-none flex items-center justify-center gap-2 hover:bg-white/10 hover:border-white transition-all"
             >
               <RefreshCcw className="w-5 h-5" />
-              {this.props.fullScreen !== false ? "Reload Application" : "Try Again"}
+              {this.props.fullScreen !== false ? "Reinitialize System" : "Retry Operation"}
             </button>
           </div>
         </div>

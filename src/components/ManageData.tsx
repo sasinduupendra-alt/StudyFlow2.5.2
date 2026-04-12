@@ -107,18 +107,18 @@ export default function ManageData({
 
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
         <div>
-          <h2 className="text-3xl font-black mb-2 tracking-tighter uppercase">Data_Control_Center</h2>
-          <p className="hud-label !text-gray-600">SYSTEM_CONFIGURATION_INTERFACE</p>
+          <h2 className="text-3xl font-mono uppercase tracking-widest mb-2 text-white">Data_Control_Center</h2>
+          <p className="text-[10px] font-mono text-zinc-500 uppercase tracking-widest">SYSTEM_CONFIGURATION_INTERFACE</p>
         </div>
         
-        <div className="flex p-1 bg-white/5 border border-border-dim overflow-x-auto scrollbar-hide">
+        <div className="flex p-1 bg-transparent border border-white/10 overflow-x-auto scrollbar-hide rounded-none">
           {(['syllabus', 'schedule', 'logs', 'exams', 'profile'] as ManageTab[]).map((tab) => (
             <button
               key={tab}
               onClick={() => setActiveSubTab(tab)}
               className={cn(
-                "px-4 md:px-6 py-2 text-[10px] font-black transition-all uppercase tracking-widest whitespace-nowrap",
-                activeSubTab === tab ? "bg-brand text-black" : "text-gray-500 hover:text-white"
+                "px-4 md:px-6 py-2 text-[10px] font-mono transition-all uppercase tracking-widest whitespace-nowrap rounded-none",
+                activeSubTab === tab ? "bg-white text-black" : "text-zinc-500 hover:text-white"
               )}
             >
               {tab === 'profile' ? 'CORE_SETTINGS' : tab === 'exams' ? 'EXAM_LOGS' : `${tab}_SYNC`}
@@ -203,47 +203,47 @@ export default function ManageData({
       <AnimatePresence>
         {resourceModal?.isOpen && (
           <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/90 backdrop-blur-md">
-            <motion.div initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.95, opacity: 0 }} className="scifi-panel w-full max-w-md overflow-hidden">
-              <div className="p-6 border-b border-border-dim flex items-center justify-between bg-white/5">
+            <motion.div initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.95, opacity: 0 }} className="bg-transparent border border-white/20 w-full max-w-md overflow-hidden rounded-none">
+              <div className="p-6 border-b border-white/10 flex items-center justify-between bg-transparent">
                 <div>
-                  <h3 className="text-sm font-black uppercase tracking-tighter">Manage_Resources</h3>
-                  <p className="hud-label !text-gray-600 mt-1">{resourceModal.topicTitle}</p>
+                  <h3 className="text-sm font-mono uppercase tracking-widest text-white">Manage_Resources</h3>
+                  <p className="text-[10px] font-mono text-zinc-500 uppercase tracking-widest mt-1">{resourceModal.topicTitle}</p>
                 </div>
-                <button onClick={() => setResourceModal(null)} className="p-2 hover:text-brand transition-colors"><X className="w-4 h-4" /></button>
+                <button onClick={() => setResourceModal(null)} className="p-2 hover:text-white transition-colors rounded-none"><X className="w-4 h-4" /></button>
               </div>
               <div className="p-6 space-y-6 max-h-[60vh] overflow-y-auto scrollbar-hide">
-                <div className="space-y-3 bg-white/5 p-4 border border-border-dim">
-                  <p className="hud-label !text-brand">ADD_NEW_RESOURCE</p>
-                  <input type="text" placeholder="TITLE" value={newResource.title} onChange={(e) => setNewResource({ ...newResource, title: e.target.value })} className="w-full bg-black/40 border border-border-dim px-4 py-2 text-[10px] font-black uppercase outline-none focus:border-brand transition-colors" />
+                <div className="space-y-3 bg-transparent p-4 border border-white/10 rounded-none">
+                  <p className="text-[10px] font-mono text-white uppercase tracking-widest">ADD_NEW_RESOURCE</p>
+                  <input type="text" placeholder="TITLE" value={newResource.title} onChange={(e) => setNewResource({ ...newResource, title: e.target.value })} className="w-full bg-black border border-white/20 px-4 py-2 text-[10px] font-mono uppercase tracking-widest text-white outline-none focus:border-white transition-colors rounded-none" />
                   <div className="flex gap-2">
-                    <select value={newResource.type} onChange={(e) => setNewResource({ ...newResource, type: e.target.value as any })} className="bg-black/40 border border-border-dim px-3 py-2 text-[10px] font-black uppercase outline-none focus:border-brand transition-colors">
+                    <select value={newResource.type} onChange={(e) => setNewResource({ ...newResource, type: e.target.value as any })} className="bg-black border border-white/20 px-3 py-2 text-[10px] font-mono uppercase tracking-widest text-white outline-none focus:border-white transition-colors rounded-none">
                       <option value="link">LINK</option>
                       <option value="video">VIDEO</option>
                       <option value="pdf">PDF</option>
                     </select>
-                    <input type="text" placeholder="URL_ENDPOINT" value={newResource.url} onChange={(e) => setNewResource({ ...newResource, url: e.target.value })} className="flex-1 bg-black/40 border border-border-dim px-4 py-2 text-[10px] font-black outline-none focus:border-brand transition-colors" />
+                    <input type="text" placeholder="URL_ENDPOINT" value={newResource.url} onChange={(e) => setNewResource({ ...newResource, url: e.target.value })} className="flex-1 bg-black border border-white/20 px-4 py-2 text-[10px] font-mono uppercase tracking-widest text-white outline-none focus:border-white transition-colors rounded-none" />
                   </div>
-                  <button onClick={() => { if (newResource.title && newResource.url && resourceModal) { const updatedResources = [...resourceModal.resources, { ...newResource, id: Math.random().toString(36).substr(2, 9) }]; setResourceModal({ ...resourceModal, resources: updatedResources }); setNewResource({ title: '', url: '', type: 'link' }); } }} className="scifi-button w-full py-2 text-[10px]">INITIALIZE_RESOURCE</button>
+                  <button onClick={() => { if (newResource.title && newResource.url && resourceModal) { const updatedResources = [...resourceModal.resources, { ...newResource, id: Math.random().toString(36).substr(2, 9) }]; setResourceModal({ ...resourceModal, resources: updatedResources }); setNewResource({ title: '', url: '', type: 'link' }); } }} className="w-full py-2 text-[10px] font-mono uppercase tracking-widest bg-white text-black hover:bg-zinc-200 transition-colors rounded-none">INITIALIZE_RESOURCE</button>
                 </div>
                 <div className="space-y-2">
                   {resourceModal.resources.map(res => (
-                    <div key={res.id} className="flex items-center justify-between p-3 bg-white/5 border border-border-dim group">
+                    <div key={res.id} className="flex items-center justify-between p-3 bg-transparent border border-white/10 group rounded-none">
                       <div className="flex items-center gap-3 overflow-hidden">
-                        <div className={cn("w-8 h-8 flex items-center justify-center shrink-0 border", res.type === 'video' ? "border-red-500/30 text-red-500 bg-red-500/5" : "border-brand/30 text-brand bg-brand/5")}>
+                        <div className={cn("w-8 h-8 flex items-center justify-center shrink-0 border rounded-none", res.type === 'video' ? "border-red-500/30 text-red-500 bg-transparent" : "border-white/30 text-white bg-transparent")}>
                           {res.type === 'video' ? <Video className="w-3 h-3" /> : <LinkIcon className="w-3 h-3" />}
                         </div>
                         <div className="overflow-hidden">
-                          <p className="text-[10px] font-black uppercase truncate tracking-tight">{res.title}</p>
+                          <p className="text-[10px] font-mono uppercase tracking-widest text-white truncate">{res.title}</p>
                         </div>
                       </div>
-                      <button onClick={() => { const updatedResources = resourceModal.resources.filter(r => r.id !== res.id); setResourceModal({ ...resourceModal, resources: updatedResources }); }} className="p-2 text-gray-700 hover:text-red-500 transition-colors"><Trash2 className="w-3 h-3" /></button>
+                      <button onClick={() => { const updatedResources = resourceModal.resources.filter(r => r.id !== res.id); setResourceModal({ ...resourceModal, resources: updatedResources }); }} className="p-2 text-zinc-600 hover:text-red-500 transition-colors rounded-none"><Trash2 className="w-3 h-3" /></button>
                     </div>
                   ))}
                 </div>
               </div>
-              <div className="p-6 bg-white/5 border-t border-border-dim flex gap-3">
-                <button onClick={() => setResourceModal(null)} className="flex-1 px-4 py-3 bg-white/5 border border-border-dim text-[10px] font-black uppercase tracking-widest hover:bg-white/10 transition-colors">CANCEL</button>
-                <button onClick={() => { if (resourceModal) { onUpdateResources(resourceModal.subjectId, resourceModal.topicId, resourceModal.resources); setResourceModal(null); } }} className="scifi-button flex-1 px-4 py-3 text-[10px]">SAVE_CHANGES</button>
+              <div className="p-6 bg-transparent border-t border-white/10 flex gap-3">
+                <button onClick={() => setResourceModal(null)} className="flex-1 px-4 py-3 bg-transparent border border-white/20 text-[10px] font-mono uppercase tracking-widest text-white hover:bg-white/10 transition-colors rounded-none">CANCEL</button>
+                <button onClick={() => { if (resourceModal) { onUpdateResources(resourceModal.subjectId, resourceModal.topicId, resourceModal.resources); setResourceModal(null); } }} className="flex-1 px-4 py-3 text-[10px] font-mono uppercase tracking-widest bg-white text-black hover:bg-zinc-200 transition-colors rounded-none">SAVE_CHANGES</button>
               </div>
             </motion.div>
           </div>

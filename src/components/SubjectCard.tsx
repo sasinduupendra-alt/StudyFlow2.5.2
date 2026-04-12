@@ -33,9 +33,9 @@ export const SubjectCard = React.memo(({ subject, onStartFocus }: SubjectCardPro
 
   return (
     <motion.div 
-      whileHover={{ y: -5 }}
+      whileHover={{ y: -4 }}
       whileTap={{ scale: 0.98 }}
-      className="scifi-panel group cursor-pointer"
+      className="enterprise-card group cursor-pointer relative overflow-hidden"
       onClick={() => onStartFocus(subject.id)}
     >
       {/* Background Image & Gradient */}
@@ -44,33 +44,30 @@ export const SubjectCard = React.memo(({ subject, onStartFocus }: SubjectCardPro
           src={subject.image}
           alt={subject.name}
           containerClassName="w-full h-full"
-          className="opacity-10 group-hover:opacity-30 transition-opacity duration-1000"
+          className="opacity-5 group-hover:opacity-10 transition-opacity duration-1000"
           fallbackGradient={subject.gradient}
           fallbackText={subject.name[0]}
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-surface via-surface/80 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-t from-zinc-950 via-zinc-950/90 to-transparent" />
       </div>
 
-      <div className="relative z-10 p-6 flex flex-col h-full min-h-[340px]">
+      <div className="relative z-10 p-6 flex flex-col h-full min-h-[360px]">
         <div className="flex items-start justify-between mb-6">
           <div className={cn(
-            "px-3 py-1 border text-[8px] font-black uppercase tracking-[0.2em] flex items-center gap-2 backdrop-blur-md",
+            "px-3 py-1 rounded-none text-[10px] font-mono uppercase tracking-widest flex items-center gap-2 backdrop-blur-md border",
             getStatusColor(subject.status)
           )}>
-            <StatusIcon className="w-3 h-3" />
+            <StatusIcon className="w-3.5 h-3.5" />
             {subject.status}
           </div>
-          <div className="w-8 h-8 bg-white/5 border border-border-dim flex items-center justify-center text-gray-600 group-hover:text-brand transition-colors">
+          <div className="w-8 h-8 rounded-none bg-transparent border border-white/20 flex items-center justify-center text-zinc-500 hover:text-white hover:border-white/50 transition-colors">
             <MoreVertical className="w-4 h-4" />
           </div>
         </div>
 
         <div className="flex-1">
-          <h3 className="text-lg font-black mb-1 group-hover:text-brand transition-colors uppercase tracking-tight">{subject.name}</h3>
-          <div className="flex items-center gap-2 mb-6">
-            <div className="w-1 h-3 bg-brand/40" />
-            <p className="hud-label !text-gray-600">{subject.topics.length} MODULES_DETECTED</p>
-          </div>
+          <h3 className="text-xl font-bold text-white mb-1 uppercase tracking-widest group-hover:text-white transition-colors">{subject.name}</h3>
+          <p className="text-[10px] font-mono text-zinc-500 uppercase tracking-widest mb-6">{subject.topics.length} Modules</p>
           
           <div className="flex items-center gap-6 mb-8">
             <div className="relative w-16 h-16">
@@ -82,7 +79,7 @@ export const SubjectCard = React.memo(({ subject, onStartFocus }: SubjectCardPro
                   fill="none"
                   stroke="currentColor"
                   strokeWidth="2"
-                  className="text-white/5"
+                  className="text-white/10"
                 />
                 <circle
                   cx="32"
@@ -94,33 +91,33 @@ export const SubjectCard = React.memo(({ subject, onStartFocus }: SubjectCardPro
                   strokeDasharray={2 * Math.PI * 28}
                   strokeDashoffset={2 * Math.PI * 28 * (1 - subject.readiness / 100)}
                   className={cn(
-                    "transition-all duration-1000 shadow-[0_0_10px_var(--color-brand-glow)]",
-                    subject.readiness > 65 ? "text-brand" : subject.readiness > 40 ? "text-yellow-500" : "text-red-500"
+                    "transition-all duration-1000 rounded-none",
+                    subject.readiness > 65 ? "text-white" : subject.readiness > 40 ? "text-zinc-400" : "text-zinc-600"
                   )}
+                  strokeLinecap="square"
                 />
               </svg>
               <div className="absolute inset-0 flex flex-col items-center justify-center">
-                <span className="text-xs font-black tabular-nums">{Math.round(subject.readiness)}%</span>
-                <span className="text-[7px] text-gray-600 uppercase font-black tracking-tighter">READY</span>
+                <span className="text-xs font-mono text-white tabular-nums">{Math.round(subject.readiness)}%</span>
               </div>
             </div>
 
-            <div className="flex-1 grid grid-cols-2 gap-2">
-              <div className="bg-white/5 p-2 border border-border-dim">
-                <p className="hud-label !text-gray-700">SCORE</p>
-                <p className="text-sm font-black tabular-nums">{subject.score}%</p>
+            <div className="flex-1 grid grid-cols-2 gap-3">
+              <div className="bg-transparent p-2.5 rounded-none border border-white/10">
+                <p className="text-[9px] font-mono text-zinc-500 uppercase tracking-widest">Score</p>
+                <p className="text-sm font-mono text-white tabular-nums">{subject.score}%</p>
               </div>
-              <div className="bg-white/5 p-2 border border-border-dim">
-                <p className="hud-label !text-gray-700">WEAK</p>
-                <p className="text-sm font-black tabular-nums text-red-500">{subject.weakCount}</p>
+              <div className="bg-transparent p-2.5 rounded-none border border-white/10">
+                <p className="text-[9px] font-mono text-zinc-500 uppercase tracking-widest">Weak</p>
+                <p className="text-sm font-mono text-zinc-400 tabular-nums">{subject.weakCount}</p>
               </div>
             </div>
           </div>
 
           {/* Quick Links Section */}
-          <div className="mb-6 space-y-2">
-            <p className="hud-label">Module_Index</p>
-            <div className="space-y-1">
+          <div className="mb-6 space-y-3">
+            <p className="text-[10px] font-mono text-zinc-500 uppercase tracking-widest">Recent Modules</p>
+            <div className="space-y-2">
               {subject.topics.slice(0, 2).map((topic) => (
                 <button
                   key={topic.id}
@@ -128,39 +125,38 @@ export const SubjectCard = React.memo(({ subject, onStartFocus }: SubjectCardPro
                     e.stopPropagation();
                     onStartFocus(subject.id, topic.id);
                   }}
-                  className="w-full flex items-center justify-between p-2 bg-white/5 border border-transparent hover:border-brand/20 transition-all group/link"
+                  className="w-full flex items-center justify-between p-2.5 bg-transparent border border-white/10 rounded-none hover:border-white/30 transition-all group/link"
                 >
-                  <span className="text-[9px] font-black text-gray-600 group-hover/link:text-white truncate pr-2 uppercase tracking-tight">
+                  <span className="text-[10px] font-mono text-zinc-500 group-hover/link:text-white uppercase tracking-widest truncate pr-2">
                     {topic.title}
                   </span>
-                  <Zap className="w-3 h-3 text-gray-800 group-hover/link:text-brand shrink-0 transition-colors" />
+                  <Zap className="w-3 h-3 text-zinc-700 group-hover/link:text-white shrink-0 transition-colors" />
                 </button>
               ))}
             </div>
           </div>
         </div>
 
-        <div className="flex items-center gap-2 mt-auto">
+        <div className="flex items-center gap-3 mt-auto">
           <button 
             onClick={() => onStartFocus(subject.id)}
-            className="scifi-button flex-1"
+            className="flex-1 py-2.5 text-[10px] font-mono uppercase tracking-widest bg-white text-black hover:bg-zinc-200 transition-colors rounded-none"
           >
-            <Zap className="w-4 h-4 fill-current" />
-            INIT_FOCUS
+            Start Focus
           </button>
-          <button className="w-12 h-12 flex items-center justify-center bg-white/5 border border-border-dim hover:border-brand/30 transition-all group/btn">
-            <TrendingUp className="w-5 h-5 text-gray-600 group-hover:text-white transition-colors" />
+          <button className="w-10 h-10 flex items-center justify-center bg-transparent border border-white/20 rounded-none hover:border-white/50 transition-all group/btn">
+            <TrendingUp className="w-4 h-4 text-zinc-500 group-hover:text-white transition-colors" />
           </button>
         </div>
       </div>
 
       {/* Mastery Progress Bar */}
-      <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-white/5">
+      <div className="absolute bottom-0 left-0 right-0 h-1 bg-white/10 overflow-hidden">
         <motion.div 
           initial={{ width: 0 }}
           whileInView={{ width: `${subject.score}%` }}
-          transition={{ duration: 1, ease: "easeOut" }}
-          className="h-full bg-brand shadow-[0_0_10px_var(--color-brand-glow)]" 
+          transition={{ duration: 1.5, ease: "circOut" }}
+          className="h-full bg-white shadow-[0_0_15px_rgba(255,255,255,0.5)]" 
         />
       </div>
     </motion.div>

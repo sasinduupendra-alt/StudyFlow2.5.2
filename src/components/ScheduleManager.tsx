@@ -182,29 +182,29 @@ export default function ScheduleManager({
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h3 className="text-sm font-black flex items-center gap-2 uppercase tracking-tighter">
-          <Calendar className="w-4 h-4 text-brand" />
+        <h3 className="text-sm font-mono uppercase tracking-widest flex items-center gap-2 text-white">
+          <Calendar className="w-4 h-4 text-white" />
           CHRONO_SCHEDULE_INTERFACE
         </h3>
       </div>
       <div className="grid grid-cols-1 gap-4">
         {days.map(day => (
-          <div key={day} className="scifi-panel overflow-hidden">
-            <button onClick={() => setExpandedDay(expandedDay === day ? null : day)} className="w-full flex items-center justify-between p-6 hover:bg-white/5 transition-colors">
+          <div key={day} className="bg-transparent border border-white/10 overflow-hidden rounded-none">
+            <button onClick={() => setExpandedDay(expandedDay === day ? null : day)} className="w-full flex items-center justify-between p-6 hover:bg-white/5 transition-colors rounded-none">
               <div className="flex items-center gap-4">
-                <div className="w-10 h-10 border border-border-dim flex items-center justify-center">
-                  <Clock className="w-4 h-4 text-gray-700" />
+                <div className="w-10 h-10 border border-white/20 flex items-center justify-center rounded-none">
+                  <Clock className="w-4 h-4 text-zinc-500" />
                 </div>
                 <div className="text-left">
-                  <h4 className="text-sm font-black uppercase tracking-tighter">{day}</h4>
-                  <p className="hud-label !text-brand">{schedule[day].length}_ACTIVITIES_LOADED</p>
+                  <h4 className="text-sm font-mono uppercase tracking-widest text-white">{day}</h4>
+                  <p className="text-[10px] font-mono text-zinc-500 uppercase tracking-widest mt-1">{schedule[day].length}_ACTIVITIES_LOADED</p>
                 </div>
               </div>
-              {expandedDay === day ? <ChevronUp className="w-4 h-4 text-gray-700" /> : <ChevronDown className="w-4 h-4 text-gray-700" />}
+              {expandedDay === day ? <ChevronUp className="w-4 h-4 text-zinc-500" /> : <ChevronDown className="w-4 h-4 text-zinc-500" />}
             </button>
             <AnimatePresence>
               {expandedDay === day && (
-                <motion.div initial={{ height: 0 }} animate={{ height: 'auto' }} exit={{ height: 0 }} className="border-t border-border-dim overflow-hidden">
+                <motion.div initial={{ height: 0 }} animate={{ height: 'auto' }} exit={{ height: 0 }} className="border-t border-white/10 overflow-hidden">
                   <div className="p-6 space-y-4">
                     <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={(e) => handleDragEnd(e, day)}>
                       <SortableContext items={schedule[day].map(a => a.id)} strategy={verticalListSortingStrategy}>
@@ -225,35 +225,35 @@ export default function ScheduleManager({
                       </SortableContext>
                     </DndContext>
                     {isAddingActivity === day ? (
-                      <form onSubmit={addForm.handleSubmit(onAddSubmit)} className="bg-black/40 p-4 border border-border-dim space-y-4">
+                      <form onSubmit={addForm.handleSubmit(onAddSubmit)} className="bg-transparent p-4 border border-white/10 space-y-4 rounded-none">
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                           <div className="space-y-1">
-                            <label className="hud-label !text-gray-600">TIME_WINDOW</label>
+                            <label className="text-[10px] font-mono text-zinc-500 uppercase tracking-widest">TIME_WINDOW</label>
                             <input 
                               {...addForm.register('time')}
                               placeholder="08:00 AM – 10:00 AM" 
                               className={cn(
-                                "w-full bg-black/40 border px-4 py-2 text-[10px] font-black uppercase outline-none focus:border-brand transition-colors",
-                                addForm.formState.errors.time ? "border-red-500" : "border-border-dim"
+                                "w-full bg-black border px-4 py-2 text-[10px] font-mono uppercase tracking-widest text-white outline-none focus:border-white transition-colors rounded-none",
+                                addForm.formState.errors.time ? "border-red-500" : "border-white/20"
                               )} 
                             />
-                            {addForm.formState.errors.time && <p className="text-[9px] text-red-500 font-black uppercase">{addForm.formState.errors.time.message}</p>}
+                            {addForm.formState.errors.time && <p className="text-[9px] text-red-500 font-mono uppercase tracking-widest">{addForm.formState.errors.time.message}</p>}
                           </div>
                           <div className="space-y-1">
-                            <label className="hud-label !text-gray-600">ACTIVITY_DESC</label>
+                            <label className="text-[10px] font-mono text-zinc-500 uppercase tracking-widest">ACTIVITY_DESC</label>
                             <input 
                               {...addForm.register('description')}
                               placeholder="DESCRIPTION" 
                               className={cn(
-                                "w-full bg-black/40 border px-4 py-2 text-[10px] font-black uppercase outline-none focus:border-brand transition-colors",
-                                addForm.formState.errors.description ? "border-red-500" : "border-border-dim"
+                                "w-full bg-black border px-4 py-2 text-[10px] font-mono uppercase tracking-widest text-white outline-none focus:border-white transition-colors rounded-none",
+                                addForm.formState.errors.description ? "border-red-500" : "border-white/20"
                               )} 
                             />
-                            {addForm.formState.errors.description && <p className="text-[9px] text-red-500 font-black uppercase">{addForm.formState.errors.description.message}</p>}
+                            {addForm.formState.errors.description && <p className="text-[9px] text-red-500 font-mono uppercase tracking-widest">{addForm.formState.errors.description.message}</p>}
                           </div>
                           <div className="space-y-1">
-                            <label className="hud-label !text-gray-600">TYPE_CLASS</label>
-                            <select {...addForm.register('type')} className="w-full bg-black/40 border border-border-dim px-4 py-2 text-[10px] font-black uppercase outline-none focus:border-brand transition-colors">
+                            <label className="text-[10px] font-mono text-zinc-500 uppercase tracking-widest">TYPE_CLASS</label>
+                            <select {...addForm.register('type')} className="w-full bg-black border border-white/20 px-4 py-2 text-[10px] font-mono uppercase tracking-widest text-white outline-none focus:border-white transition-colors rounded-none">
                               <option value="study">STUDY</option>
                               <option value="tuition">TUITION</option>
                               <option value="break">BREAK</option>
@@ -262,11 +262,11 @@ export default function ScheduleManager({
                           </div>
                         </div>
                         <div className="flex justify-end gap-2">
-                          <button type="button" onClick={() => { setIsAddingActivity(null); addForm.reset(); }} className="px-4 py-2 text-gray-700 font-black text-[10px] uppercase tracking-widest hover:text-white transition-colors">CANCEL</button>
-                          <button type="submit" className="scifi-button px-6 py-2 text-[10px]">INITIALIZE_ACTIVITY</button>
+                          <button type="button" onClick={() => { setIsAddingActivity(null); addForm.reset(); }} className="px-4 py-2 text-zinc-500 font-mono text-[10px] uppercase tracking-widest hover:text-white transition-colors rounded-none">CANCEL</button>
+                          <button type="submit" className="px-6 py-2 text-[10px] font-mono uppercase tracking-widest bg-white text-black hover:bg-zinc-200 transition-colors rounded-none">INITIALIZE_ACTIVITY</button>
                         </div>
                       </form>
-                    ) : ( <button onClick={() => setIsAddingActivity(day)} className="w-full py-3 border border-dashed border-border-dim text-[9px] font-black uppercase tracking-widest text-gray-700 hover:text-white transition-colors">+ ADD_ACTIVITY_TO_{day}</button> )}
+                    ) : ( <button onClick={() => setIsAddingActivity(day)} className="w-full py-3 border border-dashed border-white/20 text-[9px] font-mono uppercase tracking-widest text-zinc-500 hover:text-white transition-colors rounded-none">+ ADD_ACTIVITY_TO_{day}</button> )}
                   </div>
                 </motion.div>
               )}
@@ -285,16 +285,16 @@ function SortableActivityItem({ activity, day, editingActivity, setEditingActivi
   const isEditing = editingActivity?.id === activity.id;
 
   return (
-    <div ref={setNodeRef} style={style} className={cn("flex items-center gap-4 p-3 bg-white/5 border border-border-dim group transition-all", isDragging && "shadow-2xl ring-1 ring-brand/50")}>
-      <div {...attributes} {...listeners} className="cursor-grab p-1 text-gray-800 hover:text-gray-600 transition-colors"><GripVertical className="w-4 h-4" /></div>
+    <div ref={setNodeRef} style={style} className={cn("flex items-center gap-4 p-3 bg-transparent border border-white/10 group transition-all rounded-none", isDragging && "shadow-2xl ring-1 ring-white/50")}>
+      <div {...attributes} {...listeners} className="cursor-grab p-1 text-zinc-600 hover:text-white transition-colors"><GripVertical className="w-4 h-4" /></div>
       {isEditing ? (
         <form id={`edit-form-${activity.id}`} onSubmit={editForm.handleSubmit(onEditSubmit)} className="flex-1 grid grid-cols-1 md:grid-cols-3 gap-3">
           <div className="space-y-1">
             <input 
               {...editForm.register('time')}
               className={cn(
-                "w-full bg-black/40 border px-3 py-1 text-[10px] font-black uppercase outline-none focus:border-brand transition-colors",
-                editForm.formState.errors.time ? "border-red-500" : "border-border-dim"
+                "w-full bg-black border px-3 py-1 text-[10px] font-mono uppercase tracking-widest text-white outline-none focus:border-white transition-colors rounded-none",
+                editForm.formState.errors.time ? "border-red-500" : "border-white/20"
               )} 
             />
           </div>
@@ -302,12 +302,12 @@ function SortableActivityItem({ activity, day, editingActivity, setEditingActivi
             <input 
               {...editForm.register('description')}
               className={cn(
-                "w-full bg-black/40 border px-3 py-1 text-[10px] font-black uppercase outline-none focus:border-brand transition-colors",
-                editForm.formState.errors.description ? "border-red-500" : "border-border-dim"
+                "w-full bg-black border px-3 py-1 text-[10px] font-mono uppercase tracking-widest text-white outline-none focus:border-white transition-colors rounded-none",
+                editForm.formState.errors.description ? "border-red-500" : "border-white/20"
               )} 
             />
           </div>
-          <select {...editForm.register('type')} className="bg-black/40 border border-border-dim px-3 py-1 text-[10px] font-black uppercase outline-none focus:border-brand transition-colors">
+          <select {...editForm.register('type')} className="bg-black border border-white/20 px-3 py-1 text-[10px] font-mono uppercase tracking-widest text-white outline-none focus:border-white transition-colors rounded-none">
             <option value="study">STUDY</option>
             <option value="tuition">TUITION</option>
             <option value="break">BREAK</option>
@@ -316,14 +316,14 @@ function SortableActivityItem({ activity, day, editingActivity, setEditingActivi
         </form>
       ) : (
         <>
-          <div className="w-32 text-[10px] font-black text-gray-600 tabular-nums uppercase tracking-tighter">{activity.time}</div>
-          <div className="flex-1 text-[11px] font-black uppercase tracking-tight">{activity.description}</div>
+          <div className="w-32 text-[10px] font-mono text-zinc-500 tabular-nums uppercase tracking-widest">{activity.time}</div>
+          <div className="flex-1 text-[11px] font-mono text-white uppercase tracking-widest">{activity.description}</div>
           <div className={cn(
-            "px-2 py-0.5 border text-[9px] font-black uppercase tracking-widest", 
-            activity.type === 'study' ? "border-brand/30 text-brand bg-brand/5" : 
-            activity.type === 'tuition' ? "border-blue-500/30 text-blue-500 bg-blue-500/5" :
-            activity.type === 'break' ? "border-yellow-500/30 text-yellow-500 bg-yellow-500/5" :
-            "border-gray-500/30 text-gray-500 bg-gray-500/5"
+            "px-2 py-0.5 border text-[9px] font-mono uppercase tracking-widest rounded-none", 
+            activity.type === 'study' ? "border-white/30 text-white bg-transparent" : 
+            activity.type === 'tuition' ? "border-blue-500/30 text-blue-500 bg-transparent" :
+            activity.type === 'break' ? "border-yellow-500/30 text-yellow-500 bg-transparent" :
+            "border-zinc-500/30 text-zinc-500 bg-transparent"
           )}>
             {activity.type}
           </div>
@@ -332,13 +332,13 @@ function SortableActivityItem({ activity, day, editingActivity, setEditingActivi
       <div className="flex items-center gap-1">
         {isEditing ? ( 
           <>
-            <button type="submit" form={`edit-form-${activity.id}`} className="p-2 text-brand hover:scale-110 transition-transform"><Save className="w-4 h-4" /></button> 
-            <button type="button" onClick={() => setEditingActivity(null)} className="p-2 text-red-500 hover:scale-110 transition-transform"><X className="w-4 h-4" /></button>
+            <button type="submit" form={`edit-form-${activity.id}`} className="p-2 text-white hover:scale-110 transition-transform rounded-none"><Save className="w-4 h-4" /></button> 
+            <button type="button" onClick={() => setEditingActivity(null)} className="p-2 text-red-500 hover:scale-110 transition-transform rounded-none"><X className="w-4 h-4" /></button>
           </>
         ) : ( 
-          <button onClick={() => setEditingActivity({ day, id: activity.id })} className="p-2 text-gray-700 hover:text-white opacity-0 group-hover:opacity-100 transition-all"><Edit2 className="w-3.5 h-3.5" /></button> 
+          <button onClick={() => setEditingActivity({ day, id: activity.id })} className="p-2 text-zinc-600 hover:text-white opacity-0 group-hover:opacity-100 transition-all rounded-none"><Edit2 className="w-3.5 h-3.5" /></button> 
         )}
-        <button onClick={() => handleDeleteActivity(day, activity.id)} className="p-2 text-gray-700 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-all"><Trash2 className="w-3.5 h-3.5" /></button>
+        <button onClick={() => handleDeleteActivity(day, activity.id)} className="p-2 text-zinc-600 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-all rounded-none"><Trash2 className="w-3.5 h-3.5" /></button>
       </div>
     </div>
   );

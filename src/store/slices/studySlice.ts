@@ -2,6 +2,7 @@ import { StateCreator } from 'zustand';
 import { Subject, StudyLog, WeeklySchedule, AIRecommendation, ExamRecord, AIStudyPlan, AIPlanTask, Activity, Task } from '../../types';
 import { INITIAL_SUBJECTS, WEEKLY_BASE_SCHEDULE, INITIAL_TASKS } from '../../constants';
 import { parseTimeStr, formatTimeStr } from '../../lib/timeUtils';
+import { calculateSNR } from '../../lib/utils';
 import { AppState } from '../useAppStore';
 
 const recalculateActivityTimes = (activities: Activity[]) => {
@@ -159,36 +160,44 @@ export const createStudySlice: StateCreator<AppState, [], [], StudySlice> = (set
     const tuitionBlocks = activities.filter(a => a.type === 'tuition');
     const optimized: Activity[] = [];
     
-    // Define study parameters
-    const studyDuration = 90; // 90 mins
-    const breakDuration = 15; // 15 mins
     const dayStart = parseTimeStr("04:30 AM");
     const dayEnd = parseTimeStr("10:30 PM");
     
     let currentTime = dayStart;
     
     const workTypes = [
-      "Deep Work: Concept Mastery",
+      "Ultra-Deep Work: Concept Mastery",
       "Deep Work: High-Intensity Practice",
       "Deep Work: Weak Area Rebuild",
       "Deep Work: Past Paper Simulation",
-      "Active Recall & Formulae"
+      "Active Recall & Formulae Review"
     ];
 
     // Calculate subject priority based on pending tasks SNR
     const subjectPriorities = state.subjects.map(subject => {
       const subjectTasks = tasks.filter(t => t.subjectId === subject.id && !t.completed);
-      const totalSNR = subjectTasks.reduce((acc, t) => acc + (t.impact / t.effort), 0);
+      const totalSNR = subjectTasks.reduce((acc, t) => acc + calculateSNR(t, subject), 0);
       return { id: subject.id, score: totalSNR + (subject.focus / 10) };
     }).sort((a, b) => b.score - a.score);
 
     let subjectIndex = 0;
     let workTypeIndex = 0;
 
+    // Helper to get duration based on time of day (Circadian alignment)
+    const getStudyDuration = (time: number) => {
+      if (time < parseTimeStr("10:00 AM")) return 120; // 2h morning deep work
+      if (time < parseTimeStr("06:00 PM")) return 90;  // 1.5h mid-day focus
+      return 60; // 1h evening review
+    };
+
     // Helper to add study/break blocks in a gap
     const fillGap = (start: number, end: number) => {
       let gapTime = start;
-      while (gapTime + studyDuration <= end) {
+      const breakDuration = 15;
+      
+      while (gapTime + 30 <= end) { // Minimum 30 min block
+        const currentDuration = Math.min(getStudyDuration(gapTime), end - gapTime);
+        
         // Pick subject based on priority, but rotate to ensure coverage
         const subjectId = subjectPriorities[subjectIndex % subjectPriorities.length].id;
         const subject = state.subjects.find(s => s.id === subjectId) || state.subjects[0];
@@ -197,7 +206,7 @@ export const createStudySlice: StateCreator<AppState, [], [], StudySlice> = (set
         // Find top task for this subject to include in description
         const topTask = tasks
           .filter(t => t.subjectId === subject.id && !t.completed)
-          .sort((a, b) => (b.impact / b.effort) - (a.impact / a.effort))[0];
+          .sort((a, b) => calculateSNR(b, subject) - calculateSNR(a, subject))[0];
 
         const description = topTask 
           ? `${subject.name}: ${workType} (${topTask.title})`
@@ -207,16 +216,16 @@ export const createStudySlice: StateCreator<AppState, [], [], StudySlice> = (set
         optimized.push({
           id: Math.random().toString(36).substring(2, 9),
           description,
-          time: `${formatTimeStr(gapTime)} – ${formatTimeStr(gapTime + studyDuration)}`,
+          time: `${formatTimeStr(gapTime)} – ${formatTimeStr(gapTime + currentDuration)}`,
           type: 'study'
         });
         
-        gapTime += studyDuration;
+        gapTime += currentDuration;
         subjectIndex++;
         workTypeIndex++;
         
-        // Add Break if there's room
-        if (gapTime + breakDuration <= end) {
+        // Add Break if there's room and it's not the very end of the gap
+        if (gapTime + breakDuration + 30 <= end) {
           optimized.push({
             id: Math.random().toString(36).substring(2, 9),
             description: "Neural Recovery Break",
@@ -227,8 +236,8 @@ export const createStudySlice: StateCreator<AppState, [], [], StudySlice> = (set
         }
       }
       
-      // Fill remaining small gap with rest if > 15 mins
-      if (end - gapTime >= 15) {
+      // Fill remaining small gap with rest if > 10 mins
+      if (end - gapTime >= 10) {
         optimized.push({
           id: Math.random().toString(36).substring(2, 9),
           description: "System Standby / Rest",
@@ -244,11 +253,41 @@ export const createStudySlice: StateCreator<AppState, [], [], StudySlice> = (set
       const tuitionEnd = parseTimeStr(tuition.time.split(' – ')[1]);
       
       if (tuitionStart > currentTime) {
-        fillGap(currentTime, tuitionStart);
+        // Add Tuition Prep if gap is large enough
+        if (tuitionStart - currentTime > 15) {
+          fillGap(currentTime, tuitionStart - 15);
+          optimized.push({
+            id: Math.random().toString(36).substring(2, 9),
+            description: "Tuition Prep: Pre-session Review",
+            time: `${formatTimeStr(tuitionStart - 15)} – ${formatTimeStr(tuitionStart)}`,
+            type: 'study'
+          });
+        } else {
+          fillGap(currentTime, tuitionStart);
+        }
       }
       
       optimized.push(tuition);
       currentTime = tuitionEnd;
+
+      // Add Tuition Conversion (Review what was just learned)
+      if (currentTime + 30 <= dayEnd) {
+        const conversionEnd = currentTime + 30;
+        // Check if next tuition block is too close
+        const nextTuition = tuitionBlocks.find(t => parseTimeStr(t.time.split(' – ')[0]) > currentTime);
+        const limit = nextTuition ? parseTimeStr(nextTuition.time.split(' – ')[0]) : dayEnd;
+        
+        const actualConversionEnd = Math.min(conversionEnd, limit);
+        if (actualConversionEnd - currentTime >= 15) {
+          optimized.push({
+            id: Math.random().toString(36).substring(2, 9),
+            description: "Tuition Conversion: Post-session Synthesis",
+            time: `${formatTimeStr(currentTime)} – ${formatTimeStr(actualConversionEnd)}`,
+            type: 'study'
+          });
+          currentTime = actualConversionEnd;
+        }
+      }
     });
     
     // Fill final gap

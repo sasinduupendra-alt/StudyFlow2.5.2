@@ -19,18 +19,18 @@ interface TopicItemProps {
 
 const TopicItem = React.memo(({ subject, topic, onUpdateMastery, onViewResources }: TopicItemProps) => {
   return (
-    <div className="group bg-white/5 hover:bg-white/10 p-4 rounded-2xl border border-white/5 transition-all duration-300">
-      <div className="flex items-start justify-between mb-3">
-        <h4 className="font-bold text-sm leading-tight flex-1 pr-4">{topic.title}</h4>
-        <div className="flex items-center gap-2">
+    <div className="group bg-transparent hover:bg-white/5 p-6 rounded-none border border-white/10 hover:border-white/30 transition-all duration-300">
+      <div className="flex items-start justify-between mb-6">
+        <h4 className="font-mono text-sm text-white flex-1 pr-4 uppercase tracking-widest group-hover:text-white transition-colors">{topic.title}</h4>
+        <div className="flex items-center gap-3">
           {topic.resources && topic.resources.length > 0 && (
-            <div className="flex items-center gap-1.5 px-2 py-0.5 bg-white/5 rounded text-[8px] font-bold text-gray-500">
-              <div className="flex items-center -space-x-0.5">
+            <div className="flex items-center gap-2 px-2 py-1 bg-transparent rounded-none border border-white/20 text-[9px] font-mono text-zinc-500 uppercase tracking-widest">
+              <div className="flex items-center -space-x-1">
                 {Array.from(new Set(topic.resources.map(r => r.type))).map(type => (
                   <div key={type} className="p-0.5">
-                    {type === 'video' ? <Video className="w-2 h-2 text-red-500" /> :
-                     type === 'pdf' ? <FileText className="w-2 h-2 text-blue-500" /> :
-                     <LinkIcon className="w-2 h-2 text-[#1DB954]" />}
+                    {type === 'video' ? <Video className="w-2.5 h-2.5 text-zinc-400" /> :
+                     type === 'pdf' ? <FileText className="w-2.5 h-2.5 text-zinc-400" /> :
+                     <LinkIcon className="w-2.5 h-2.5 text-zinc-400" />}
                   </div>
                 ))}
               </div>
@@ -38,21 +38,32 @@ const TopicItem = React.memo(({ subject, topic, onUpdateMastery, onViewResources
             </div>
           )}
           {topic.mastery >= 80 ? (
-            <CheckCircle2 className="w-5 h-5 text-[#1DB954]" />
+            <CheckCircle2 className="w-5 h-5 text-white" />
           ) : topic.mastery >= 50 ? (
-            <TrendingUp className="w-5 h-5 text-yellow-500" />
+            <TrendingUp className="w-5 h-5 text-zinc-400" />
           ) : (
-            <AlertCircle className="w-5 h-5 text-red-500" />
+            <AlertCircle className="w-5 h-5 text-zinc-600" />
           )}
         </div>
       </div>
 
-      <div className="space-y-3">
-        <div className="flex items-center justify-between text-[10px] font-bold text-gray-500 uppercase">
+      <div className="space-y-4">
+        <div className="flex items-center justify-between text-[10px] font-mono text-zinc-500 uppercase tracking-widest">
           <span>Mastery Level</span>
           <span className={cn(
-            topic.mastery >= 80 ? "text-[#1DB954]" : topic.mastery >= 50 ? "text-yellow-500" : "text-red-500"
+            "tabular-nums",
+            topic.mastery >= 80 ? "text-white" : topic.mastery >= 50 ? "text-zinc-400" : "text-zinc-600"
           )}>{topic.mastery}%</span>
+        </div>
+        <div className="h-1 bg-white/10 rounded-none relative overflow-hidden">
+          <motion.div 
+            initial={{ width: 0 }}
+            animate={{ width: `${topic.mastery}%` }}
+            className={cn(
+              "h-full rounded-none transition-all duration-1000",
+              topic.mastery >= 80 ? "bg-white" : topic.mastery >= 50 ? "bg-zinc-400" : "bg-zinc-600"
+            )}
+          />
         </div>
         <input 
           type="range"
@@ -60,19 +71,19 @@ const TopicItem = React.memo(({ subject, topic, onUpdateMastery, onViewResources
           max="100"
           value={topic.mastery}
           onChange={(e) => onUpdateMastery(subject.id, topic.id, parseInt(e.target.value))}
-          className="w-full h-1.5 bg-white/10 rounded-full appearance-none cursor-pointer accent-[#1DB954]"
+          className="w-full h-4 opacity-0 absolute inset-0 cursor-pointer z-10"
         />
       </div>
 
-      <div className="mt-4 flex items-center gap-2 md:opacity-0 group-hover:opacity-100 transition-opacity">
+      <div className="mt-6 flex items-center gap-4 opacity-0 group-hover:opacity-100 transition-opacity">
         <button 
           onClick={() => onViewResources(subject, topic)}
-          className="text-[10px] font-bold text-[#1DB954] hover:underline uppercase tracking-widest"
+          className="text-[10px] font-mono text-zinc-400 hover:text-white uppercase tracking-widest transition-colors"
         >
           View Resources
         </button>
-        <span className="text-gray-700">•</span>
-        <button className="text-[10px] font-bold text-[#1DB954] hover:underline uppercase tracking-widest">Past Papers</button>
+        <div className="w-1 h-1 bg-white/20 rounded-none" />
+        <button className="text-[10px] font-mono text-zinc-500 hover:text-white uppercase tracking-widest transition-colors">Past Papers</button>
       </div>
     </div>
   );
@@ -88,7 +99,7 @@ interface SubjectBlockProps {
 
 const SubjectBlock = React.memo(({ subject, onUpdateMastery, onViewResources, isHighlighted, innerRef }: SubjectBlockProps) => {
   const itemVariants = {
-    hidden: { opacity: 0, y: 20 },
+    hidden: { opacity: 0, y: 30 },
     show: { opacity: 1, y: 0 }
   };
 
@@ -97,40 +108,40 @@ const SubjectBlock = React.memo(({ subject, onUpdateMastery, onViewResources, is
       variants={itemVariants}
       ref={innerRef}
       className={cn(
-        "bg-[#181818] rounded-3xl border overflow-hidden transition-all duration-500",
-        isHighlighted ? "border-[#1DB954] shadow-[0_0_30px_rgba(29,185,84,0.1)] scale-[1.01]" : "border-white/5"
+        "bg-transparent border border-white/10 transition-all duration-500 overflow-hidden rounded-none",
+        isHighlighted ? "border-white/50 ring-1 ring-white/20 scale-[1.01] z-10" : ""
       )}
     >
-      <div className={cn("p-6 flex flex-col md:flex-row md:items-center justify-between gap-4 bg-gradient-to-r", subject.gradient)}>
-        <div className="flex items-center gap-4">
-          <div className="w-12 h-12 rounded-xl bg-white/10 flex items-center justify-center backdrop-blur-md border border-white/10">
-            <BookOpen className="w-6 h-6" />
+      <div className={cn("p-10 flex flex-col md:flex-row md:items-center justify-between gap-8 bg-white/5 border-b border-white/10")}>
+        <div className="flex items-center gap-8">
+          <div className="w-16 h-16 rounded-none bg-transparent flex items-center justify-center border border-white/20">
+            <BookOpen className="w-8 h-8 text-white" />
           </div>
           <div>
-            <h3 className="text-xl font-bold">{subject.name}</h3>
-            <p className="text-xs font-bold text-white/60 uppercase tracking-widest">{subject.topics.length} Topics Total</p>
+            <h3 className="text-3xl font-bold text-white tracking-widest uppercase">{subject.name}</h3>
+            <p className="text-[10px] font-mono text-zinc-500 uppercase tracking-widest mt-1">{subject.topics.length} Topics Total</p>
           </div>
         </div>
-        <div className="flex items-center gap-6">
+        <div className="flex items-center gap-10">
           {subject.notes && (
-            <div className="hidden md:block max-w-xs text-xs text-white/80 italic border-l-2 border-white/20 pl-3 py-1">
+            <div className="hidden lg:block max-w-sm text-[10px] font-mono text-zinc-400 uppercase tracking-widest leading-loose border-l border-white/20 pl-6">
               {subject.notes}
             </div>
           )}
           <div className="text-right">
-            <p className="text-2xl font-bold">{Math.round(subject.readiness)}%</p>
-            <p className="text-[10px] font-bold text-white/60 uppercase">Subject Mastery</p>
+            <p className="text-4xl font-mono text-white tabular-nums tracking-widest">{Math.round(subject.readiness)}%</p>
+            <p className="text-[10px] font-mono text-zinc-500 uppercase tracking-widest">Subject Mastery</p>
           </div>
         </div>
       </div>
       
       {subject.notes && (
-        <div className="md:hidden px-6 pt-4 pb-2 text-xs text-white/80 italic border-l-2 border-[#1DB954] ml-6">
+        <div className="lg:hidden px-10 pt-8 pb-4 text-[10px] font-mono text-zinc-400 uppercase tracking-widest leading-loose border-l border-white/20 ml-10">
           {subject.notes}
         </div>
       )}
 
-      <div className="p-4 md:p-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4">
+      <div className="p-8 md:p-10 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {subject.topics.map((topic) => (
           <TopicItem 
             key={topic.id}
@@ -173,28 +184,28 @@ export const SyllabusTracker = React.memo(({ subjects, onUpdateMastery, highligh
   };
 
   return (
-    <div className="p-4 md:p-8 space-y-6 md:space-y-8">
+    <div className="p-6 md:p-10 space-y-10 md:space-y-16">
       <motion.div 
-        initial={{ opacity: 0, y: -20 }}
+        initial={{ opacity: 0, y: -30 }}
         animate={{ opacity: 1, y: 0 }}
-        className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4 md:mb-8"
+        className="flex flex-col md:flex-row md:items-center justify-between gap-8"
       >
-        <div>
-          <h2 className="text-2xl md:text-3xl font-bold mb-1 md:mb-2 text-center md:text-left">Syllabus Tracker</h2>
-          <p className="text-gray-400 text-sm text-center md:text-left">Track your progress across the A/L Physical Science stream.</p>
+        <div className="space-y-4">
+          <h2 className="text-4xl font-bold text-white tracking-widest uppercase">Syllabus Tracker</h2>
+          <p className="text-zinc-500 text-sm max-w-xl leading-relaxed font-mono uppercase tracking-widest">Track your progress across the A/L Physical Science stream. Mission critical data for exam readiness.</p>
         </div>
-        <div className="flex items-center justify-center gap-2 md:gap-4 bg-[#181818] p-3 md:p-4 rounded-2xl border border-white/5">
-          <div className="text-center px-3 md:px-4 border-r border-white/10">
-            <p className="text-xl md:text-2xl font-bold text-[#1DB954]">
+        <div className="flex items-center justify-center gap-8 md:gap-12 bg-transparent border border-white/10 p-8 md:p-10 rounded-none">
+          <div className="text-center px-6 md:px-8 border-r border-white/10">
+            <p className="text-3xl md:text-5xl font-mono text-white tabular-nums tracking-widest">
               {subjects.length > 0 ? Math.round(subjects.reduce((acc, s) => acc + s.readiness, 0) / subjects.length) : 0}%
             </p>
-            <p className="text-[8px] md:text-[10px] font-bold text-gray-500 uppercase">Overall Readiness</p>
+            <p className="text-[10px] font-mono text-zinc-500 uppercase tracking-widest mt-2">Overall Readiness</p>
           </div>
-          <div className="text-center px-3 md:px-4">
-            <p className="text-xl md:text-2xl font-bold text-blue-500">
+          <div className="text-center px-6 md:px-8">
+            <p className="text-3xl md:text-5xl font-mono text-white tabular-nums tracking-widest">
               {subjects.reduce((acc, s) => acc + s.topics.filter(t => t.mastery >= 80).length, 0)}
             </p>
-            <p className="text-[8px] md:text-[10px] font-bold text-gray-500 uppercase">Topics Mastered</p>
+            <p className="text-[10px] font-mono text-zinc-500 uppercase tracking-widest mt-2">Topics Mastered</p>
           </div>
         </div>
       </motion.div>
@@ -203,7 +214,7 @@ export const SyllabusTracker = React.memo(({ subjects, onUpdateMastery, highligh
         variants={containerVariants}
         initial="hidden"
         animate="show"
-        className="grid grid-cols-1 gap-8"
+        className="grid grid-cols-1 gap-10"
       >
         {subjects.map((subject) => (
           <SubjectBlock 
@@ -232,37 +243,37 @@ export const SyllabusTracker = React.memo(({ subjects, onUpdateMastery, highligh
               initial={{ opacity: 0, scale: 0.9, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.9, y: 20 }}
-              className="relative w-full max-w-2xl bg-[#181818] rounded-3xl border border-white/10 overflow-hidden shadow-2xl"
+              className="relative w-full max-w-2xl bg-black border border-white/20 overflow-hidden shadow-2xl rounded-none"
             >
-              <div className={cn("p-6 md:p-8 bg-gradient-to-r relative", selectedTopic.subject.gradient)}>
+              <div className={cn("p-8 bg-white/5 border-b border-white/10 relative")}>
                 <button 
                   onClick={() => setSelectedTopic(null)}
-                  className="absolute top-4 right-4 md:top-6 md:right-6 p-2 bg-black/20 hover:bg-black/40 rounded-full transition-colors"
+                  className="absolute top-6 right-6 p-2 bg-transparent hover:bg-white/10 transition-colors rounded-none border border-white/20"
                 >
-                  <X className="w-5 h-5" />
+                  <X className="w-5 h-5 text-white" />
                 </button>
-                <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 md:w-16 md:h-16 rounded-xl md:rounded-2xl bg-white/10 flex items-center justify-center backdrop-blur-md border border-white/10">
-                    <BookOpen className="w-6 h-6 md:w-8 md:h-8" />
+                <div className="flex items-center gap-6">
+                  <div className="w-16 h-16 rounded-none bg-transparent flex items-center justify-center border border-white/20">
+                    <BookOpen className="w-8 h-8 text-white" />
                   </div>
                   <div>
-                    <p className="text-[10px] md:text-xs font-bold text-white/60 uppercase tracking-widest mb-0.5 md:mb-1">{selectedTopic.subject.name}</p>
-                    <h3 className="text-xl md:text-2xl font-bold leading-tight">{selectedTopic.topic.title}</h3>
+                    <p className="text-[10px] font-mono text-zinc-500 uppercase tracking-widest mb-1">{selectedTopic.subject.name}</p>
+                    <h3 className="text-2xl font-bold text-white leading-tight uppercase tracking-widest">{selectedTopic.topic.title}</h3>
                   </div>
                 </div>
               </div>
 
-              <div className="p-6 md:p-8 space-y-6">
+              <div className="p-8 space-y-8">
                 <div>
-                  <h4 className="text-[10px] md:text-sm font-bold text-gray-400 uppercase tracking-widest mb-4">Study Resources</h4>
+                  <h4 className="text-[10px] font-mono text-zinc-500 uppercase tracking-widest mb-4">Study Resources</h4>
                   {(!selectedTopic.topic.resources || selectedTopic.topic.resources.length === 0) ? (
-                    <div className="bg-white/5 rounded-2xl p-6 md:p-8 text-center border border-dashed border-white/10">
-                      <LinkIcon className="w-6 h-6 md:w-8 md:h-8 text-gray-600 mx-auto mb-3" />
-                      <p className="text-gray-500 text-sm">No resources added for this topic yet.</p>
-                      <p className="text-xs text-gray-600 mt-1">Add links, videos, or PDFs in the Manage tab.</p>
+                    <div className="bg-transparent rounded-none p-10 text-center border border-dashed border-white/20">
+                      <LinkIcon className="w-8 h-8 text-zinc-600 mx-auto mb-3" />
+                      <p className="text-zinc-500 text-sm font-mono uppercase tracking-widest">No resources added for this topic yet.</p>
+                      <p className="text-xs text-zinc-600 mt-1 font-mono uppercase tracking-widest">Add links, videos, or PDFs in the Manage tab.</p>
                     </div>
                   ) : (
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       {selectedTopic.topic.resources.map(resource => (
                         <a 
                           key={resource.id}
@@ -270,43 +281,43 @@ export const SyllabusTracker = React.memo(({ subjects, onUpdateMastery, highligh
                           target="_blank"
                           rel="noopener noreferrer"
                           className={cn(
-                            "flex items-center gap-3 md:gap-4 p-3 md:p-4 bg-white/5 hover:bg-white/10 rounded-xl md:rounded-2xl border transition-all group",
-                            resource.type === 'video' ? "border-red-500/10 hover:border-red-500/20" :
-                            resource.type === 'pdf' ? "border-blue-500/10 hover:border-blue-500/20" :
-                            "border-[#1DB954]/10 hover:border-[#1DB954]/20"
+                            "flex items-center gap-4 p-4 bg-transparent hover:bg-white/5 rounded-none border transition-all group",
+                            resource.type === 'video' ? "border-white/10 hover:border-white/30" :
+                            resource.type === 'pdf' ? "border-white/10 hover:border-white/30" :
+                            "border-white/10 hover:border-white/30"
                           )}
                         >
                           <div className={cn(
-                            "w-8 h-8 md:w-10 md:h-10 rounded-lg md:rounded-xl flex items-center justify-center transition-transform group-hover:scale-110 shrink-0",
-                            resource.type === 'video' ? "bg-red-500/10 text-red-500" :
-                            resource.type === 'pdf' ? "bg-blue-500/10 text-blue-500" :
-                            "bg-[#1DB954]/10 text-[#1DB954]"
+                            "w-10 h-10 rounded-none flex items-center justify-center transition-transform group-hover:scale-110 shrink-0 border border-white/20",
+                            resource.type === 'video' ? "bg-transparent text-white" :
+                            resource.type === 'pdf' ? "bg-transparent text-white" :
+                            "bg-transparent text-white"
                           )}>
-                            {resource.type === 'video' ? <Video className="w-4 h-4 md:w-5 md:h-5" /> :
-                             resource.type === 'pdf' ? <FileText className="w-4 h-4 md:w-5 md:h-5" /> :
-                             <LinkIcon className="w-4 h-4 md:w-5 md:h-5" />}
+                            {resource.type === 'video' ? <Video className="w-5 h-5" /> :
+                             resource.type === 'pdf' ? <FileText className="w-5 h-5" /> :
+                             <LinkIcon className="w-5 h-5" />}
                           </div>
                           <div className="flex-1 min-w-0">
-                            <p className="text-xs md:text-sm font-bold truncate">{resource.title}</p>
-                            <p className="text-[8px] md:text-[10px] text-gray-500 uppercase font-bold">{resource.type}</p>
+                            <p className="text-sm font-mono text-white truncate uppercase tracking-widest">{resource.title}</p>
+                            <p className="text-[10px] text-zinc-500 uppercase font-mono tracking-widest">{resource.type}</p>
                           </div>
-                          <ExternalLink className="w-3 h-3 md:w-4 md:h-4 text-gray-600 group-hover:text-white transition-colors" />
+                          <ExternalLink className="w-4 h-4 text-zinc-600 group-hover:text-white transition-colors" />
                         </a>
                       ))}
                     </div>
                   )}
                 </div>
 
-                <div className="pt-4 border-t border-white/5">
+                <div className="pt-6 border-t border-white/10">
                   <div className="flex items-center justify-between mb-4">
-                    <h4 className="text-sm font-bold text-gray-400 uppercase tracking-widest">Topic Mastery</h4>
-                    <span className="text-sm font-bold text-[#1DB954]">{selectedTopic.topic.mastery}%</span>
+                    <h4 className="text-[10px] font-mono text-zinc-500 uppercase tracking-widest">Topic Mastery</h4>
+                    <span className="text-sm font-mono text-white">{selectedTopic.topic.mastery}%</span>
                   </div>
-                  <div className="h-2 bg-white/5 rounded-full overflow-hidden">
+                  <div className="h-1 bg-white/10 rounded-none overflow-hidden">
                     <motion.div 
                       initial={{ width: 0 }}
                       animate={{ width: `${selectedTopic.topic.mastery}%` }}
-                      className="h-full bg-[#1DB954]"
+                      className="h-full bg-white"
                     />
                   </div>
                 </div>

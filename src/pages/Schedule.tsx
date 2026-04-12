@@ -2,7 +2,7 @@ import React from 'react';
 import { motion } from 'motion/react';
 import { useNavigate } from 'react-router-dom';
 import { useAppStore } from '../store/useAppStore';
-import WeeklyScheduleView from '../components/WeeklyScheduleView';
+import ScheduleView from '../components/ScheduleView';
 
 export default function Schedule() {
   const navigate = useNavigate();
@@ -14,7 +14,7 @@ export default function Schedule() {
       animate={{ opacity: 1, x: 0 }}
       exit={{ opacity: 0, x: -20 }}
     >
-      <WeeklyScheduleView 
+      <ScheduleView 
         schedule={schedule} 
         onManageSchedule={() => navigate('/manage')}
       />

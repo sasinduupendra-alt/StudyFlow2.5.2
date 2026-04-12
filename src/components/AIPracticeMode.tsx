@@ -106,19 +106,19 @@ Return ONLY valid JSON.`;
   };
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-10">
       <div>
-        <h2 className="text-4xl font-black mb-2 tracking-tight flex items-center gap-3">
-          <Brain className="w-10 h-10 text-[#1DB954]" />
+        <h2 className="text-4xl font-mono text-white uppercase tracking-widest flex items-center gap-4">
+          <Brain className="w-10 h-10 text-white" />
           AI Practice Mode
         </h2>
-        <p className="text-gray-400">Test your knowledge. Our AI tutor will grade your answers and update your mastery levels.</p>
+        <p className="text-zinc-500 mt-2 font-mono uppercase tracking-widest text-xs">Test your knowledge. Our AI tutor will grade your answers and update your mastery levels.</p>
       </div>
 
-      <div className="bg-[#181818] p-6 rounded-2xl border border-white/5 space-y-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="bg-transparent border border-white/10 p-8 space-y-8 rounded-none">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="space-y-2">
-            <label className="text-xs font-bold text-gray-500 uppercase tracking-widest">Subject</label>
+            <label className="text-[10px] font-mono text-zinc-500 uppercase tracking-widest">Subject</label>
             <select 
               value={selectedSubjectId}
               onChange={(e) => {
@@ -126,17 +126,17 @@ Return ONLY valid JSON.`;
                 const sub = subjects.find(s => s.id === e.target.value);
                 if (sub) setSelectedTopicId(sub.topics[0]?.id || '');
               }}
-              className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 focus:ring-2 focus:ring-[#1DB954] outline-none"
+              className="w-full bg-black border border-white/20 rounded-none px-4 py-3 text-sm text-white font-mono uppercase tracking-widest focus:border-white outline-none transition-colors appearance-none"
             >
               {subjects.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
             </select>
           </div>
           <div className="space-y-2">
-            <label className="text-xs font-bold text-gray-500 uppercase tracking-widest">Topic</label>
+            <label className="text-[10px] font-mono text-zinc-500 uppercase tracking-widest">Topic</label>
             <select 
               value={selectedTopicId}
               onChange={(e) => setSelectedTopicId(e.target.value)}
-              className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 focus:ring-2 focus:ring-[#1DB954] outline-none"
+              className="w-full bg-black border border-white/20 rounded-none px-4 py-3 text-sm text-white font-mono uppercase tracking-widest focus:border-white outline-none transition-colors appearance-none"
             >
               {selectedSubject?.topics.map(t => <option key={t.id} value={t.id}>{t.title}</option>)}
             </select>
@@ -146,7 +146,7 @@ Return ONLY valid JSON.`;
         <button 
           onClick={generateQuestion}
           disabled={isGenerating || !selectedTopicId}
-          className="w-full py-4 bg-[#1DB954] text-black rounded-xl font-black flex items-center justify-center gap-2 hover:scale-[1.02] active:scale-95 transition-all disabled:opacity-50 disabled:hover:scale-100"
+          className="w-full py-4 bg-white text-black rounded-none font-mono uppercase tracking-widest flex items-center justify-center gap-3 hover:bg-zinc-200 transition-colors disabled:opacity-50"
         >
           {isGenerating ? <RefreshCw className="w-5 h-5 animate-spin" /> : <Brain className="w-5 h-5" />}
           {isGenerating ? 'Generating Question...' : 'Generate Practice Question'}
@@ -159,20 +159,20 @@ Return ONLY valid JSON.`;
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
-            className="bg-[#181818] p-6 rounded-2xl border border-white/5 space-y-6"
+            className="bg-transparent border border-white/10 p-8 space-y-8 rounded-none"
           >
-            <div className="p-6 bg-white/5 rounded-xl border border-white/10">
-              <h3 className="text-sm font-bold text-[#1DB954] uppercase tracking-widest mb-2">Question</h3>
-              <p className="text-lg leading-relaxed">{question}</p>
+            <div className="p-6 bg-transparent rounded-none border border-white/20">
+              <h3 className="text-[10px] font-mono text-white uppercase tracking-widest mb-3">Question</h3>
+              <p className="text-lg text-white leading-relaxed font-mono">{question}</p>
             </div>
 
             <div className="space-y-2">
-              <label className="text-xs font-bold text-gray-500 uppercase tracking-widest">Your Answer</label>
+              <label className="text-[10px] font-mono text-zinc-500 uppercase tracking-widest">Your Answer</label>
               <textarea 
                 value={answer}
                 onChange={(e) => setAnswer(e.target.value)}
-                placeholder="Type your detailed answer here..."
-                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 h-40 focus:ring-2 focus:ring-[#1DB954] outline-none resize-none"
+                placeholder="TYPE YOUR DETAILED ANSWER HERE..."
+                className="w-full bg-black border border-white/20 rounded-none px-6 py-5 h-48 text-white font-mono focus:border-white outline-none resize-none transition-colors"
                 disabled={!!feedback || isGrading}
               />
             </div>
@@ -181,7 +181,7 @@ Return ONLY valid JSON.`;
               <button 
                 onClick={gradeAnswer}
                 disabled={!answer.trim() || isGrading}
-                className="w-full py-4 bg-white text-black rounded-xl font-black flex items-center justify-center gap-2 hover:bg-gray-200 transition-colors disabled:opacity-50"
+                className="w-full py-4 bg-white text-black rounded-none font-mono uppercase tracking-widest flex items-center justify-center gap-3 hover:bg-zinc-200 transition-colors disabled:opacity-50"
               >
                 {isGrading ? <RefreshCw className="w-5 h-5 animate-spin" /> : <Send className="w-5 h-5" />}
                 {isGrading ? 'Grading...' : 'Submit Answer'}
@@ -196,31 +196,31 @@ Return ONLY valid JSON.`;
           <motion.div 
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="bg-[#181818] p-6 rounded-2xl border border-white/5 space-y-6 relative overflow-hidden"
+            className="bg-transparent border border-white/10 p-8 space-y-8 relative overflow-hidden rounded-none"
           >
-            <div className={`absolute top-0 left-0 w-2 h-full ${feedback.score >= 80 ? 'bg-[#1DB954]' : feedback.score >= 50 ? 'bg-yellow-500' : 'bg-red-500'}`} />
+            <div className={`absolute top-0 left-0 w-1.5 h-full ${feedback.score >= 80 ? 'bg-white' : feedback.score >= 50 ? 'bg-zinc-400' : 'bg-zinc-600'}`} />
             
             <div className="flex items-center justify-between pl-4">
-              <h3 className="text-xl font-bold flex items-center gap-2">
-                {feedback.score >= 80 ? <CheckCircle2 className="w-6 h-6 text-[#1DB954]" /> : 
-                 feedback.score >= 50 ? <AlertCircle className="w-6 h-6 text-yellow-500" /> : 
-                 <XCircle className="w-6 h-6 text-red-500" />}
+              <h3 className="text-2xl font-mono uppercase tracking-widest text-white flex items-center gap-3">
+                {feedback.score >= 80 ? <CheckCircle2 className="w-7 h-7 text-white" /> : 
+                 feedback.score >= 50 ? <AlertCircle className="w-7 h-7 text-zinc-400" /> : 
+                 <XCircle className="w-7 h-7 text-zinc-600" />}
                 AI Feedback
               </h3>
-              <div className="flex items-center gap-2 bg-white/10 px-4 py-2 rounded-full">
-                <Star className={`w-5 h-5 ${feedback.score >= 80 ? 'text-[#1DB954]' : feedback.score >= 50 ? 'text-yellow-500' : 'text-red-500'} fill-current`} />
-                <span className="font-black text-lg">{feedback.score}/100</span>
+              <div className="flex items-center gap-3 bg-transparent border border-white/20 px-5 py-2.5 rounded-none">
+                <Star className={`w-5 h-5 ${feedback.score >= 80 ? 'text-white' : feedback.score >= 50 ? 'text-zinc-400' : 'text-zinc-600'} fill-current`} />
+                <span className="font-mono text-xl text-white">{feedback.score}/100</span>
               </div>
             </div>
 
             <div className="pl-4 prose prose-invert max-w-none">
-              <p className="text-gray-300 leading-relaxed whitespace-pre-wrap">{feedback.explanation}</p>
+              <p className="text-zinc-300 leading-relaxed whitespace-pre-wrap text-base font-mono">{feedback.explanation}</p>
             </div>
 
-            <div className="pl-4 pt-4 border-t border-white/10">
+            <div className="pl-4 pt-6 border-t border-white/10">
               <button 
                 onClick={generateQuestion}
-                className="px-6 py-3 bg-white/10 hover:bg-white/20 rounded-xl font-bold transition-colors flex items-center gap-2"
+                className="px-6 py-3 bg-transparent hover:bg-white/5 text-white rounded-none font-mono uppercase tracking-widest transition-colors flex items-center gap-3 border border-white/20"
               >
                 <RefreshCw className="w-4 h-4" />
                 Try Another Question
