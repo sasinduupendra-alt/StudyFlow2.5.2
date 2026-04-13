@@ -8,6 +8,8 @@ interface LogoProps {
 }
 
 export default function Logo({ className, size = 24 }: LogoProps) {
+  const brandColor = "#00e5ff";
+  
   return (
     <svg
       width={size}
@@ -15,87 +17,114 @@ export default function Logo({ className, size = 24 }: LogoProps) {
       viewBox="0 0 24 24"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
-      className={cn("text-black", className)}
+      className={cn("text-brand", className)}
     >
       <defs>
         <linearGradient id="logo-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stopColor="currentColor" stopOpacity="1" />
-          <stop offset="50%" stopColor="currentColor" stopOpacity="0.9" />
-          <stop offset="100%" stopColor="currentColor" stopOpacity="0.7" />
+          <stop offset="0%" stopColor={brandColor} stopOpacity="1" />
+          <stop offset="50%" stopColor="#80f2ff" stopOpacity="0.9" />
+          <stop offset="100%" stopColor={brandColor} stopOpacity="0.7" />
         </linearGradient>
         
-        <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
-          <feGaussianBlur stdDeviation="0.5" result="blur" />
+        <filter id="logo-glow" x="-50%" y="-50%" width="200%" height="200%">
+          <feGaussianBlur stdDeviation="1.5" result="blur" />
           <feComposite in="SourceGraphic" in2="blur" operator="over" />
         </filter>
 
-        <radialGradient id="aura" cx="50%" cy="50%" r="50%" fx="50%" fy="50%">
-          <stop offset="0%" stopColor="#1DB954" stopOpacity="0.15" />
-          <stop offset="100%" stopColor="#1DB954" stopOpacity="0" />
+        <radialGradient id="logo-aura" cx="50%" cy="50%" r="50%" fx="50%" fy="50%">
+          <stop offset="0%" stopColor={brandColor} stopOpacity="0.2" />
+          <stop offset="100%" stopColor={brandColor} stopOpacity="0" />
         </radialGradient>
       </defs>
       
       {/* Background Aura */}
-      <circle cx="12" cy="12" r="10" fill="url(#aura)" />
+      <circle cx="12" cy="12" r="10" fill="url(#logo-aura)" />
 
-      {/* Outer Ring / Flow */}
-      <motion.circle 
-        cx="12" 
-        cy="12" 
-        r="10" 
-        stroke="url(#logo-gradient)" 
-        strokeWidth="1" 
-        strokeDasharray="4 2"
+      {/* Outer Hexagon / Neural Frame */}
+      <motion.path
+        d="M12 2L20.66 7V17L12 22L3.34 17V7L12 2Z"
+        stroke={brandColor}
+        strokeWidth="0.5"
+        strokeDasharray="2 2"
         className="opacity-20"
         animate={{ rotate: 360 }}
-        transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
+        transition={{ duration: 30, repeat: Infinity, ease: "linear" }}
       />
       
-      {/* The "S" Flow Path - Enhanced for more "flow" */}
+      {/* Neural Pathways */}
       <motion.path
-        d="M7 8C7 8 9 6.5 12 6.5C15 6.5 17 8 17 11C17 14 14.5 14.5 12 14.5C9.5 14.5 7 15 7 18C7 21 9 22 12 22C15 22 17 20.5 17 20.5"
+        d="M7 8C7 8 9 6.5 12 6.5C15 6.5 17 8 17 11C17 14 14.5 14.5 12 14.5C9.5 14.5 7 15 7 18C7 21 9 22 12 22"
         stroke="url(#logo-gradient)"
-        strokeWidth="2.5"
+        strokeWidth="2"
         strokeLinecap="round"
-        filter="url(#glow)"
+        filter="url(#logo-glow)"
         initial={{ pathLength: 0, opacity: 0 }}
         animate={{ pathLength: 1, opacity: 1 }}
-        transition={{ duration: 2, ease: "easeInOut" }}
+        transition={{ duration: 1.5, ease: "easeInOut" }}
       />
-      
-      {/* Play / Focus Indicator - Centered and more prominent */}
-      <motion.path
-        d="M10.5 10.5L14.5 12.5L10.5 14.5V10.5Z"
-        fill="#1DB954"
-        initial={{ scale: 0, opacity: 0 }}
-        animate={{ scale: 1, opacity: 1 }}
-        transition={{ delay: 1, duration: 0.5, type: "spring" }}
-      />
-      
-      {/* Sparkle / Insight - Multiple sparkles for a "flow" feel */}
-      <motion.circle 
-        cx="18" 
-        cy="6" 
-        r="1.2" 
-        fill="#1DB954" 
-        animate={{ 
-          scale: [1, 1.5, 1], 
-          opacity: [0.3, 1, 0.3],
-          y: [0, -2, 0]
+
+      {/* Central Core / Synapse */}
+      <motion.circle
+        cx="12"
+        cy="12"
+        r="2.5"
+        fill={brandColor}
+        filter="url(#logo-glow)"
+        animate={{
+          scale: [1, 1.2, 1],
+          opacity: [0.8, 1, 0.8],
+          boxShadow: ["0 0 10px #00e5ff", "0 0 20px #00e5ff", "0 0 10px #00e5ff"]
         }}
-        transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+        transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+      />
+
+      {/* Data Nodes */}
+      <motion.circle 
+        cx="17" 
+        cy="11" 
+        r="1" 
+        fill="#ffffff" 
+        animate={{ opacity: [0, 1, 0] }}
+        transition={{ duration: 2, repeat: Infinity, delay: 0.5 }}
       />
       <motion.circle 
-        cx="6" 
+        cx="7" 
         cy="18" 
         r="0.8" 
-        fill="#1DB954" 
-        animate={{ 
-          scale: [1, 1.3, 1], 
-          opacity: [0.2, 0.8, 0.2],
-          y: [0, 2, 0]
+        fill="#ffffff" 
+        animate={{ opacity: [0, 1, 0] }}
+        transition={{ duration: 2, repeat: Infinity, delay: 1.2 }}
+      />
+      
+      {/* Orbital Ring */}
+      <motion.circle
+        cx="12"
+        cy="12"
+        r="6"
+        stroke={brandColor}
+        strokeWidth="0.25"
+        strokeDasharray="1 4"
+        animate={{ rotate: -360 }}
+        transition={{ duration: 10, repeat: Infinity, ease: "linear" }}
+      />
+
+      {/* Scan Line Effect */}
+      <motion.rect
+        x="2"
+        y="2"
+        width="20"
+        height="0.5"
+        fill={brandColor}
+        className="opacity-40"
+        animate={{
+          y: [0, 20, 0],
+          opacity: [0, 0.4, 0]
         }}
-        transition={{ duration: 4, repeat: Infinity, ease: "easeInOut", delay: 1 }}
+        transition={{
+          duration: 4,
+          repeat: Infinity,
+          ease: "linear"
+        }}
       />
     </svg>
   );

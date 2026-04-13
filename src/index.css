@@ -28,6 +28,10 @@
   --animate-scan: scan 4s linear infinite;
   --animate-float: float 6s ease-in-out infinite;
   --ease-expo: cubic-bezier(0.16, 1, 0.3, 1);
+
+  @keyframes shimmer {
+    100% { transform: translateX(100%); }
+  }
 }
 
 @keyframes neural-pulse {
