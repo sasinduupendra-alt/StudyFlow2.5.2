@@ -7,7 +7,10 @@ export function cn(...inputs: ClassValue[]) {
 }
 
 export function calculateSNR(task: Task, subject?: Subject) {
-  const baseSNR = (task.impact || 5) / (task.effort || 5);
+  // 80/20 ratio: Impact is weighted at 80%, Effort at 20%
+  const signal = (task.impact || 5) * 0.8;
+  const noise = (task.effort || 5) * 0.2;
+  const baseSNR = signal / noise;
   
   // Urgency factor (Time decay/pressure)
   let urgencyFactor = 1;

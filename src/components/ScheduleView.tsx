@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
 import { WeeklySchedule, Activity, Task, Subject } from '../types';
 import { motion, AnimatePresence } from 'motion/react';
-import { Clock, BookOpen, Zap, CheckCircle2, Circle, ChevronRight, GripVertical, Edit2, Trash2, Save, X as CloseIcon, ListTodo, Sparkles, Calendar, Plus } from 'lucide-react';
+import { Clock, BookOpen, Zap, CheckCircle2, Circle, ChevronRight, GripVertical, Edit2, Trash2, Save, X as CloseIcon, ListTodo, Sparkles, Calendar, Plus, Download } from 'lucide-react';
 import { cn, calculateSNR } from '../lib/utils';
 import { useAppStore } from '../store/useAppStore';
-import { auth, db, handleFirestoreError, OperationType } from '../firebase';
+import { auth, db, handleFirestoreError, OperationType, googleProvider, signInWithPopup } from '../firebase';
+import { GoogleAuthProvider } from 'firebase/auth';
 import { doc, setDoc, updateDoc } from 'firebase/firestore';
 import {
   DndContext,
@@ -142,6 +143,7 @@ export default function ScheduleView({ schedule, onManageSchedule }: ScheduleVie
   const [editingActivity, setEditingActivity] = useState<{ day: keyof WeeklySchedule, activity: Activity } | null>(null);
   const [isSaving, setIsSaving] = useState(false);
   const [isOptimizing, setIsOptimizing] = useState(false);
+  const [isSyncing, setIsSyncing] = useState(false);
   
   const days: (keyof WeeklySchedule)[] = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
   const currentDayName = new Intl.DateTimeFormat('en-US', { weekday: 'long' }).format(new Date());
@@ -229,6 +231,108 @@ export default function ScheduleView({ schedule, onManageSchedule }: ScheduleVie
     addToast(`Neural optimization complete for ${selectedDay}`, 'success');
   };
 
+  const handleSyncCalendar = async () => {
+    setIsSyncing(true);
+    try {
+      googleProvider.addScope('https://www.googleapis.com/auth/calendar.events');
+      
+      const result = await signInWithPopup(auth, googleProvider);
+      const credential = GoogleAuthProvider.credentialFromResult(result);
+      const token = credential?.accessToken;
+
+      if (!token) {
+        throw new Error("Failed to get Google Calendar access token.");
+      }
+
+      const today = new Date();
+      const currentDayOfWeek = today.getDay() || 7; // 1 (Mon) to 7 (Sun)
+      const monday = new Date(today);
+      monday.setDate(today.getDate() - currentDayOfWeek + 1);
+
+      const daysOfWeek = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+
+      for (let i = 0; i < daysOfWeek.length; i++) {
+        const dayName = daysOfWeek[i] as keyof WeeklySchedule;
+        const activities = schedule[dayName];
+        if (!activities || activities.length === 0) continue;
+
+        const dateForDay = new Date(monday);
+        dateForDay.setDate(monday.getDate() + i);
+        const dateString = dateForDay.toISOString().split('T')[0];
+
+        for (const activity of activities) {
+          const timeMatch = activity.time.match(/(\d{2}:\d{2})\s*[-–]\s*(\d{2}:\d{2})/);
+          if (!timeMatch) continue;
+
+          const startTimeStr = timeMatch[1];
+          const endTimeStr = timeMatch[2];
+
+          const startDateTime = `${dateString}T${startTimeStr}:00`;
+          const endDateTime = `${dateString}T${endTimeStr}:00`;
+
+          const event = {
+            summary: `[StudyFlow] ${activity.description}`,
+            description: `Type: ${activity.type}`,
+            start: {
+              dateTime: new Date(startDateTime).toISOString(),
+              timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+            },
+            end: {
+              dateTime: new Date(endDateTime).toISOString(),
+              timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+            },
+          };
+
+          await fetch('https://www.googleapis.com/calendar/v3/calendars/primary/events', {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${token}`,
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(event),
+          });
+        }
+      }
+
+      addToast('Successfully synced to Google Calendar', 'success');
+    } catch (error) {
+      console.error("Calendar sync error:", error);
+      addToast('Failed to sync to Google Calendar', 'error');
+    } finally {
+      setIsSyncing(false);
+    }
+  };
+
+  const handleExportText = () => {
+    const daysOfWeek = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+    let content = "=========================================\n";
+    content += "        STUDYFLOW NEURAL SCHEDULE        \n";
+    content += "=========================================\n\n";
+
+    daysOfWeek.forEach(day => {
+      const activities = schedule[day as keyof WeeklySchedule];
+      if (activities && activities.length > 0) {
+        content += `[ ${day.toUpperCase()} ]\n`;
+        content += "-----------------------------------------\n";
+        activities.forEach(act => {
+          content += `${act.time.padEnd(15)} | ${act.type.toUpperCase().padEnd(8)} | ${act.description}\n`;
+        });
+        content += "\n";
+      }
+    });
+
+    const blob = new Blob([content], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'StudyFlow_Schedule.txt';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    addToast('Schedule exported as text document', 'success');
+  };
+
   return (
     <div className="p-8 md:p-12 space-y-12 pb-32 relative min-h-screen max-w-7xl mx-auto">
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-12 mb-16">
@@ -281,14 +385,33 @@ export default function ScheduleView({ schedule, onManageSchedule }: ScheduleVie
             </div>
           </div>
           
-          <button 
-            onClick={handleOptimize}
-            disabled={isOptimizing}
-            className="enterprise-button px-10 py-4"
-          >
-            <Sparkles className={cn("w-4 h-4", isOptimizing && "animate-spin")} />
-            {isOptimizing ? 'Optimizing...' : 'Neural Optimize'}
-          </button>
+          <div className="flex flex-col gap-4">
+            <button 
+              onClick={handleOptimize}
+              disabled={isOptimizing}
+              className="enterprise-button px-10 py-4"
+            >
+              <Sparkles className={cn("w-4 h-4", isOptimizing && "animate-spin")} />
+              {isOptimizing ? 'Optimizing...' : 'Neural Optimize'}
+            </button>
+            <div className="flex gap-4">
+              <button 
+                onClick={handleSyncCalendar}
+                disabled={isSyncing}
+                className="enterprise-button-secondary flex-1 py-4"
+              >
+                <Calendar className={cn("w-4 h-4", isSyncing && "animate-spin")} />
+                {isSyncing ? 'Syncing...' : 'Sync Calendar'}
+              </button>
+              <button 
+                onClick={handleExportText}
+                className="enterprise-button-secondary flex-1 py-4"
+              >
+                <Download className="w-4 h-4" />
+                Export TXT
+              </button>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -299,7 +422,7 @@ export default function ScheduleView({ schedule, onManageSchedule }: ScheduleVie
             key={day}
             onClick={() => setSelectedDay(day)}
             className={cn(
-              "px-8 py-4 rounded-none text-[10px] font-mono uppercase tracking-[0.2em] transition-all whitespace-nowrap relative overflow-hidden group",
+              "px-6 py-3 rounded-none text-[10px] font-mono uppercase tracking-[0.2em] transition-all whitespace-nowrap relative overflow-hidden group",
               selectedDay === day 
                 ? "text-black bg-white" 
                 : "text-zinc-600 hover:text-white hover:bg-white/5"
@@ -465,24 +588,24 @@ export default function ScheduleView({ schedule, onManageSchedule }: ScheduleVie
               initial={{ opacity: 0, scale: 0.98, y: 10 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.98, y: 10 }}
-              className="relative w-full max-w-xl enterprise-card p-12 bg-black border-white/20 shadow-2xl rounded-none"
+              className="relative w-full max-w-[320px] enterprise-card p-5 bg-black border-white/20 shadow-2xl rounded-2xl"
             >
-              <div className="flex items-center justify-between mb-12">
-                <div className="space-y-2">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-[1px] bg-white" />
-                    <span className="text-[9px] font-mono text-white uppercase tracking-[0.4em]">Protocol Adjustment</span>
+              <div className="flex items-center justify-between mb-4">
+                <div className="space-y-1">
+                  <div className="flex items-center gap-2">
+                    <div className="w-6 h-[1px] bg-white" />
+                    <span className="text-[7px] font-mono text-white uppercase tracking-[0.4em]">Adjustment</span>
                   </div>
-                  <h3 className="text-3xl font-black text-white tracking-tighter uppercase">Edit Activity</h3>
+                  <h3 className="text-lg font-black text-white tracking-tighter uppercase">Edit Activity</h3>
                 </div>
-                <button onClick={() => setEditingActivity(null)} className="p-3 hover:bg-white/10 rounded-none transition-colors border border-white/10">
-                  <CloseIcon className="w-6 h-6 text-zinc-500" />
+                <button onClick={() => setEditingActivity(null)} className="p-1.5 hover:bg-white/10 rounded-lg transition-colors border border-white/10">
+                  <CloseIcon className="w-4 h-4 text-zinc-500" />
                 </button>
               </div>
 
-              <div className="space-y-10">
-                <div className="space-y-3">
-                  <label className="text-[9px] font-mono uppercase tracking-[0.3em] text-zinc-600 block">Description Identifier</label>
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <label className="text-[8px] font-mono uppercase tracking-[0.3em] text-zinc-600 block">Description</label>
                   <input 
                     type="text"
                     value={editingActivity.activity.description}
@@ -490,13 +613,13 @@ export default function ScheduleView({ schedule, onManageSchedule }: ScheduleVie
                       ...editingActivity,
                       activity: { ...editingActivity.activity, description: e.target.value }
                     })}
-                    className="enterprise-input"
+                    className="enterprise-input py-2 text-xs rounded-lg"
                   />
                 </div>
 
-                <div className="grid grid-cols-2 gap-8">
-                  <div className="space-y-3">
-                    <label className="text-[9px] font-mono uppercase tracking-[0.3em] text-zinc-600 block">Start Time</label>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <label className="text-[8px] font-mono uppercase tracking-[0.3em] text-zinc-600 block">Start Time</label>
                     <input 
                       type="text"
                       placeholder="08:00 AM"
@@ -508,11 +631,11 @@ export default function ScheduleView({ schedule, onManageSchedule }: ScheduleVie
                           activity: { ...editingActivity.activity, time: `${e.target.value} – ${end}` }
                         });
                       }}
-                      className="enterprise-input tabular-nums"
+                      className="enterprise-input py-2 text-xs rounded-lg tabular-nums"
                     />
                   </div>
-                  <div className="space-y-3">
-                    <label className="text-[9px] font-mono uppercase tracking-[0.3em] text-zinc-600 block">End Time</label>
+                  <div className="space-y-2">
+                    <label className="text-[8px] font-mono uppercase tracking-[0.3em] text-zinc-600 block">End Time</label>
                     <input 
                       type="text"
                       placeholder="09:00 AM"
@@ -524,14 +647,14 @@ export default function ScheduleView({ schedule, onManageSchedule }: ScheduleVie
                           activity: { ...editingActivity.activity, time: `${start} – ${e.target.value}` }
                         });
                       }}
-                      className="enterprise-input tabular-nums"
+                      className="enterprise-input py-2 text-xs rounded-lg tabular-nums"
                     />
                   </div>
                 </div>
 
-                <div className="space-y-3">
-                  <label className="text-[9px] font-mono uppercase tracking-[0.3em] text-zinc-600 block">Activity Classification</label>
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div className="space-y-2">
+                  <label className="text-[8px] font-mono uppercase tracking-[0.3em] text-zinc-600 block">Classification</label>
+                  <div className="grid grid-cols-2 gap-2">
                     {['study', 'tuition', 'break', 'rest'].map(type => (
                       <button
                         key={type}
@@ -540,7 +663,7 @@ export default function ScheduleView({ schedule, onManageSchedule }: ScheduleVie
                           activity: { ...editingActivity.activity, type: type as Activity['type'] }
                         })}
                         className={cn(
-                          "px-4 py-4 text-[9px] font-mono uppercase tracking-[0.2em] rounded-none border transition-all",
+                          "px-2 py-1 text-[8px] font-mono uppercase tracking-[0.2em] rounded-md border transition-all",
                           editingActivity.activity.type === type 
                             ? "bg-white text-black border-white font-bold" 
                             : "bg-transparent text-zinc-600 border-white/10 hover:border-white/30"
@@ -552,10 +675,10 @@ export default function ScheduleView({ schedule, onManageSchedule }: ScheduleVie
                   </div>
                 </div>
 
-                <div className="flex gap-6 pt-8">
+                <div className="flex gap-3 pt-2">
                   <button 
                     onClick={() => setEditingActivity(null)}
-                    className="flex-1 py-4 bg-transparent hover:bg-white/5 text-zinc-600 hover:text-white transition-all font-mono uppercase tracking-[0.2em] text-[10px] rounded-none border border-white/10"
+                    className="flex-1 py-2 bg-transparent hover:bg-white/5 text-zinc-600 hover:text-white transition-all font-mono uppercase tracking-[0.2em] text-[8px] rounded-lg border border-white/10"
                   >
                     Abort
                   </button>
@@ -564,9 +687,9 @@ export default function ScheduleView({ schedule, onManageSchedule }: ScheduleVie
                       updateActivity(editingActivity.day, editingActivity.activity.id, editingActivity.activity);
                       setEditingActivity(null);
                     }}
-                    className="flex-1 py-4 bg-white text-black font-bold hover:bg-zinc-200 transition-all flex items-center justify-center gap-3 uppercase tracking-[0.2em] text-[10px] rounded-none"
+                    className="flex-1 py-2 bg-white text-black font-bold hover:bg-zinc-200 transition-all flex items-center justify-center gap-2 uppercase tracking-[0.2em] text-[8px] rounded-lg"
                   >
-                    <Save className="w-4 h-4" />
+                    <Save className="w-3 h-3" />
                     Commit
                   </button>
                 </div>

@@ -14,6 +14,7 @@ import { doc, setDoc, deleteDoc, updateDoc, collection } from 'firebase/firestor
 export default function Tasks() {
   const { tasks, addTask, toggleTask, deleteTask, subjects, user } = useAppStore();
   const [activeTab, setActiveTab] = useState<TaskFrequency>('Daily');
+  const [viewMode, setViewMode] = useState<'Cycle' | 'Subject' | 'Optimization'>('Cycle');
   const [isAddingTask, setIsAddingTask] = useState(false);
   const [newTaskTitle, setNewTaskTitle] = useState('');
   const [newTaskDesc, setNewTaskDesc] = useState('');
@@ -173,19 +174,38 @@ export default function Tasks() {
       </div>
 
       {/* Tabs */}
-      <div className="flex gap-2 p-1 bg-transparent border border-white/10 rounded-none w-fit">
-        {tabs.map((tab) => (
-          <button
-            key={tab}
-            onClick={() => setActiveTab(tab)}
-            className={cn(
-              "px-6 py-2.5 text-[11px] font-bold uppercase tracking-[0.2em] transition-all relative rounded-none",
-              activeTab === tab ? "text-black bg-white" : "text-zinc-500 hover:text-white hover:bg-white/5"
-            )}
-          >
-            {tab} Cycle
-          </button>
-        ))}
+      <div className="flex flex-col md:flex-row gap-6 items-start md:items-center justify-between">
+        <div className="flex gap-2 p-1 bg-transparent border border-white/10 rounded-none w-fit">
+          {['Cycle', 'Subject', 'Optimization'].map((mode) => (
+            <button
+              key={mode}
+              onClick={() => setViewMode(mode as any)}
+              className={cn(
+                "px-6 py-2 text-[11px] font-bold uppercase tracking-[0.2em] transition-all relative rounded-none",
+                viewMode === mode ? "text-black bg-white" : "text-zinc-500 hover:text-white hover:bg-white/5"
+              )}
+            >
+              {mode} View
+            </button>
+          ))}
+        </div>
+
+        {viewMode === 'Cycle' && (
+          <div className="flex gap-2 p-1 bg-transparent border border-white/10 rounded-none w-fit">
+            {tabs.map((tab) => (
+              <button
+                key={tab}
+                onClick={() => setActiveTab(tab)}
+                className={cn(
+                  "px-6 py-2 text-[11px] font-bold uppercase tracking-[0.2em] transition-all relative rounded-none",
+                  activeTab === tab ? "text-black bg-white" : "text-zinc-500 hover:text-white hover:bg-white/5"
+                )}
+              >
+                {tab}
+              </button>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Task List */}
@@ -193,108 +213,153 @@ export default function Tasks() {
         variants={containerVariants}
         initial="hidden"
         animate="show"
-        className="grid grid-cols-1 gap-6"
+        className="grid grid-cols-1 gap-12"
       >
         <AnimatePresence mode="popLayout">
-          {filteredTasks.length > 0 ? (
-            filteredTasks.map((task) => (
-              <motion.div
-                key={task.id}
-                layout
-                variants={itemVariants}
-                exit={{ opacity: 0, scale: 0.98 }}
-                className={cn(
-                  "enterprise-card group transition-all duration-500 relative overflow-hidden",
-                  task.completed ? "opacity-40 border-zinc-900" : "hover:border-white/40"
-                )}
-              >
-                <div className="scan-line opacity-0 group-hover:opacity-100 transition-opacity duration-1000" />
-                
-                <div className="p-8 flex items-start gap-8 relative z-10">
-                  <button 
-                    onClick={() => handleToggleTask(task.id)}
-                    className={cn(
-                      "mt-1 p-1 transition-all transform hover:scale-125",
-                      task.completed ? "text-white" : "text-zinc-800 hover:text-white"
-                    )}
-                  >
-                    {task.completed ? <CheckCircle2 className="w-8 h-8" /> : <Circle className="w-8 h-8" />}
-                  </button>
-
-                  <div className="flex-1 min-w-0">
-                    <div className="flex flex-wrap items-center gap-4 mb-4">
-                      <h4 className={cn(
-                        "text-xl font-black uppercase tracking-tighter truncate leading-none",
-                        task.completed ? "line-through text-zinc-600" : "text-white"
-                      )}>
-                        {task.title}
-                      </h4>
-                      <div className="flex items-center gap-3">
-                        {task.dueDate === tomorrowStr && (
-                          <span className="badge bg-white/10 text-white border-white/20">
-                            Tomorrow
-                          </span>
-                        )}
-                        {task.subjectId && (
-                          <span className="badge badge-zinc">
-                            {subjects.find(s => s.id === task.subjectId)?.name}
-                          </span>
-                        )}
-                        <span className={cn(
-                          "badge",
-                          calculateSNR(task, subjects.find(s => s.id === task.subjectId)) >= 2 
-                            ? "badge-brand" 
-                            : "badge-zinc"
-                        )}>
-                          SNR: {calculateSNR(task, subjects.find(s => s.id === task.subjectId)).toFixed(1)}
-                        </span>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-12">
-                      {task.description && (
-                        <p className="text-[10px] text-zinc-500 font-mono uppercase tracking-[0.2em] line-clamp-1 flex-1">
-                          {task.description}
-                        </p>
-                      )}
-                      <div className="flex items-center gap-8 shrink-0">
-                        <div className="flex items-center gap-3">
-                          <span className="text-[9px] font-mono text-zinc-700 uppercase tracking-widest">Impact</span>
-                          <div className="flex gap-1.5">
-                            {[...Array(5)].map((_, i) => (
-                              <div key={i} className={cn("w-2 h-4 transition-all duration-500", i < (task.impact / 2) ? "bg-white" : "bg-zinc-900")} />
-                            ))}
-                          </div>
-                        </div>
-                        <div className="flex items-center gap-3">
-                          <span className="text-[9px] font-mono text-zinc-700 uppercase tracking-widest">Effort</span>
-                          <div className="flex gap-1.5">
-                            {[...Array(5)].map((_, i) => (
-                              <div key={i} className={cn("w-2 h-4 transition-all duration-500", i < (task.effort / 2) ? "bg-zinc-500" : "bg-zinc-900")} />
-                            ))}
-                          </div>
-                        </div>
-                      </div>
-                    </div>
+          {viewMode === 'Cycle' ? (
+            filteredTasks.length > 0 ? (
+              filteredTasks.map((task) => (
+                <TaskItem 
+                  key={task.id} 
+                  task={task} 
+                  subjects={subjects} 
+                  tomorrowStr={tomorrowStr}
+                  onToggle={handleToggleTask}
+                  onDelete={handleDeleteTask}
+                />
+              ))
+            ) : (
+              <EmptyTasks />
+            )
+          ) : viewMode === 'Subject' ? (
+            subjects.map(subject => {
+              const subjectTasks = tasks.filter(t => t.subjectId === subject.id);
+              if (subjectTasks.length === 0) return null;
+              
+              return (
+                <div key={subject.id} className="space-y-6">
+                  <div className="flex items-center gap-4 border-l-4 border-white pl-6 py-2">
+                    <h3 className="text-2xl font-black uppercase tracking-tighter text-white">{subject.name}</h3>
+                    <span className="text-[10px] font-mono text-zinc-600 uppercase tracking-widest">{subjectTasks.length} Objectives</span>
                   </div>
-
-                  <div className="flex items-center gap-4 opacity-0 group-hover:opacity-100 transition-all duration-500">
-                    <button 
-                      onClick={() => handleDeleteTask(task.id)}
-                      className="p-3 text-zinc-800 hover:text-white hover:bg-white/5 transition-all"
-                    >
-                      <Trash2 className="w-5 h-5" />
-                    </button>
+                  <div className="grid grid-cols-1 gap-4">
+                    {subjectTasks.map(task => (
+                      <TaskItem 
+                        key={task.id} 
+                        task={task} 
+                        subjects={subjects} 
+                        tomorrowStr={tomorrowStr}
+                        onToggle={handleToggleTask}
+                        onDelete={handleDeleteTask}
+                      />
+                    ))}
                   </div>
                 </div>
-              </motion.div>
-            ))
+              );
+            })
           ) : (
-            <div className="h-96 flex flex-col items-center justify-center enterprise-card border-dashed border-white/10 opacity-40">
-              <div className="p-8 bg-white/5 border border-white/10 mb-8">
-                <AlertCircle className="w-12 h-12 text-zinc-700" />
+            <div className="space-y-6">
+              <div className="p-6 enterprise-card bg-white/5 border-white/10 mb-4">
+                <div className="flex items-center gap-4 mb-4">
+                  <AlertCircle className="w-6 h-6 text-white" />
+                  <h3 className="text-xl font-black text-white uppercase tracking-tighter">SNR Optimization Insights</h3>
+                </div>
+                <p className="text-xs font-mono text-zinc-400 uppercase tracking-[0.1em] leading-relaxed">
+                  The following tasks have a low Signal-to-Noise Ratio (SNR &lt; 2.0). Review these objectives to ensure they are worth your time. Consider increasing their impact or decreasing the effort required.
+                </p>
               </div>
-              <p className="text-lg font-black text-white uppercase tracking-[0.3em]">No Active Objectives</p>
-              <p className="text-[10px] font-mono text-zinc-600 uppercase tracking-[0.2em] mt-4">Initialize a new task to begin your study cycle.</p>
+
+              {tasks
+                .filter(t => !t.completed)
+                .map(t => ({ task: t, snr: calculateSNR(t, subjects.find(s => s.id === t.subjectId)) }))
+                .filter(item => item.snr < 2.0)
+                .sort((a, b) => a.snr - b.snr)
+                .map(({ task, snr }) => (
+                  <motion.div
+                    key={task.id}
+                    layout
+                    initial={{ opacity: 0, y: 15 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, scale: 0.98 }}
+                    className="enterprise-card p-6 border-white/10 hover:border-white/30 transition-all"
+                  >
+                    <div className="flex flex-col md:flex-row justify-between gap-6">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-3 mb-2">
+                          <span className="px-2 py-1 bg-white/10 text-white text-[9px] font-bold uppercase tracking-[0.2em]">
+                            SNR: {snr.toFixed(2)}
+                          </span>
+                          <h4 className="text-lg font-bold text-white">{task.title}</h4>
+                        </div>
+                        <p className="text-xs text-zinc-500 font-mono mb-4">{task.description || 'No description provided.'}</p>
+                        
+                        <div className="flex gap-4 mb-4">
+                          <div className="px-3 py-2 bg-black/50 border border-white/5">
+                            <span className="text-[8px] font-mono text-zinc-500 uppercase tracking-[0.2em] block mb-1">Impact</span>
+                            <span className="text-sm font-bold text-white">{task.impact || 5}/10</span>
+                          </div>
+                          <div className="px-3 py-2 bg-black/50 border border-white/5">
+                            <span className="text-[8px] font-mono text-zinc-500 uppercase tracking-[0.2em] block mb-1">Effort</span>
+                            <span className="text-sm font-bold text-white">{task.effort || 5}/10</span>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <div className="flex-1 bg-white/5 p-4 border border-white/10">
+                        <h5 className="text-[10px] font-mono text-white uppercase tracking-[0.2em] mb-3 flex items-center gap-2">
+                          <div className="w-1 h-1 bg-white rounded-full" />
+                          Improvement Suggestions
+                        </h5>
+                        <ul className="space-y-3">
+                          {(task.effort || 5) > 5 && (
+                            <li className="text-xs text-zinc-400 font-mono leading-relaxed flex items-start gap-2">
+                              <ChevronRight className="w-3 h-3 mt-0.5 text-zinc-600 shrink-0" />
+                              <span><strong>High Effort Detected:</strong> Break this task into smaller, manageable sub-tasks. Can you automate or delegate parts of this?</span>
+                            </li>
+                          )}
+                          {(task.impact || 5) < 5 && (
+                            <li className="text-xs text-zinc-400 font-mono leading-relaxed flex items-start gap-2">
+                              <ChevronRight className="w-3 h-3 mt-0.5 text-zinc-600 shrink-0" />
+                              <span><strong>Low Impact Detected:</strong> Re-evaluate the necessity of this task. Does it directly contribute to your core objectives? Consider dropping it if not.</span>
+                            </li>
+                          )}
+                          {(task.effort || 5) <= 5 && (task.impact || 5) >= 5 && (
+                            <li className="text-xs text-zinc-400 font-mono leading-relaxed flex items-start gap-2">
+                              <ChevronRight className="w-3 h-3 mt-0.5 text-zinc-600 shrink-0" />
+                              <span><strong>General Optimization:</strong> Review the task's subject alignment. Assigning it to a 'Critical' or 'Weak' subject will boost its strategic value.</span>
+                            </li>
+                          )}
+                        </ul>
+                      </div>
+                    </div>
+                  </motion.div>
+                ))}
+              {tasks.filter(t => !t.completed && calculateSNR(t, subjects.find(s => s.id === t.subjectId)) < 2.0).length === 0 && (
+                <div className="p-12 text-center border border-white/10 bg-white/5">
+                  <CheckCircle2 className="w-12 h-12 text-zinc-600 mx-auto mb-4" />
+                  <p className="text-sm font-mono text-zinc-400 uppercase tracking-[0.2em]">All active tasks have optimal SNR.</p>
+                </div>
+              )}
+            </div>
+          )}
+          {viewMode === 'Subject' && tasks.filter(t => !t.subjectId).length > 0 && (
+            <div className="space-y-6">
+              <div className="flex items-center gap-4 border-l-4 border-zinc-800 pl-6 py-2">
+                <h3 className="text-2xl font-black uppercase tracking-tighter text-zinc-500">Uncategorized</h3>
+                <span className="text-[10px] font-mono text-zinc-600 uppercase tracking-widest">{tasks.filter(t => !t.subjectId).length} Objectives</span>
+              </div>
+              <div className="grid grid-cols-1 gap-4">
+                {tasks.filter(t => !t.subjectId).map(task => (
+                  <TaskItem 
+                    key={task.id} 
+                    task={task} 
+                    subjects={subjects} 
+                    tomorrowStr={tomorrowStr}
+                    onToggle={handleToggleTask}
+                    onDelete={handleDeleteTask}
+                  />
+                ))}
+              </div>
             </div>
           )}
         </AnimatePresence>
@@ -315,65 +380,67 @@ export default function Tasks() {
               initial={{ opacity: 0, scale: 0.95, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              className="relative w-full max-w-2xl enterprise-card-premium p-12 shadow-2xl overflow-hidden"
+              className="relative w-full max-w-[320px] enterprise-card-premium p-5 shadow-2xl overflow-hidden rounded-2xl border-white/30"
             >
               <div className="scan-line" />
               
-              <div className="relative z-10 flex items-center gap-8 mb-16">
-                <div className="w-20 h-20 bg-white flex items-center justify-center text-black shadow-[0_0_30px_rgba(255,255,255,0.3)]">
-                  <Plus className="w-10 h-10" />
+              <div className="relative z-10 flex items-center gap-3 mb-4">
+                <div className="w-10 h-10 bg-white flex items-center justify-center text-black shadow-[0_0_15px_rgba(255,255,255,0.2)] rounded-lg">
+                  <Plus className="w-5 h-5" />
                 </div>
                 <div>
-                  <p className="text-[10px] font-mono text-zinc-500 uppercase tracking-[0.4em] mb-4">Objective Initialization</p>
-                  <h3 className="text-4xl font-black text-white uppercase tracking-tighter leading-none">New {activeTab} Cycle</h3>
+                  <p className="text-[7px] font-mono text-zinc-500 uppercase tracking-[0.4em] mb-0.5">Initialization</p>
+                  <h3 className="text-lg font-black text-white uppercase tracking-tighter leading-none">New {activeTab}</h3>
                 </div>
               </div>
 
-              <form onSubmit={handleAddTask} className="space-y-12 relative z-10">
-                <div className="space-y-4">
-                  <label className="text-[10px] font-mono text-zinc-600 uppercase tracking-[0.3em] font-bold">Objective Title</label>
+              <form onSubmit={handleAddTask} className="space-y-4 relative z-10">
+                <div className="space-y-2">
+                  <label className="text-[8px] font-mono text-zinc-600 uppercase tracking-[0.3em] font-bold">Objective Title</label>
                   <input 
                     autoFocus
                     type="text"
                     value={newTaskTitle}
                     onChange={(e) => setNewTaskTitle(e.target.value)}
-                    placeholder="Define your strategic goal..."
-                    className="enterprise-input text-lg"
+                    placeholder="Enter Protocol..."
+                    className="enterprise-input py-2 text-xs rounded-lg"
+                    required
                   />
                 </div>
 
-                <div className="space-y-4">
-                  <label className="text-[10px] font-mono text-zinc-600 uppercase tracking-[0.3em] font-bold">Operational Details</label>
+                <div className="space-y-2">
+                  <label className="text-[8px] font-mono text-zinc-600 uppercase tracking-[0.3em] font-bold">Description</label>
                   <textarea 
                     value={newTaskDesc}
                     onChange={(e) => setNewTaskDesc(e.target.value)}
-                    placeholder="Provide context for this objective..."
-                    className="enterprise-input h-32 resize-none"
+                    placeholder="Optional parameters..."
+                    className="enterprise-input py-2 text-xs min-h-[60px] rounded-lg"
                   />
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
-                  <div className="space-y-4">
-                    <label className="text-[10px] font-mono text-zinc-600 uppercase tracking-[0.3em] font-bold">Subject Association</label>
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="space-y-2">
+                    <label className="text-[8px] font-mono text-zinc-600 uppercase tracking-[0.3em] font-bold">Subject</label>
                     <select 
                       value={newTaskSubject}
                       onChange={(e) => setNewTaskSubject(e.target.value)}
-                      className="enterprise-input appearance-none cursor-pointer"
+                      className="enterprise-input py-2 text-xs rounded-lg"
                     >
-                      <option value="">No Subject</option>
-                      {subjects.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
+                      <option value="">None</option>
+                      {subjects.map(s => (
+                        <option key={s.id} value={s.id}>{s.name}</option>
+                      ))}
                     </select>
                   </div>
-
-                  <div className="space-y-4">
-                    <label className="text-[10px] font-mono text-zinc-600 uppercase tracking-[0.3em] font-bold">Execution Timing</label>
-                    <div className="flex gap-4">
+                  <div className="space-y-2">
+                    <label className="text-[8px] font-mono text-zinc-600 uppercase tracking-[0.3em] font-bold">Timing</label>
+                    <div className="flex gap-1 p-0.5 bg-white/5 rounded-lg border border-white/10">
                       <button
                         type="button"
                         onClick={() => setIsForTomorrow(false)}
                         className={cn(
-                          "flex-1 py-4 text-[10px] font-bold uppercase tracking-[0.2em] border transition-all",
-                          !isForTomorrow ? "bg-white text-black border-white" : "bg-transparent text-zinc-500 border-white/10 hover:border-white/30"
+                          "flex-1 py-1 text-[8px] font-bold uppercase tracking-[0.2em] rounded-md transition-all",
+                          !isForTomorrow ? "bg-white text-black" : "bg-transparent text-zinc-500"
                         )}
                       >
                         Today
@@ -382,39 +449,21 @@ export default function Tasks() {
                         type="button"
                         onClick={() => setIsForTomorrow(true)}
                         className={cn(
-                          "flex-1 py-4 text-[10px] font-bold uppercase tracking-[0.2em] border transition-all",
-                          isForTomorrow ? "bg-white text-black border-white" : "bg-transparent text-zinc-500 border-white/10 hover:border-white/30"
+                          "flex-1 py-1 text-[8px] font-bold uppercase tracking-[0.2em] rounded-md transition-all",
+                          isForTomorrow ? "bg-white text-black" : "bg-transparent text-zinc-500"
                         )}
                       >
-                        Tomorrow
+                        Tmrw
                       </button>
                     </div>
                   </div>
                 </div>
 
-                <div className="p-8 bg-white/[0.02] border border-white/10 flex flex-col justify-center">
-                    <div className="flex justify-between items-center mb-4">
-                      <span className="text-[10px] font-mono text-zinc-500 uppercase tracking-[0.3em]">Priority SNR</span>
-                      <span className={cn(
-                        "text-3xl font-black tabular-nums tracking-tighter",
-                        calculateSNR({ impact: newTaskImpact, effort: newTaskEffort, frequency: activeTab, subjectId: newTaskSubject } as Task, subjects.find(s => s.id === newTaskSubject)) >= 2 ? "text-white" : "text-zinc-600"
-                      )}>
-                        {calculateSNR({ impact: newTaskImpact, effort: newTaskEffort, frequency: activeTab, subjectId: newTaskSubject } as Task, subjects.find(s => s.id === newTaskSubject)).toFixed(2)}
-                      </span>
-                    </div>
-                    <div className="h-1 w-full bg-white/5 overflow-hidden">
-                      <motion.div 
-                        className="h-full bg-white shadow-[0_0_10px_rgba(255,255,255,0.5)]"
-                        animate={{ width: `${Math.min(100, calculateSNR({ impact: newTaskImpact, effort: newTaskEffort, frequency: activeTab, subjectId: newTaskSubject } as Task, subjects.find(s => s.id === newTaskSubject)) * 20)}%` }}
-                      />
-                    </div>
-                  </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-16">
-                  <div className="space-y-8">
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="space-y-2">
                     <div className="flex justify-between items-center">
-                      <label className="text-[10px] font-mono text-zinc-600 uppercase tracking-[0.3em]">Impact Value</label>
-                      <span className="text-2xl font-black text-white tabular-nums tracking-tighter">{newTaskImpact}</span>
+                      <label className="text-[8px] font-mono text-zinc-600 uppercase tracking-[0.3em] font-bold">Impact</label>
+                      <span className="text-[8px] font-mono text-white">{newTaskImpact}</span>
                     </div>
                     <input 
                       type="range"
@@ -422,13 +471,13 @@ export default function Tasks() {
                       max="10"
                       value={newTaskImpact}
                       onChange={(e) => setNewTaskImpact(parseInt(e.target.value))}
-                      className="w-full h-1 bg-white/5 rounded-none appearance-none cursor-pointer accent-white"
+                      className="w-full h-1 bg-white/5 rounded-full appearance-none cursor-pointer accent-white"
                     />
                   </div>
-                  <div className="space-y-8">
+                  <div className="space-y-2">
                     <div className="flex justify-between items-center">
-                      <label className="text-[10px] font-mono text-zinc-600 uppercase tracking-[0.3em]">Effort Required</label>
-                      <span className="text-2xl font-black text-zinc-500 tabular-nums tracking-tighter">{newTaskEffort}</span>
+                      <label className="text-[8px] font-mono text-zinc-600 uppercase tracking-[0.3em] font-bold">Effort</label>
+                      <span className="text-[8px] font-mono text-white">{newTaskEffort}</span>
                     </div>
                     <input 
                       type="range"
@@ -436,24 +485,24 @@ export default function Tasks() {
                       max="10"
                       value={newTaskEffort}
                       onChange={(e) => setNewTaskEffort(parseInt(e.target.value))}
-                      className="w-full h-1 bg-white/5 rounded-none appearance-none cursor-pointer accent-zinc-500"
+                      className="w-full h-1 bg-white/5 rounded-full appearance-none cursor-pointer accent-zinc-500"
                     />
                   </div>
                 </div>
 
-                <div className="flex gap-8 pt-12">
+                <div className="flex gap-3 pt-2">
                   <button
                     type="button"
                     onClick={() => setIsAddingTask(false)}
-                    className="flex-1 py-5 text-[10px] font-bold uppercase tracking-[0.3em] text-zinc-600 hover:text-white transition-all"
+                    className="flex-1 py-2 text-[8px] font-bold uppercase tracking-[0.3em] text-zinc-600 hover:text-white transition-all"
                   >
                     Abort
                   </button>
                   <button
                     type="submit"
-                    className="enterprise-button flex-1 py-5"
+                    className="enterprise-button flex-1 py-2 text-[8px] rounded-lg"
                   >
-                    Commit Protocol
+                    Commit
                   </button>
                 </div>
               </form>
@@ -461,6 +510,118 @@ export default function Tasks() {
           </div>
         )}
       </AnimatePresence>
+    </div>
+  );
+}
+
+function TaskItem({ task, subjects, tomorrowStr, onToggle, onDelete }: { 
+  task: Task, 
+  subjects: Subject[], 
+  tomorrowStr: string,
+  onToggle: (id: string) => void,
+  onDelete: (id: string) => void
+}) {
+  return (
+    <motion.div
+      layout
+      initial={{ opacity: 0, y: 15 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, scale: 0.98 }}
+      className={cn(
+        "enterprise-card group transition-all duration-500 relative overflow-hidden",
+        task.completed ? "opacity-40 border-zinc-900" : "hover:border-white/40"
+      )}
+    >
+      <div className="scan-line opacity-0 group-hover:opacity-100 transition-opacity duration-1000" />
+      
+      <div className="p-8 flex items-start gap-8 relative z-10">
+        <button 
+          onClick={() => onToggle(task.id)}
+          className={cn(
+            "mt-1 p-1 transition-all transform hover:scale-125",
+            task.completed ? "text-white" : "text-zinc-800 hover:text-white"
+          )}
+        >
+          {task.completed ? <CheckCircle2 className="w-8 h-8" /> : <Circle className="w-8 h-8" />}
+        </button>
+
+        <div className="flex-1 min-w-0">
+          <div className="flex flex-wrap items-center gap-4 mb-4">
+            <h4 className={cn(
+              "text-xl font-black uppercase tracking-tighter truncate leading-none",
+              task.completed ? "line-through text-zinc-600" : "text-white"
+            )}>
+              {task.title}
+            </h4>
+            <div className="flex items-center gap-3">
+              {task.dueDate === tomorrowStr && (
+                <span className="badge bg-white/10 text-white border-white/20">
+                  Tomorrow
+                </span>
+              )}
+              {task.subjectId && (
+                <span className="badge badge-zinc">
+                  {subjects.find(s => s.id === task.subjectId)?.name}
+                </span>
+              )}
+              <span className={cn(
+                "badge",
+                calculateSNR(task, subjects.find(s => s.id === task.subjectId)) >= 2 
+                  ? "badge-brand" 
+                  : "badge-zinc"
+              )}>
+                SNR: {calculateSNR(task, subjects.find(s => s.id === task.subjectId)).toFixed(1)}
+              </span>
+            </div>
+          </div>
+          <div className="flex items-center gap-12">
+            {task.description && (
+              <p className="text-[10px] text-zinc-500 font-mono uppercase tracking-[0.2em] line-clamp-1 flex-1">
+                {task.description}
+              </p>
+            )}
+            <div className="flex items-center gap-8 shrink-0">
+              <div className="flex items-center gap-3">
+                <span className="text-[9px] font-mono text-zinc-700 uppercase tracking-widest">Impact</span>
+                <div className="flex gap-1.5">
+                  {[...Array(5)].map((_, i) => (
+                    <div key={i} className={cn("w-2 h-4 transition-all duration-500", i < (task.impact / 2) ? "bg-white" : "bg-zinc-900")} />
+                  ))}
+                </div>
+              </div>
+              <div className="flex items-center gap-3">
+                <span className="text-[9px] font-mono text-zinc-700 uppercase tracking-widest">Effort</span>
+                <div className="flex gap-1.5">
+                  {[...Array(5)].map((_, i) => (
+                    <div key={i} className={cn("w-2 h-4 transition-all duration-500", i < (task.effort / 2) ? "bg-zinc-500" : "bg-zinc-900")} />
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-4 opacity-0 group-hover:opacity-100 transition-all duration-500">
+          <button 
+            onClick={() => onDelete(task.id)}
+            className="p-3 text-zinc-800 hover:text-white hover:bg-white/5 transition-all"
+          >
+            <Trash2 className="w-5 h-5" />
+          </button>
+        </div>
+      </div>
+    </motion.div>
+  );
+}
+
+function EmptyTasks() {
+  return (
+    <div className="h-96 flex flex-col items-center justify-center enterprise-card border-dashed border-white/10 opacity-40">
+      <div className="p-8 bg-white/5 border border-white/10 mb-8">
+        <AlertCircle className="w-12 h-12 text-zinc-700" />
+      </div>
+      <p className="text-lg font-black text-white uppercase tracking-[0.3em]">No Active Objectives</p>
+      <p className="text-[10px] font-mono text-zinc-600 uppercase tracking-[0.2em] mt-4">Initialize a new task to begin your study cycle.</p>
     </div>
   );
 }
