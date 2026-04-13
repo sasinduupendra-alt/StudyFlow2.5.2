@@ -23,7 +23,18 @@ export default function ActiveSessionBar() {
       }, 1000);
     }
     return () => clearInterval(interval);
-  }, [activeSession?.subjectId, activeSession?.topicId, isPaused, tickActiveSession]);
+  }, [activeSession?.id, isPaused, tickActiveSession]);
+
+  // Handle session completion
+  useEffect(() => {
+    if (activeSession && activeSession.elapsedSeconds >= activeSession.totalSeconds) {
+      setIsPaused(true);
+      setIsFocusMode(false);
+      setIsNowPlayingOpen(true);
+      // We don't call addToast here because it might cause multiple toasts if not careful
+      // But it's generally safe in a useEffect with proper dependencies
+    }
+  }, [activeSession?.elapsedSeconds, activeSession?.totalSeconds, setIsPaused, setIsFocusMode, setIsNowPlayingOpen]);
 
   if (!activeSession) return null;
 
@@ -36,17 +47,6 @@ export default function ActiveSessionBar() {
     const secs = seconds % 60;
     return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
-
-  // Handle session completion
-  useEffect(() => {
-    if (activeSession && activeSession.elapsedSeconds >= activeSession.totalSeconds) {
-      setIsPaused(true);
-      setIsFocusMode(false);
-      setIsNowPlayingOpen(true);
-      // We don't call addToast here because it might cause multiple toasts if not careful
-      // But it's generally safe in a useEffect with proper dependencies
-    }
-  }, [activeSession?.elapsedSeconds, activeSession?.totalSeconds, setIsPaused, setIsFocusMode, setIsNowPlayingOpen]);
 
   return (
     <motion.div 

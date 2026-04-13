@@ -1,15 +1,15 @@
 import React, { useMemo, useCallback } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Zap, Clock, Target, Flame, Coffee, Play, Sparkles, TrendingUp, BookOpen, Brain, ChevronRight, Trophy } from 'lucide-react';
+import { Zap, Clock, Target, Flame, Coffee, Play, Sparkles, TrendingUp, BookOpen, Brain, ChevronRight, Trophy, LogIn } from 'lucide-react';
 import { useAppStore } from '../store/useAppStore';
 import { cn } from '../lib/utils';
+import { useNavigate } from 'react-router-dom';
+import { auth, googleProvider, signInWithPopup } from '../firebase';
 import CurrentScheduleBlock from '../components/CurrentScheduleBlock';
 import Planner from '../components/Planner';
 import AIStudyPlanner from '../components/AIStudyPlanner';
 import TopicCard from '../components/TopicCard';
 import SubjectCard from '../components/SubjectCard';
-import { useNavigate } from 'react-router-dom';
-
 import { CardSkeleton } from '../components/ui/Skeleton';
 
 export default function Home() {
@@ -101,6 +101,14 @@ export default function Home() {
     }
   };
 
+  const handleLogin = async () => {
+    try {
+      await signInWithPopup(auth, googleProvider);
+    } catch (error) {
+      console.error('Login failed:', error);
+    }
+  };
+
   const itemVariants = {
     hidden: { opacity: 0, y: 15 },
     show: { opacity: 1, y: 0 }
@@ -115,30 +123,43 @@ export default function Home() {
     >
       {/* Welcome Header */}
       <motion.header variants={itemVariants} className="flex flex-col md:flex-row md:items-end justify-between gap-12 pb-8 border-b border-white/10">
-        <div>
+        <div className="flex-1">
           <h1 className="text-4xl md:text-6xl font-black text-white uppercase tracking-tighter leading-none">
             Welcome, <span className="text-brand drop-shadow-[0_0_15px_var(--color-brand-glow)]">{user?.displayName?.split(' ')[0] || 'Scholar'}</span>
           </h1>
           <p className="text-zinc-500 text-[10px] font-mono uppercase tracking-[0.3em] mt-4 flex items-center gap-3">
             <span className="w-1.5 h-1.5 bg-brand rounded-full animate-pulse shadow-[0_0_8px_var(--color-brand-glow)]" />
-            Neural Link: Established // Protocol 01
+            Neural Link: {user ? 'Established // Protocol 01' : 'Awaiting Connection // Protocol 00'}
           </p>
         </div>
-        <div className="flex items-center gap-12">
-          <div className="text-right">
-            <p className="text-[9px] font-mono text-zinc-500 uppercase tracking-[0.3em] leading-none mb-2">Streak</p>
-            <p className="text-3xl font-black text-white tabular-nums leading-none tracking-tighter flex items-center justify-end gap-2">
-              {userProfile?.streak || 0} <Flame className="w-5 h-5 text-zinc-600" />
-            </p>
+
+        {!user ? (
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={handleLogin}
+            className="enterprise-button px-10 py-5 flex items-center gap-3"
+          >
+            <LogIn className="w-5 h-5" />
+            Establish Neural Link
+          </motion.button>
+        ) : (
+          <div className="flex items-center gap-12">
+            <div className="text-right">
+              <p className="text-[9px] font-mono text-zinc-500 uppercase tracking-[0.3em] leading-none mb-2">Streak</p>
+              <p className="text-3xl font-black text-white tabular-nums leading-none tracking-tighter flex items-center justify-end gap-2">
+                {userProfile?.streak || 0} <Flame className="w-5 h-5 text-zinc-600" />
+              </p>
+            </div>
+            <div className="w-[1px] h-12 bg-white/10" />
+            <div className="text-right">
+              <p className="text-[9px] font-mono text-zinc-500 uppercase tracking-[0.3em] leading-none mb-2">Level</p>
+              <p className="text-3xl font-black text-white tabular-nums leading-none tracking-tighter flex items-center justify-end gap-2">
+                {userProfile?.level || 1} <Trophy className="w-5 h-5 text-zinc-600" />
+              </p>
+            </div>
           </div>
-          <div className="w-[1px] h-12 bg-white/10" />
-          <div className="text-right">
-            <p className="text-[9px] font-mono text-zinc-500 uppercase tracking-[0.3em] leading-none mb-2">Level</p>
-            <p className="text-3xl font-black text-white tabular-nums leading-none tracking-tighter flex items-center justify-end gap-2">
-              {userProfile?.level || 1} <Trophy className="w-5 h-5 text-zinc-600" />
-            </p>
-          </div>
-        </div>
+        )}
       </motion.header>
 
       {/* Bento Grid Stats */}

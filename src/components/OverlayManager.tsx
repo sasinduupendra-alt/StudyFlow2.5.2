@@ -4,6 +4,8 @@ import { useAppStore } from '../store/useAppStore';
 import StudyLogForm from './StudyLogForm';
 import FocusMode from './FocusMode';
 
+import { Subject } from '../types';
+
 interface OverlayManagerProps {
   handleSaveLog: (log: any) => void;
   finishSession: () => void;
@@ -18,14 +20,26 @@ export default function OverlayManager({ handleSaveLog, finishSession }: Overlay
   const isPaused = useAppStore(state => state.isPaused);
   const setIsPaused = useAppStore(state => state.setIsPaused);
 
-  const activeSubject = subjects.find(s => s.id === activeSession?.subjectId);
+  const activeSubject = subjects.find(s => s.id === activeSession?.subjectId) || {
+    id: activeSession?.subjectId || 'unknown',
+    name: 'Unknown Subject',
+    topics: [],
+    readiness: 0,
+    focus: 0,
+    weakCount: 0,
+    status: 'Strong',
+    priorityScore: 0,
+    gradient: 'from-zinc-500/20 to-zinc-900/40',
+    image: '',
+    score: 0
+  } as Subject;
   const isSessionComplete = activeSession ? activeSession.elapsedSeconds >= activeSession.totalSeconds : false;
 
   return (
     <>
       {/* Focus Mode Overlay */}
       <AnimatePresence>
-        {isFocusMode && activeSession && activeSubject && (
+        {isFocusMode && activeSession && (
           <FocusMode 
             key="focus-mode-overlay"
             subject={activeSubject}

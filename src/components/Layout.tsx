@@ -286,6 +286,42 @@ export default function Layout() {
           </nav>
 
           <div className="pt-6 border-t border-white/10 space-y-2 mt-4">
+            {!user ? (
+              <button
+                onClick={handleLogin}
+                className="w-full flex items-center gap-4 px-4 py-3.5 text-brand hover:bg-brand/10 rounded-2xl transition-all duration-300 group"
+              >
+                <LogIn className="w-5 h-5 group-hover:scale-110 transition-transform" />
+                {isSidebarOpen && (
+                  <motion.span
+                    initial={{ opacity: 0, x: -10 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: -10 }}
+                    className="text-[13px] font-bold uppercase tracking-widest"
+                  >
+                    Sign In
+                  </motion.span>
+                )}
+              </button>
+            ) : (
+              <button
+                onClick={handleLogout}
+                className="w-full flex items-center gap-4 px-4 py-3.5 text-zinc-500 hover:text-red-500 hover:bg-red-500/5 rounded-2xl transition-all duration-300 group"
+              >
+                <LogOut className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                {isSidebarOpen && (
+                  <motion.span
+                    initial={{ opacity: 0, x: -10 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: -10 }}
+                    className="text-[13px] font-medium"
+                  >
+                    Sign Out
+                  </motion.span>
+                )}
+              </button>
+            )}
+            
             <button
               onClick={() => setIsSidebarOpen(!isSidebarOpen)}
               className="w-full flex items-center gap-4 px-4 py-3.5 text-zinc-400 hover:text-white hover:bg-white/5 rounded-2xl transition-all duration-300 group hidden md:flex"
@@ -349,23 +385,36 @@ export default function Layout() {
           </div>
 
           <div className="flex items-center gap-6">
-            <div className="flex items-center gap-3 px-4 py-2 bg-brand/5 border border-brand/20 rounded-full">
-              <div className="w-2 h-2 bg-brand rounded-full shadow-[0_0_8px_var(--color-brand-glow)]" />
-              <span className="text-[11px] font-medium text-brand">Sync: Active</span>
-            </div>
-            <div className="flex items-center gap-4">
-              <div className="text-right hidden xl:block">
-                <p className="text-sm font-semibold text-white">{user?.displayName?.split(' ')[0] || 'Guest'}</p>
-                <p className="text-[11px] text-zinc-400 font-medium">Level {userProfile?.level || 1}</p>
+            {!user ? (
+              <button 
+                onClick={handleLogin}
+                className="flex items-center gap-2 px-6 py-2.5 bg-brand text-black rounded-full font-bold text-sm hover:bg-brand-bright transition-all shadow-[0_0_15px_var(--color-brand-glow)]"
+              >
+                <LogIn className="w-4 h-4" />
+                Sign In
+              </button>
+            ) : (
+              <div className="flex items-center gap-3 px-4 py-2 bg-brand/5 border border-brand/20 rounded-full">
+                <div className="w-2 h-2 bg-brand rounded-full shadow-[0_0_8px_var(--color-brand-glow)]" />
+                <span className="text-[11px] font-medium text-brand">Sync: Active</span>
               </div>
-              <div className="w-10 h-10 bg-white/10 border border-white/20 flex items-center justify-center overflow-hidden rounded-full hover:border-white/40 transition-all duration-300 cursor-pointer shadow-sm" onClick={() => navigate('/settings')}>
-                {user?.photoURL ? (
-                  <img src={user.photoURL} alt="" className="w-full h-full object-cover" referrerPolicy="no-referrer" />
-                ) : (
-                  <User className="w-5 h-5 text-zinc-400" />
-                )}
+            )}
+            
+            {user && (
+              <div className="flex items-center gap-4">
+                <div className="text-right hidden xl:block">
+                  <p className="text-sm font-semibold text-white">{user.displayName?.split(' ')[0]}</p>
+                  <p className="text-[11px] text-zinc-400 font-medium">Level {userProfile?.level || 1}</p>
+                </div>
+                <div className="w-10 h-10 bg-white/10 border border-white/20 flex items-center justify-center overflow-hidden rounded-full hover:border-white/40 transition-all duration-300 cursor-pointer shadow-sm" onClick={() => navigate('/settings')}>
+                  {user.photoURL ? (
+                    <img src={user.photoURL} alt="" className="w-full h-full object-cover" referrerPolicy="no-referrer" />
+                  ) : (
+                    <User className="w-5 h-5 text-zinc-400" />
+                  )}
+                </div>
               </div>
-            </div>
+            )}
           </div>
         </header>
 
@@ -382,8 +431,6 @@ export default function Layout() {
         <AnimatePresence>
           <ActiveSessionBar />
         </AnimatePresence>
-
-        <OverlayManager handleSaveLog={handleSaveLog} finishSession={finishSession} />
       </main>
 
       {/* Right Sidebar - Now Playing */}
@@ -429,6 +476,7 @@ export default function Layout() {
       </div>
 
       <AIAssistant />
+      <OverlayManager handleSaveLog={handleSaveLog} finishSession={finishSession} />
     </div>
   );
 }

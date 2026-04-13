@@ -13,7 +13,7 @@ const studyLogSchema = z.object({
   minutes: z.number().min(0).max(59),
   focusLevel: z.number().min(1).max(5),
   notes: z.string().optional(),
-  sessionType: z.enum(['self-study', 'tuition', 'exam']).default('self-study'),
+  sessionType: z.enum(['self-study', 'tuition', 'exam']),
 }).refine((data) => (data.hours * 60 + data.minutes) > 0, {
   message: "Duration must be greater than 0",
   path: ["minutes"],
@@ -57,7 +57,7 @@ export default function StudyLogForm({ subjects, initialData, onSave, onClose }:
       duration: (data.hours * 60) + data.minutes,
       focusLevel: data.focusLevel,
       notes: data.notes || '',
-      sessionType: data.sessionType,
+      sessionType: data.sessionType as 'self-study' | 'tuition' | 'exam',
     });
   };
 

@@ -9,6 +9,7 @@ export interface UISlice {
   isLoggingSession: boolean;
   setIsLoggingSession: (isLoggingSession: boolean) => void;
   activeSession: {
+    id: string;
     subjectId: string;
     topicId: string;
     elapsedSeconds: number;
@@ -54,6 +55,7 @@ export const createUISlice: StateCreator<UISlice> = (set) => ({
     isFocusMode: true,
     isPaused: false,
     activeSession: {
+      id: Math.random().toString(36).substr(2, 9),
       subjectId,
       topicId,
       elapsedSeconds: 0,
