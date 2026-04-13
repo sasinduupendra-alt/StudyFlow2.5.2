@@ -46,7 +46,7 @@ export default function OverlayManager({ handleSaveLog, finishSession }: Overlay
             subjects={subjects}
             initialData={{
               subjectId: activeSession.subjectId,
-              topicId: activeSession.topicId,
+              topicIds: [activeSession.topicId],
               duration: Math.floor(activeSession.elapsedSeconds / 60)
             }}
             onSave={handleSaveLog}

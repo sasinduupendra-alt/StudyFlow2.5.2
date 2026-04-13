@@ -36,5 +36,28 @@ export function calculateSNR(task: Task, subject?: Subject) {
   // Frequency multiplier
   const frequencyFactor = task.frequency === 'Daily' ? 1.2 : 1.0;
 
-  return baseSNR * urgencyFactor * subjectFactor * frequencyFactor;
+  // Recency of last review (Spaced Repetition)
+  let recencyFactor = 1;
+  if (task.lastReviewed) {
+    const lastReview = new Date(task.lastReviewed);
+    const now = new Date();
+    const diffDays = Math.ceil((now.getTime() - lastReview.getTime()) / (1000 * 60 * 60 * 24));
+    
+    // The longer it's been since the last review, the higher the priority (SNR)
+    if (diffDays > 30) recencyFactor = 1.5;
+    else if (diffDays > 14) recencyFactor = 1.3;
+    else if (diffDays > 7) recencyFactor = 1.1;
+    else if (diffDays <= 2) recencyFactor = 0.8; // Recently reviewed, lower priority
+  }
+
+  // Difficulty level (Practice tasks)
+  let difficultyFactor = 1;
+  if (task.difficulty) {
+    // Higher difficulty means higher priority (more signal needed to overcome it)
+    if (task.difficulty >= 8) difficultyFactor = 1.3;
+    else if (task.difficulty >= 4) difficultyFactor = 1.1;
+    else difficultyFactor = 0.9;
+  }
+
+  return baseSNR * urgencyFactor * subjectFactor * frequencyFactor * recencyFactor * difficultyFactor;
 }

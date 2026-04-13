@@ -117,10 +117,10 @@ export default function Home() {
       <motion.header variants={itemVariants} className="flex flex-col md:flex-row md:items-end justify-between gap-12 pb-8 border-b border-white/10">
         <div>
           <h1 className="text-4xl md:text-6xl font-black text-white uppercase tracking-tighter leading-none">
-            Welcome, <span className="text-white">{user?.displayName?.split(' ')[0] || 'Scholar'}</span>
+            Welcome, <span className="text-brand drop-shadow-[0_0_15px_var(--color-brand-glow)]">{user?.displayName?.split(' ')[0] || 'Scholar'}</span>
           </h1>
           <p className="text-zinc-500 text-[10px] font-mono uppercase tracking-[0.3em] mt-4 flex items-center gap-3">
-            <span className="w-1.5 h-1.5 bg-white animate-pulse" />
+            <span className="w-1.5 h-1.5 bg-brand rounded-full animate-pulse shadow-[0_0_8px_var(--color-brand-glow)]" />
             Neural Link: Established // Protocol 01
           </p>
         </div>

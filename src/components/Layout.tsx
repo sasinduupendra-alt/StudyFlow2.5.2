@@ -19,6 +19,7 @@ import ActiveSessionBar from './ActiveSessionBar';
 import OverlayManager from './OverlayManager';
 import { useFirestoreSync } from '../hooks/useFirestoreSync';
 import ErrorBoundary from './ErrorBoundary';
+import AIAssistant from './AIAssistant';
 
 export default function Layout() {
   const location = useLocation();
@@ -49,7 +50,9 @@ export default function Layout() {
   const studyLogs = useAppStore(state => state.studyLogs);
   const setStudyLogs = useAppStore(state => state.setStudyLogs);
 
-  const handleSaveLog = async (log: { subjectId: string, topicId: string, duration: number, focusLevel: number, notes: string }) => {
+  const updateTopicSRS = useAppStore(state => state.updateTopicSRS);
+
+  const handleSaveLog = async (log: { subjectId: string, topicIds: string[], duration: number, focusLevel: number, notes: string, sessionType: 'self-study' | 'tuition' | 'exam' }) => {
     const id = Math.random().toString(36).substr(2, 9);
     const newLog = {
       ...log,
@@ -59,6 +62,14 @@ export default function Layout() {
 
     // Update local logs
     setStudyLogs([...studyLogs, newLog]);
+
+    // Update SRS for all covered topics
+    if (log.topicIds && log.topicIds.length > 0) {
+      log.topicIds.forEach(topicId => {
+        // Performance is based on focus level (1-5)
+        updateTopicSRS(log.subjectId, topicId, log.focusLevel);
+      });
+    }
 
     // Calculate XP and update profile
     const xpEarned = log.duration * log.focusLevel * 10;
@@ -249,15 +260,15 @@ export default function Layout() {
                   end={item.path === '/'}
                   onClick={() => setIsMobileMenuOpen(false)}
                   className={({ isActive }) => cn(
-                    "flex items-center gap-4 px-4 py-3.5 transition-all duration-300 group relative rounded-2xl",
+                    "flex items-center gap-4 px-4 py-3.5 transition-all duration-300 group relative rounded-2xl border",
                     isActive 
-                      ? "text-white bg-white/10 shadow-sm" 
-                      : "text-zinc-400 hover:text-white hover:bg-white/5"
+                      ? "text-brand bg-brand/10 shadow-[0_0_15px_var(--color-brand-dim)] border-brand/20" 
+                      : "text-zinc-400 hover:text-white hover:bg-white/5 border-transparent"
                   )}
                 >
                   <item.icon className={cn(
                     "w-5 h-5 transition-all duration-300",
-                    isActive ? "scale-105 text-white" : "group-hover:scale-105 group-hover:text-white"
+                    isActive ? "scale-105 text-brand" : "group-hover:scale-105 group-hover:text-white"
                   )} />
                   {isSidebarOpen && (
                     <motion.span
@@ -338,9 +349,9 @@ export default function Layout() {
           </div>
 
           <div className="flex items-center gap-6">
-            <div className="flex items-center gap-3 px-4 py-2 bg-white/5 border border-white/10 rounded-full">
-              <div className="w-2 h-2 bg-green-500 rounded-full shadow-[0_0_8px_rgba(34,197,94,0.8)]" />
-              <span className="text-[11px] font-medium text-zinc-300">Sync: Active</span>
+            <div className="flex items-center gap-3 px-4 py-2 bg-brand/5 border border-brand/20 rounded-full">
+              <div className="w-2 h-2 bg-brand rounded-full shadow-[0_0_8px_var(--color-brand-glow)]" />
+              <span className="text-[11px] font-medium text-brand">Sync: Active</span>
             </div>
             <div className="flex items-center gap-4">
               <div className="text-right hidden xl:block">
@@ -387,7 +398,7 @@ export default function Layout() {
       </AnimatePresence>
 
       {/* Toast Notifications */}
-      <div className="fixed bottom-10 right-10 z-[100] flex flex-col gap-4 pointer-events-none">
+      <div className="fixed bottom-10 right-24 z-[100] flex flex-col gap-4 pointer-events-none">
         <AnimatePresence>
           {toasts.map((toast) => (
             <motion.div
@@ -416,6 +427,8 @@ export default function Layout() {
           ))}
         </AnimatePresence>
       </div>
+
+      <AIAssistant />
     </div>
   );
 }

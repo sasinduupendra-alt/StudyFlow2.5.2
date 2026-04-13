@@ -8,11 +8,12 @@ import * as z from 'zod';
 
 const studyLogSchema = z.object({
   subjectId: z.string().min(1, 'Please select a subject'),
-  topicId: z.string().min(1, 'Please select a topic'),
+  topicIds: z.array(z.string()).min(1, 'Please select at least one topic'),
   hours: z.number().min(0),
   minutes: z.number().min(0).max(59),
   focusLevel: z.number().min(1).max(5),
   notes: z.string().optional(),
+  sessionType: z.enum(['self-study', 'tuition', 'exam']).default('self-study'),
 }).refine((data) => (data.hours * 60 + data.minutes) > 0, {
   message: "Duration must be greater than 0",
   path: ["minutes"],
@@ -24,10 +25,11 @@ interface StudyLogFormProps {
   subjects: Subject[];
   initialData?: {
     subjectId: string;
-    topicId: string;
+    topicIds?: string[];
     duration: number;
+    sessionType?: 'self-study' | 'tuition' | 'exam';
   };
-  onSave: (log: { subjectId: string, topicId: string, duration: number, focusLevel: number, notes: string }) => void;
+  onSave: (log: { subjectId: string, topicIds: string[], duration: number, focusLevel: number, notes: string, sessionType: 'self-study' | 'tuition' | 'exam' }) => void;
   onClose: () => void;
 }
 
@@ -36,11 +38,12 @@ export default function StudyLogForm({ subjects, initialData, onSave, onClose }:
     resolver: zodResolver(studyLogSchema),
     defaultValues: {
       subjectId: initialData?.subjectId || subjects[0]?.id || '',
-      topicId: initialData?.topicId || subjects.find(s => s.id === (initialData?.subjectId || subjects[0]?.id))?.topics[0]?.id || '',
+      topicIds: initialData?.topicIds || (subjects.find(s => s.id === (initialData?.subjectId || subjects[0]?.id))?.topics[0]?.id ? [subjects.find(s => s.id === (initialData?.subjectId || subjects[0]?.id))!.topics[0].id] : []),
       hours: initialData ? Math.floor(initialData.duration / 60) : 1,
       minutes: initialData ? initialData.duration % 60 : 30,
       focusLevel: 4,
       notes: '',
+      sessionType: initialData?.sessionType || 'self-study',
     }
   });
 
@@ -50,10 +53,11 @@ export default function StudyLogForm({ subjects, initialData, onSave, onClose }:
   const onSubmit = (data: StudyLogFormData) => {
     onSave({
       subjectId: data.subjectId,
-      topicId: data.topicId,
+      topicIds: data.topicIds,
       duration: (data.hours * 60) + data.minutes,
       focusLevel: data.focusLevel,
       notes: data.notes || '',
+      sessionType: data.sessionType,
     });
   };
 
@@ -99,7 +103,8 @@ export default function StudyLogForm({ subjects, initialData, onSave, onClose }:
                 {...register('subjectId', {
                   onChange: (e) => {
                     const sub = subjects.find(s => s.id === e.target.value);
-                    if (sub) setValue('topicId', sub.topics[0]?.id || '');
+                    if (sub && sub.topics.length > 0) setValue('topicIds', [sub.topics[0].id]);
+                    else setValue('topicIds', []);
                   }
                 })}
                 className="w-full bg-black/40 border border-border-dim px-4 py-3 text-[10px] font-mono uppercase outline-none focus:border-white/50 transition-colors rounded-none"
@@ -108,13 +113,32 @@ export default function StudyLogForm({ subjects, initialData, onSave, onClose }:
               </select>
             </div>
             <div className="space-y-1">
-              <label className="hud-label !text-zinc-500">TOPIC_IDENTIFIER</label>
+              <label className="hud-label !text-zinc-500">TOPIC_IDENTIFIERS (MULTI-SELECT)</label>
               <select 
-                {...register('topicId')}
-                className="w-full bg-black/40 border border-border-dim px-4 py-3 text-[10px] font-mono uppercase outline-none focus:border-white/50 transition-colors rounded-none"
+                multiple
+                {...register('topicIds')}
+                className="w-full bg-black/40 border border-border-dim px-4 py-3 text-[10px] font-mono uppercase outline-none focus:border-white/50 transition-colors rounded-none h-24"
               >
                 {selectedSubject?.topics.map(t => <option key={t.id} value={t.id}>{t.title}</option>)}
               </select>
+              <p className="text-[8px] text-zinc-500 font-mono uppercase">Hold Ctrl/Cmd to select multiple</p>
+            </div>
+          </div>
+
+          <div className="space-y-1">
+            <label className="hud-label !text-zinc-500">SESSION_TYPE</label>
+            <div className="flex gap-2">
+              {['self-study', 'tuition', 'exam'].map((type) => (
+                <label key={type} className="flex-1 flex items-center gap-2 bg-black/40 border border-border-dim px-4 py-3 cursor-pointer hover:border-white/50 transition-colors">
+                  <input 
+                    type="radio" 
+                    value={type} 
+                    {...register('sessionType')}
+                    className="accent-white"
+                  />
+                  <span className="text-[10px] font-mono uppercase">{type}</span>
+                </label>
+              ))}
             </div>
           </div>
 

@@ -96,8 +96,8 @@ const SortableActivity = ({ activity, day, onEdit, tasks, subjects, onToggleTask
               <span className="text-[10px] font-mono text-zinc-500 tabular-nums uppercase tracking-[0.2em]">{activity.time}</span>
             </div>
             <div className="flex items-center gap-4">
-              {activity.type === 'study' && <BookOpen className="w-4 h-4 text-white" />}
-              {activity.type === 'tuition' && <Zap className="w-4 h-4 text-white" />}
+              {activity.type === 'study' && <BookOpen className="w-4 h-4 text-brand" />}
+              {activity.type === 'tuition' && <Zap className="w-4 h-4 text-brand" />}
               {activity.type === 'break' && <Clock className="w-4 h-4 text-zinc-500" />}
               <button 
                 onClick={() => onEdit(activity)}
@@ -338,13 +338,13 @@ export default function ScheduleView({ schedule, onManageSchedule }: ScheduleVie
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-12 mb-16">
         <div className="space-y-6">
           <div className="flex items-center gap-4">
-            <div className="w-10 h-10 rounded-none bg-transparent border border-white/10 flex items-center justify-center text-white">
+            <div className="w-10 h-10 rounded-none bg-brand/10 border border-brand/30 flex items-center justify-center text-brand shadow-[0_0_20px_var(--color-brand-glow)]">
               <Calendar className="w-5 h-5" />
             </div>
-            <span className="text-[9px] font-mono text-white uppercase tracking-[0.4em]">Temporal Matrix</span>
+            <span className="text-[9px] font-mono text-brand uppercase tracking-[0.4em]">Temporal Matrix</span>
           </div>
           <h2 className="text-5xl md:text-8xl font-black text-white tracking-tighter uppercase leading-none">
-            Daily <span className="text-white">Schedule</span>
+            Daily <span className="text-brand drop-shadow-[0_0_15px_var(--color-brand-glow)]">Schedule</span>
           </h2>
           <p className="text-zinc-600 text-[10px] font-mono uppercase tracking-[0.2em] max-w-xl leading-relaxed">
             Neural-synchronized study protocols and tuition alignment for the current operational cycle.
@@ -416,13 +416,13 @@ export default function ScheduleView({ schedule, onManageSchedule }: ScheduleVie
       </div>
 
       {/* Day Selector */}
-      <div className="flex overflow-x-auto scrollbar-hide gap-2 p-1 bg-transparent border border-white/5 rounded-none w-fit max-w-full">
+      <div className="flex overflow-x-auto scrollbar-hide gap-2 p-1 bg-transparent border border-white/5 rounded-full w-fit max-w-full">
         {days.map((day) => (
           <button
             key={day}
             onClick={() => setSelectedDay(day)}
             className={cn(
-              "px-6 py-3 rounded-none text-[10px] font-mono uppercase tracking-[0.2em] transition-all whitespace-nowrap relative overflow-hidden group",
+              "px-6 py-3 rounded-full text-[10px] font-mono uppercase tracking-[0.2em] transition-all whitespace-nowrap relative overflow-hidden group",
               selectedDay === day 
                 ? "text-black bg-white" 
                 : "text-zinc-600 hover:text-white hover:bg-white/5"

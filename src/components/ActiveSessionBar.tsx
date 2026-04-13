@@ -60,7 +60,7 @@ export default function ActiveSessionBar() {
         {/* Progress Bar (Top) */}
         <div className="absolute top-0 left-0 right-0 h-[2px] bg-white/5 rounded-t-full overflow-hidden">
           <motion.div 
-            className="h-full bg-white shadow-[0_0_10px_rgba(255,255,255,0.5)]"
+            className="h-full bg-brand shadow-[0_0_10px_var(--color-brand-glow)]"
             initial={{ width: 0 }}
             animate={{ width: `${progress}%` }}
             transition={{ type: "spring", bounce: 0, duration: 0.5 }}
@@ -69,10 +69,10 @@ export default function ActiveSessionBar() {
 
         <div className="flex items-center gap-4 shrink-0">
           <div 
-            className="w-10 h-10 bg-white rounded-full flex items-center justify-center shrink-0 shadow-md cursor-pointer hover:scale-105 transition-transform"
+            className="w-10 h-10 bg-brand/10 border border-brand/30 rounded-full flex items-center justify-center shrink-0 shadow-[0_0_15px_var(--color-brand-glow)] cursor-pointer hover:scale-105 transition-transform"
             onClick={() => setIsNowPlayingOpen(!isNowPlayingOpen)}
           >
-            <Brain className="w-5 h-5 text-black" />
+            <Brain className="w-5 h-5 text-brand" />
           </div>
           <div className="overflow-hidden max-w-[200px]">
             <h4 className="text-sm font-semibold text-white truncate leading-none">
@@ -90,7 +90,7 @@ export default function ActiveSessionBar() {
           </button>
           <button 
             onClick={() => setIsPaused(!isPaused)}
-            className="w-12 h-12 bg-white text-black rounded-full flex items-center justify-center shadow-md hover:scale-105 transition-all duration-300"
+            className="w-12 h-12 bg-brand text-black rounded-full flex items-center justify-center shadow-[0_0_15px_var(--color-brand-glow)] hover:scale-105 transition-all duration-300"
           >
             {isPaused ? <Play className="w-5 h-5 fill-current ml-1" /> : <Pause className="w-5 h-5 fill-current" />}
           </button>

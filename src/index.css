@@ -1,14 +1,15 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@300;400;500;600;700;800&display=swap');
 @import "tailwindcss";
+@plugin "@tailwindcss/typography";
 
 @theme {
   --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
   
-  --color-brand: #ffffff;
-  --color-brand-glow: rgba(255, 255, 255, 0.1);
-  --color-brand-dim: rgba(255, 255, 255, 0.05);
-  --color-brand-bright: #ffffff;
+  --color-brand: #00e5ff;
+  --color-brand-glow: rgba(0, 229, 255, 0.15);
+  --color-brand-dim: rgba(0, 229, 255, 0.05);
+  --color-brand-bright: #80f2ff;
   
   --color-surface: #000000;
   --color-surface-raised: #050505;
@@ -114,17 +115,17 @@
     @apply px-3 py-1 rounded-full text-xs font-medium border backdrop-blur-md;
   }
 
-  .badge-brand { @apply bg-white/5 text-white border-white/30 shadow-[0_0_10px_rgba(255,255,255,0.1)]; }
+  .badge-brand { @apply bg-brand/10 text-brand border-brand/30 shadow-[0_0_10px_var(--color-brand-glow)]; }
   .badge-zinc { @apply bg-zinc-900/50 text-zinc-500 border-zinc-800; }
   .badge-success { @apply bg-success/5 text-success border-success/30 shadow-[0_0_10px_rgba(16,185,129,0.1)]; }
   .badge-danger { @apply bg-danger/5 text-danger border-danger/30 shadow-[0_0_10px_rgba(239,68,68,0.1)]; }
 
   .brand-glow {
-    @apply shadow-[0_0_20px_rgba(255,255,255,0.1)];
+    @apply shadow-[0_0_20px_var(--color-brand-glow)];
   }
 
   .brand-glow-strong {
-    @apply shadow-[0_0_30px_rgba(255,255,255,0.2)];
+    @apply shadow-[0_0_30px_var(--color-brand-glow)];
   }
 
   .neural-field {

@@ -21,6 +21,8 @@ export default function Tasks() {
   const [newTaskSubject, setNewTaskSubject] = useState('');
   const [newTaskImpact, setNewTaskImpact] = useState(5);
   const [newTaskEffort, setNewTaskEffort] = useState(5);
+  const [newTaskDifficulty, setNewTaskDifficulty] = useState(5);
+  const [newTaskLastReviewed, setNewTaskLastReviewed] = useState('');
   const [isForTomorrow, setIsForTomorrow] = useState(false);
 
   const todayStr = new Date().toISOString().split('T')[0];
@@ -59,6 +61,8 @@ export default function Tasks() {
       dueDate: isForTomorrow ? tomorrowStr : todayStr,
       impact: newTaskImpact,
       effort: newTaskEffort,
+      difficulty: newTaskDifficulty,
+      lastReviewed: newTaskLastReviewed || undefined,
     };
 
     // Update local store
@@ -78,6 +82,8 @@ export default function Tasks() {
     setNewTaskSubject('');
     setNewTaskImpact(5);
     setNewTaskEffort(5);
+    setNewTaskDifficulty(5);
+    setNewTaskLastReviewed('');
     setIsForTomorrow(false);
     setIsAddingTask(false);
   };
@@ -137,14 +143,14 @@ export default function Tasks() {
       >
         <div>
           <div className="flex items-center gap-4 mb-6">
-            <div className="w-12 h-12 bg-white flex items-center justify-center text-black shadow-[0_0_20px_rgba(255,255,255,0.2)]">
+            <div className="w-12 h-12 bg-brand/10 border border-brand/30 flex items-center justify-center text-brand shadow-[0_0_20px_var(--color-brand-glow)] rounded-xl">
               <ListTodo className="w-6 h-6" />
             </div>
-            <span className="text-[10px] font-mono text-white uppercase tracking-[0.4em]">Task Management</span>
+            <span className="text-[10px] font-mono text-brand uppercase tracking-[0.4em]">Task Management</span>
           </div>
-          <h2 className="text-5xl md:text-7xl font-black text-white uppercase tracking-tighter leading-none">Strategic <span className="text-white">Objectives</span></h2>
+          <h2 className="text-5xl md:text-7xl font-black text-white uppercase tracking-tighter leading-none">Strategic <span className="text-brand drop-shadow-[0_0_15px_var(--color-brand-glow)]">Objectives</span></h2>
           <p className="text-zinc-600 text-[10px] font-mono uppercase tracking-[0.3em] mt-8 flex items-center gap-3">
-            <span className="w-2 h-2 bg-white animate-pulse" />
+            <span className="w-2 h-2 bg-brand rounded-full animate-pulse shadow-[0_0_8px_var(--color-brand-glow)]" />
             Priority SNR Index: Active // System Ready
           </p>
         </div>
@@ -169,19 +175,19 @@ export default function Tasks() {
         <motion.div 
           initial={{ width: 0 }}
           animate={{ width: `${progress}%` }}
-          className="h-full bg-white shadow-[0_0_15px_rgba(255,255,255,0.3)] transition-all duration-1000"
+          className="h-full bg-brand shadow-[0_0_15px_var(--color-brand-glow)] transition-all duration-1000"
         />
       </div>
 
       {/* Tabs */}
       <div className="flex flex-col md:flex-row gap-6 items-start md:items-center justify-between">
-        <div className="flex gap-2 p-1 bg-transparent border border-white/10 rounded-none w-fit">
+        <div className="flex gap-2 p-1 bg-transparent border border-white/10 rounded-full w-fit">
           {['Cycle', 'Subject', 'Optimization'].map((mode) => (
             <button
               key={mode}
               onClick={() => setViewMode(mode as any)}
               className={cn(
-                "px-6 py-2 text-[11px] font-bold uppercase tracking-[0.2em] transition-all relative rounded-none",
+                "px-6 py-2 text-[11px] font-bold uppercase tracking-[0.2em] transition-all relative rounded-full",
                 viewMode === mode ? "text-black bg-white" : "text-zinc-500 hover:text-white hover:bg-white/5"
               )}
             >
@@ -191,13 +197,13 @@ export default function Tasks() {
         </div>
 
         {viewMode === 'Cycle' && (
-          <div className="flex gap-2 p-1 bg-transparent border border-white/10 rounded-none w-fit">
+          <div className="flex gap-2 p-1 bg-transparent border border-white/10 rounded-full w-fit">
             {tabs.map((tab) => (
               <button
                 key={tab}
                 onClick={() => setActiveTab(tab)}
                 className={cn(
-                  "px-6 py-2 text-[11px] font-bold uppercase tracking-[0.2em] transition-all relative rounded-none",
+                  "px-6 py-2 text-[11px] font-bold uppercase tracking-[0.2em] transition-all relative rounded-full",
                   activeTab === tab ? "text-black bg-white" : "text-zinc-500 hover:text-white hover:bg-white/5"
                 )}
               >
@@ -293,7 +299,7 @@ export default function Tasks() {
                         </div>
                         <p className="text-xs text-zinc-500 font-mono mb-4">{task.description || 'No description provided.'}</p>
                         
-                        <div className="flex gap-4 mb-4">
+                        <div className="flex flex-wrap gap-4 mb-4">
                           <div className="px-3 py-2 bg-black/50 border border-white/5">
                             <span className="text-[8px] font-mono text-zinc-500 uppercase tracking-[0.2em] block mb-1">Impact</span>
                             <span className="text-sm font-bold text-white">{task.impact || 5}/10</span>
@@ -302,6 +308,18 @@ export default function Tasks() {
                             <span className="text-[8px] font-mono text-zinc-500 uppercase tracking-[0.2em] block mb-1">Effort</span>
                             <span className="text-sm font-bold text-white">{task.effort || 5}/10</span>
                           </div>
+                          {task.difficulty && (
+                            <div className="px-3 py-2 bg-black/50 border border-white/5">
+                              <span className="text-[8px] font-mono text-zinc-500 uppercase tracking-[0.2em] block mb-1">Difficulty</span>
+                              <span className="text-sm font-bold text-white">{task.difficulty}/10</span>
+                            </div>
+                          )}
+                          {task.lastReviewed && (
+                            <div className="px-3 py-2 bg-black/50 border border-white/5">
+                              <span className="text-[8px] font-mono text-zinc-500 uppercase tracking-[0.2em] block mb-1">Last Review</span>
+                              <span className="text-sm font-bold text-white">{new Date(task.lastReviewed).toLocaleDateString()}</span>
+                            </div>
+                          )}
                         </div>
                       </div>
                       
@@ -323,7 +341,19 @@ export default function Tasks() {
                               <span><strong>Low Impact Detected:</strong> Re-evaluate the necessity of this task. Does it directly contribute to your core objectives? Consider dropping it if not.</span>
                             </li>
                           )}
-                          {(task.effort || 5) <= 5 && (task.impact || 5) >= 5 && (
+                          {task.difficulty && task.difficulty >= 8 && (
+                            <li className="text-xs text-zinc-400 font-mono leading-relaxed flex items-start gap-2">
+                              <ChevronRight className="w-3 h-3 mt-0.5 text-zinc-600 shrink-0" />
+                              <span><strong>High Difficulty:</strong> This is a challenging task. Ensure you schedule it during your peak focus hours and eliminate distractions.</span>
+                            </li>
+                          )}
+                          {task.lastReviewed && Math.ceil((new Date().getTime() - new Date(task.lastReviewed).getTime()) / (1000 * 60 * 60 * 24)) > 14 && (
+                            <li className="text-xs text-zinc-400 font-mono leading-relaxed flex items-start gap-2">
+                              <ChevronRight className="w-3 h-3 mt-0.5 text-zinc-600 shrink-0" />
+                              <span><strong>Spaced Repetition Alert:</strong> It's been over 2 weeks since you last reviewed this. Prioritize it to prevent knowledge decay.</span>
+                            </li>
+                          )}
+                          {(task.effort || 5) <= 5 && (task.impact || 5) >= 5 && (!task.difficulty || task.difficulty < 8) && (!task.lastReviewed || Math.ceil((new Date().getTime() - new Date(task.lastReviewed).getTime()) / (1000 * 60 * 60 * 24)) <= 14) && (
                             <li className="text-xs text-zinc-400 font-mono leading-relaxed flex items-start gap-2">
                               <ChevronRight className="w-3 h-3 mt-0.5 text-zinc-600 shrink-0" />
                               <span><strong>General Optimization:</strong> Review the task's subject alignment. Assigning it to a 'Critical' or 'Weak' subject will boost its strategic value.</span>
@@ -486,6 +516,32 @@ export default function Tasks() {
                       value={newTaskEffort}
                       onChange={(e) => setNewTaskEffort(parseInt(e.target.value))}
                       className="w-full h-1 bg-white/5 rounded-full appearance-none cursor-pointer accent-zinc-500"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="space-y-2">
+                    <div className="flex justify-between items-center">
+                      <label className="text-[8px] font-mono text-zinc-600 uppercase tracking-[0.3em] font-bold">Difficulty</label>
+                      <span className="text-[8px] font-mono text-white">{newTaskDifficulty}</span>
+                    </div>
+                    <input 
+                      type="range"
+                      min="1"
+                      max="10"
+                      value={newTaskDifficulty}
+                      onChange={(e) => setNewTaskDifficulty(parseInt(e.target.value))}
+                      className="w-full h-1 bg-white/5 rounded-full appearance-none cursor-pointer accent-zinc-400"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-[8px] font-mono text-zinc-600 uppercase tracking-[0.3em] font-bold">Last Reviewed</label>
+                    <input 
+                      type="date"
+                      value={newTaskLastReviewed}
+                      onChange={(e) => setNewTaskLastReviewed(e.target.value)}
+                      className="enterprise-input py-1 text-[10px] rounded-lg w-full"
                     />
                   </div>
                 </div>

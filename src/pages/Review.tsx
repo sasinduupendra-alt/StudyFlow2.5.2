@@ -89,16 +89,16 @@ export default function Review() {
       >
         <div>
           <div className="flex items-center gap-3 mb-6">
-            <div className="w-10 h-10 bg-white flex items-center justify-center text-black shadow-[0_0_20px_rgba(255,255,255,0.2)]">
+            <div className="w-10 h-10 bg-brand/10 border border-brand/30 flex items-center justify-center text-brand shadow-[0_0_20px_var(--color-brand-glow)] rounded-xl">
               <Brain className="w-4 h-4" />
             </div>
-            <span className="text-[9px] font-mono text-white uppercase tracking-[0.4em]">Neural Retention System</span>
+            <span className="text-[9px] font-mono text-brand uppercase tracking-[0.4em]">Neural Retention System</span>
           </div>
           <h1 className="text-5xl md:text-7xl font-black text-white uppercase tracking-tighter leading-none">
             Spaced_Repetition
           </h1>
           <p className="text-zinc-600 text-[10px] font-mono uppercase tracking-[0.3em] mt-8 flex items-center gap-3">
-            <span className="w-2 h-2 bg-white animate-pulse" />
+            <span className="w-2 h-2 bg-brand rounded-full animate-pulse shadow-[0_0_8px_var(--color-brand-glow)]" />
             Recalibration Protocol: Active
           </p>
         </div>
@@ -152,7 +152,7 @@ export default function Review() {
                   
                   <div className="flex items-center justify-between relative z-10">
                     <div className="flex items-center gap-6">
-                      <div className="w-16 h-16 bg-white/5 border border-white/10 overflow-hidden shrink-0">
+                      <div className="w-16 h-16 bg-white/5 border border-white/10 overflow-hidden shrink-0 rounded-full">
                         {item.topic.image ? (
                           <img src={item.topic.image} alt="" className="w-full h-full object-cover opacity-40 group-hover:opacity-100 transition-opacity" referrerPolicy="no-referrer" />
                         ) : (

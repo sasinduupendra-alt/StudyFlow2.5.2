@@ -165,8 +165,8 @@ export default function FocusMode({ subject, session, isPaused, onTogglePause, o
               className="flex flex-col items-center"
             >
               <div className="flex items-center gap-2 mb-4">
-                <Zap className="w-5 h-5 text-white animate-pulse" />
-                <span className="text-sm font-mono uppercase tracking-[0.3em] text-white">Deep Work Session</span>
+                <Zap className="w-5 h-5 text-brand animate-pulse drop-shadow-[0_0_8px_var(--color-brand-glow)]" />
+                <span className="text-sm font-mono uppercase tracking-[0.3em] text-brand">Deep Work Session</span>
               </div>
               <h2 className="text-4xl md:text-7xl font-mono uppercase tracking-widest mb-8 md:mb-12 text-white">{subject.name}</h2>
             </motion.div>
@@ -211,7 +211,7 @@ export default function FocusMode({ subject, session, isPaused, onTogglePause, o
               strokeDasharray="100 100"
               strokeDashoffset={100 - progress}
               pathLength="100"
-              className={cn("text-white transition-all duration-1000", isImmersive && "drop-shadow-[0_0_15px_rgba(255,255,255,0.5)]")}
+              className={cn("text-brand transition-all duration-1000", isImmersive && "drop-shadow-[0_0_15px_var(--color-brand-glow)]")}
             />
           </svg>
           <div className="flex flex-col items-center justify-center z-10">
@@ -247,8 +247,8 @@ export default function FocusMode({ subject, session, isPaused, onTogglePause, o
           <button 
             onClick={onTogglePause}
             className={cn(
-              "rounded-none flex items-center justify-center hover:scale-110 active:scale-90 transition-all shadow-[0_0_50px_rgba(255,255,255,0.1)]",
-              isImmersive ? "w-20 h-20 bg-white/5 text-white hover:bg-white hover:text-black" : "w-20 h-20 md:w-24 md:h-24 bg-white text-black"
+              "rounded-none flex items-center justify-center hover:scale-110 active:scale-90 transition-all shadow-[0_0_50px_var(--color-brand-glow)]",
+              isImmersive ? "w-20 h-20 bg-brand/10 text-brand hover:bg-brand hover:text-black border border-brand/30" : "w-20 h-20 md:w-24 md:h-24 bg-brand text-black shadow-[0_0_20px_var(--color-brand-glow)]"
             )}
           >
             {!isPaused ? (

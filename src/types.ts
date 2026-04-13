@@ -40,6 +40,8 @@ export interface Task {
   createdAt: string;
   impact: number; // 1-10 (Signal)
   effort: number; // 1-10 (Noise)
+  lastReviewed?: string; // ISO Date for spaced repetition
+  difficulty?: number; // 1-10 for practice tasks
 }
 
 export interface Subject {
@@ -81,12 +83,14 @@ export interface AIStudyPlan {
 export interface StudyLog {
   id: string;
   subjectId: string;
-  topicId: string;
+  topicId?: string; // Optional for backward compatibility
+  topicIds?: string[]; // Array of topics covered (useful for tuition)
   duration: number;
   focusLevel: number;
   notes: string;
   timestamp: string;
   resources?: string[];
+  sessionType?: 'self-study' | 'tuition' | 'exam'; // Type of session
 }
 
 export interface Activity {

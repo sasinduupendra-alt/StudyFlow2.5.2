@@ -111,13 +111,13 @@ export default function ManageData({
           <p className="text-[10px] font-mono text-zinc-500 uppercase tracking-widest">SYSTEM_CONFIGURATION_INTERFACE</p>
         </div>
         
-        <div className="flex p-1 bg-transparent border border-white/10 overflow-x-auto scrollbar-hide rounded-none">
+        <div className="flex p-1 bg-transparent border border-white/10 overflow-x-auto scrollbar-hide rounded-full">
           {(['syllabus', 'schedule', 'logs', 'exams', 'profile'] as ManageTab[]).map((tab) => (
             <button
               key={tab}
               onClick={() => setActiveSubTab(tab)}
               className={cn(
-                "px-4 md:px-6 py-2 text-[10px] font-mono transition-all uppercase tracking-widest whitespace-nowrap rounded-none",
+                "px-4 md:px-6 py-2 text-[10px] font-mono transition-all uppercase tracking-widest whitespace-nowrap rounded-full",
                 activeSubTab === tab ? "bg-white text-black" : "text-zinc-500 hover:text-white"
               )}
             >
