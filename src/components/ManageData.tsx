@@ -107,21 +107,21 @@ export default function ManageData({
 
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
         <div>
-          <h2 className="text-3xl font-mono uppercase tracking-widest mb-2 text-white">Data_Control_Center</h2>
-          <p className="text-[10px] font-mono text-zinc-500 uppercase tracking-widest">SYSTEM_CONFIGURATION_INTERFACE</p>
+          <h2 className="text-3xl font-bold mb-2 text-white tracking-tight">Data Control Center</h2>
+          <p className="text-sm font-medium text-[#8E8E93]">System Configuration Interface</p>
         </div>
         
-        <div className="flex p-1 bg-transparent border border-white/10 overflow-x-auto scrollbar-hide rounded-full">
+        <div className="flex p-1.5 bg-[#1C1C1E] border border-white/5 overflow-x-auto scrollbar-hide rounded-full">
           {(['syllabus', 'schedule', 'logs', 'exams', 'profile'] as ManageTab[]).map((tab) => (
             <button
               key={tab}
               onClick={() => setActiveSubTab(tab)}
               className={cn(
-                "px-4 md:px-6 py-2 text-[10px] font-mono transition-all uppercase tracking-widest whitespace-nowrap rounded-full",
-                activeSubTab === tab ? "bg-white text-black" : "text-zinc-500 hover:text-white"
+                "px-6 py-2.5 text-sm font-semibold transition-all whitespace-nowrap rounded-full capitalize",
+                activeSubTab === tab ? "bg-white text-black" : "text-[#8E8E93] hover:text-white hover:bg-white/5"
               )}
             >
-              {tab === 'profile' ? 'CORE_SETTINGS' : tab === 'exams' ? 'EXAM_LOGS' : `${tab}_SYNC`}
+              {tab === 'profile' ? 'Settings' : tab === 'exams' ? 'Exam Logs' : `${tab} Sync`}
             </button>
           ))}
         </div>
@@ -202,48 +202,48 @@ export default function ManageData({
 
       <AnimatePresence>
         {resourceModal?.isOpen && (
-          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/90 backdrop-blur-md">
-            <motion.div initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.95, opacity: 0 }} className="bg-transparent border border-white/20 w-full max-w-md overflow-hidden rounded-none">
-              <div className="p-6 border-b border-white/10 flex items-center justify-between bg-transparent">
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
+            <motion.div initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.95, opacity: 0 }} className="bg-[#1C1C1E] border border-white/10 w-full max-w-md overflow-hidden rounded-[32px] shadow-2xl">
+              <div className="p-8 border-b border-white/5 flex items-center justify-between bg-white/5">
                 <div>
-                  <h3 className="text-sm font-mono uppercase tracking-widest text-white">Manage_Resources</h3>
-                  <p className="text-[10px] font-mono text-zinc-500 uppercase tracking-widest mt-1">{resourceModal.topicTitle}</p>
+                  <h3 className="text-xl font-bold text-white tracking-tight">Manage Resources</h3>
+                  <p className="text-sm font-medium text-[#8E8E93] mt-1">{resourceModal.topicTitle}</p>
                 </div>
-                <button onClick={() => setResourceModal(null)} className="p-2 hover:text-white transition-colors rounded-none"><X className="w-4 h-4" /></button>
+                <button onClick={() => setResourceModal(null)} className="p-2 hover:bg-white/10 transition-colors rounded-full bg-white/5"><X className="w-5 h-5 text-white" /></button>
               </div>
-              <div className="p-6 space-y-6 max-h-[60vh] overflow-y-auto scrollbar-hide">
-                <div className="space-y-3 bg-transparent p-4 border border-white/10 rounded-none">
-                  <p className="text-[10px] font-mono text-white uppercase tracking-widest">ADD_NEW_RESOURCE</p>
-                  <input type="text" placeholder="TITLE" value={newResource.title} onChange={(e) => setNewResource({ ...newResource, title: e.target.value })} className="w-full bg-black border border-white/20 px-4 py-2 text-[10px] font-mono uppercase tracking-widest text-white outline-none focus:border-white transition-colors rounded-none" />
-                  <div className="flex gap-2">
-                    <select value={newResource.type} onChange={(e) => setNewResource({ ...newResource, type: e.target.value as any })} className="bg-black border border-white/20 px-3 py-2 text-[10px] font-mono uppercase tracking-widest text-white outline-none focus:border-white transition-colors rounded-none">
-                      <option value="link">LINK</option>
-                      <option value="video">VIDEO</option>
+              <div className="p-8 space-y-6 max-h-[60vh] overflow-y-auto scrollbar-hide">
+                <div className="space-y-4 bg-white/5 p-6 border border-white/5 rounded-[24px]">
+                  <p className="text-sm font-semibold text-white">Add New Resource</p>
+                  <input type="text" placeholder="Title" value={newResource.title} onChange={(e) => setNewResource({ ...newResource, title: e.target.value })} className="w-full bg-black border border-white/10 px-4 py-3 text-sm font-medium text-white outline-none focus:border-brand transition-colors rounded-[20px]" />
+                  <div className="flex gap-3">
+                    <select value={newResource.type} onChange={(e) => setNewResource({ ...newResource, type: e.target.value as any })} className="bg-black border border-white/10 px-4 py-3 text-sm font-medium text-white outline-none focus:border-brand transition-colors rounded-[20px] appearance-none">
+                      <option value="link">Link</option>
+                      <option value="video">Video</option>
                       <option value="pdf">PDF</option>
                     </select>
-                    <input type="text" placeholder="URL_ENDPOINT" value={newResource.url} onChange={(e) => setNewResource({ ...newResource, url: e.target.value })} className="flex-1 bg-black border border-white/20 px-4 py-2 text-[10px] font-mono uppercase tracking-widest text-white outline-none focus:border-white transition-colors rounded-none" />
+                    <input type="text" placeholder="URL Endpoint" value={newResource.url} onChange={(e) => setNewResource({ ...newResource, url: e.target.value })} className="flex-1 bg-black border border-white/10 px-4 py-3 text-sm font-medium text-white outline-none focus:border-brand transition-colors rounded-[20px]" />
                   </div>
-                  <button onClick={() => { if (newResource.title && newResource.url && resourceModal) { const updatedResources = [...resourceModal.resources, { ...newResource, id: Math.random().toString(36).substr(2, 9) }]; setResourceModal({ ...resourceModal, resources: updatedResources }); setNewResource({ title: '', url: '', type: 'link' }); } }} className="w-full py-2 text-[10px] font-mono uppercase tracking-widest bg-white text-black hover:bg-zinc-200 transition-colors rounded-none">INITIALIZE_RESOURCE</button>
+                  <button onClick={() => { if (newResource.title && newResource.url && resourceModal) { const updatedResources = [...resourceModal.resources, { ...newResource, id: Math.random().toString(36).substr(2, 9) }]; setResourceModal({ ...resourceModal, resources: updatedResources }); setNewResource({ title: '', url: '', type: 'link' }); } }} className="w-full py-3 text-sm font-semibold bg-brand text-white hover:opacity-90 transition-opacity rounded-full">Initialize Resource</button>
                 </div>
-                <div className="space-y-2">
+                <div className="space-y-3">
                   {resourceModal.resources.map(res => (
-                    <div key={res.id} className="flex items-center justify-between p-3 bg-transparent border border-white/10 group rounded-none">
-                      <div className="flex items-center gap-3 overflow-hidden">
-                        <div className={cn("w-8 h-8 flex items-center justify-center shrink-0 border rounded-none", res.type === 'video' ? "border-red-500/30 text-red-500 bg-transparent" : "border-white/30 text-white bg-transparent")}>
-                          {res.type === 'video' ? <Video className="w-3 h-3" /> : <LinkIcon className="w-3 h-3" />}
+                    <div key={res.id} className="flex items-center justify-between p-4 bg-white/5 border border-white/5 group rounded-[20px] hover:bg-white/10 transition-colors">
+                      <div className="flex items-center gap-4 overflow-hidden">
+                        <div className={cn("w-10 h-10 flex items-center justify-center shrink-0 rounded-full", res.type === 'video' ? "bg-brand/20 text-brand" : "bg-white/10 text-white")}>
+                          {res.type === 'video' ? <Video className="w-4 h-4" /> : <LinkIcon className="w-4 h-4" />}
                         </div>
                         <div className="overflow-hidden">
-                          <p className="text-[10px] font-mono uppercase tracking-widest text-white truncate">{res.title}</p>
+                          <p className="text-sm font-semibold text-white truncate">{res.title}</p>
                         </div>
                       </div>
-                      <button onClick={() => { const updatedResources = resourceModal.resources.filter(r => r.id !== res.id); setResourceModal({ ...resourceModal, resources: updatedResources }); }} className="p-2 text-zinc-600 hover:text-red-500 transition-colors rounded-none"><Trash2 className="w-3 h-3" /></button>
+                      <button onClick={() => { const updatedResources = resourceModal.resources.filter(r => r.id !== res.id); setResourceModal({ ...resourceModal, resources: updatedResources }); }} className="p-2 text-[#8E8E93] hover:text-[#FF453A] transition-colors rounded-full"><Trash2 className="w-4 h-4" /></button>
                     </div>
                   ))}
                 </div>
               </div>
-              <div className="p-6 bg-transparent border-t border-white/10 flex gap-3">
-                <button onClick={() => setResourceModal(null)} className="flex-1 px-4 py-3 bg-transparent border border-white/20 text-[10px] font-mono uppercase tracking-widest text-white hover:bg-white/10 transition-colors rounded-none">CANCEL</button>
-                <button onClick={() => { if (resourceModal) { onUpdateResources(resourceModal.subjectId, resourceModal.topicId, resourceModal.resources); setResourceModal(null); } }} className="flex-1 px-4 py-3 text-[10px] font-mono uppercase tracking-widest bg-white text-black hover:bg-zinc-200 transition-colors rounded-none">SAVE_CHANGES</button>
+              <div className="p-8 bg-white/5 border-t border-white/5 flex gap-4">
+                <button onClick={() => setResourceModal(null)} className="flex-1 px-4 py-4 bg-white/5 text-sm font-semibold text-white hover:bg-white/10 transition-colors rounded-full">Cancel</button>
+                <button onClick={() => { if (resourceModal) { onUpdateResources(resourceModal.subjectId, resourceModal.topicId, resourceModal.resources); setResourceModal(null); } }} className="flex-1 px-4 py-4 text-sm font-semibold bg-brand text-white hover:opacity-90 transition-opacity rounded-full">Save Changes</button>
               </div>
             </motion.div>
           </div>

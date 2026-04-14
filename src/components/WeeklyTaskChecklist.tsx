@@ -127,20 +127,20 @@ export default function WeeklyTaskChecklist() {
         className="flex flex-col md:flex-row md:items-center justify-between gap-8"
       >
         <div className="flex items-center gap-6">
-          <div className="p-4 bg-white text-black shadow-[0_0_20px_rgba(255,255,255,0.2)]">
+          <div className="p-4 bg-brand/20 rounded-[20px] text-brand">
             <BookOpen className="w-6 h-6" />
           </div>
           <div>
-            <h2 className="text-xl font-black uppercase tracking-tighter text-white leading-none">Weekly Objectives</h2>
-            <p className="text-[10px] font-mono text-zinc-600 uppercase tracking-[0.3em] mt-4 flex items-center gap-2">
-              <span className="w-1.5 h-1.5 bg-white animate-pulse" />
-              Core Requirements Per Node
+            <h2 className="text-2xl font-bold text-white tracking-tight">Weekly Objectives</h2>
+            <p className="text-sm font-medium text-[#8E8E93] mt-1 flex items-center gap-2">
+              <span className="w-2 h-2 bg-brand rounded-full animate-pulse" />
+              Core Requirements Per Subject
             </p>
           </div>
         </div>
         <button 
           onClick={resetAllTasks}
-          className="px-8 py-3 text-[10px] font-mono uppercase tracking-[0.2em] bg-white text-black hover:bg-zinc-200 transition-colors rounded-none font-bold"
+          className="px-6 py-2.5 text-sm font-semibold bg-white/5 text-white hover:bg-white/10 transition-colors rounded-full"
         >
           Reset Cycle
         </button>
@@ -172,24 +172,22 @@ export default function WeeklyTaskChecklist() {
                 hidden: { opacity: 0, y: 20 },
                 show: { opacity: 1, y: 0 }
               }}
-              className="enterprise-card overflow-hidden flex flex-col group relative"
+              className="bg-[#1C1C1E] border border-white/5 rounded-[32px] overflow-hidden flex flex-col group relative"
             >
-              <div className="scan-line opacity-0 group-hover:opacity-100 transition-opacity duration-1000" />
-              
-              <div className="p-8 border-b border-white/5 relative overflow-hidden bg-white/[0.02]">
-                <div className="relative z-10 flex items-center justify-between mb-6">
-                  <h3 className="text-[10px] font-mono uppercase tracking-[0.2em] text-white font-bold">{subject.name}</h3>
-                  <span className="text-[10px] font-mono text-zinc-600 tabular-nums tracking-tighter">{Math.round(progress)}%</span>
+              <div className="p-8 border-b border-white/5 relative overflow-hidden bg-white/5">
+                <div className="relative z-10 flex items-center justify-between mb-4">
+                  <h3 className="text-base font-bold text-white">{subject.name}</h3>
+                  <span className="text-sm font-semibold text-[#8E8E93] tabular-nums">{Math.round(progress)}%</span>
                 </div>
-                <div className="relative z-10 h-[2px] w-full bg-white/5 overflow-hidden">
+                <div className="relative z-10 h-2 w-full bg-white/10 rounded-full overflow-hidden">
                   <div 
-                    className="h-full bg-white transition-all duration-1000"
+                    className="h-full bg-brand transition-all duration-1000"
                     style={{ width: `${progress}%` }}
                   />
                 </div>
               </div>
               
-              <div className="p-6 space-y-2 flex-1">
+              <div className="p-6 space-y-3 flex-1">
                 <AnimatePresence>
                   {tasks.map((task) => (
                     <motion.div
@@ -198,8 +196,8 @@ export default function WeeklyTaskChecklist() {
                       animate={{ opacity: 1, height: 'auto' }}
                       exit={{ opacity: 0, height: 0 }}
                       className={cn(
-                        "w-full flex items-center gap-4 p-4 transition-all group/task border rounded-none",
-                        task.completed ? "bg-white/[0.02] border-white/5" : "bg-transparent hover:bg-white/5 border-white/5"
+                        "w-full flex items-center gap-4 p-4 transition-all group/task rounded-[20px]",
+                        task.completed ? "bg-white/5" : "bg-transparent hover:bg-white/5"
                       )}
                     >
                       <button
@@ -207,9 +205,9 @@ export default function WeeklyTaskChecklist() {
                         className="shrink-0 focus:outline-none"
                       >
                         {task.completed ? (
-                          <CheckCircle2 className="w-4 h-4 text-white" />
+                          <CheckCircle2 className="w-5 h-5 text-brand" />
                         ) : (
-                          <Circle className="w-4 h-4 text-zinc-800 group-hover/task:text-zinc-600" />
+                          <Circle className="w-5 h-5 text-[#8E8E93] group-hover/task:text-white" />
                         )}
                       </button>
                       
@@ -220,17 +218,17 @@ export default function WeeklyTaskChecklist() {
                             value={editTaskTitle}
                             onChange={(e) => setEditTaskTitle(e.target.value)}
                             onKeyDown={(e) => e.key === 'Enter' && saveEditTask(subject.id, task.id)}
-                            className="flex-1 bg-black text-[10px] font-mono uppercase px-3 py-2 outline-none border border-white/30 focus:border-white transition-colors rounded-none text-white"
+                            className="flex-1 bg-black text-sm font-medium px-4 py-2 outline-none border border-white/10 focus:border-brand transition-colors rounded-full text-white"
                             autoFocus
                           />
-                          <button onClick={() => saveEditTask(subject.id, task.id)} className="text-white hover:text-zinc-300"><Check className="w-4 h-4" /></button>
-                          <button onClick={() => setEditingTaskId(null)} className="text-red-500 hover:text-red-400"><X className="w-4 h-4" /></button>
+                          <button onClick={() => saveEditTask(subject.id, task.id)} className="text-white hover:text-brand"><Check className="w-5 h-5" /></button>
+                          <button onClick={() => setEditingTaskId(null)} className="text-[#FF453A] hover:opacity-80"><X className="w-5 h-5" /></button>
                         </div>
                       ) : (
                         <>
                           <span className={cn(
-                            "text-[10px] font-mono uppercase tracking-[0.15em] flex-1 text-left leading-relaxed",
-                            task.completed ? "text-zinc-700 line-through" : "text-zinc-300"
+                            "text-sm font-medium flex-1 text-left leading-relaxed",
+                            task.completed ? "text-[#8E8E93] line-through" : "text-white"
                           )}>
                             {task.title}
                           </span>
@@ -240,15 +238,15 @@ export default function WeeklyTaskChecklist() {
                                 setEditingTaskId(task.id);
                                 setEditTaskTitle(task.title);
                               }}
-                              className="p-2 text-zinc-700 hover:text-white transition-colors"
+                              className="p-2 text-[#8E8E93] hover:text-white transition-colors"
                             >
-                              <Edit2 className="w-3.5 h-3.5" />
+                              <Edit2 className="w-4 h-4" />
                             </button>
                             <button 
                               onClick={() => deleteTask(subject.id, task.id)}
-                              className="p-2 text-zinc-700 hover:text-red-500 transition-colors"
+                              className="p-2 text-[#8E8E93] hover:text-[#FF453A] transition-colors"
                             >
-                              <Trash2 className="w-3.5 h-3.5" />
+                              <Trash2 className="w-4 h-4" />
                             </button>
                           </div>
                         </>
@@ -258,39 +256,39 @@ export default function WeeklyTaskChecklist() {
                 </AnimatePresence>
 
                 {editingSubjectId === subject.id ? (
-                  <div className="flex items-center gap-3 p-3 mt-4">
+                  <div className="flex items-center gap-3 p-2 mt-4">
                     <input
                       type="text"
                       value={newTaskTitle}
                       onChange={(e) => setNewTaskTitle(e.target.value)}
                       onKeyDown={(e) => e.key === 'Enter' && addTask(subject.id)}
-                      placeholder="NEW_OBJECTIVE..."
-                      className="flex-1 bg-black border border-white/10 px-4 py-3 text-[10px] font-mono uppercase focus:border-white/30 outline-none transition-colors rounded-none text-white"
+                      placeholder="New Objective..."
+                      className="flex-1 bg-black border border-white/10 px-4 py-3 text-sm font-medium focus:border-brand outline-none transition-colors rounded-full text-white"
                       autoFocus
                     />
                     <button 
                       onClick={() => addTask(subject.id)}
-                      className="p-3 bg-white text-black hover:bg-zinc-200 transition-colors rounded-none"
+                      className="p-3 bg-brand text-white hover:opacity-90 transition-opacity rounded-full"
                     >
-                      <Plus className="w-4 h-4" />
+                      <Plus className="w-5 h-5" />
                     </button>
                     <button 
                       onClick={() => {
                         setEditingSubjectId(null);
                         setNewTaskTitle('');
                       }}
-                      className="p-3 bg-transparent border border-white/10 text-zinc-700 hover:text-white hover:border-white/30 transition-colors rounded-none"
+                      className="p-3 bg-white/5 text-[#8E8E93] hover:text-white hover:bg-white/10 transition-colors rounded-full"
                     >
-                      <X className="w-4 h-4" />
+                      <X className="w-5 h-5" />
                     </button>
                   </div>
                 ) : (
                   <button
                     onClick={() => setEditingSubjectId(subject.id)}
-                    className="w-full flex items-center justify-center gap-3 p-4 mt-4 border border-dashed border-white/10 text-zinc-700 hover:text-white hover:border-white/30 transition-all text-[10px] font-mono uppercase tracking-[0.2em] rounded-none bg-transparent"
+                    className="w-full flex items-center justify-center gap-3 p-4 mt-4 border border-dashed border-white/10 text-[#8E8E93] hover:text-white hover:border-white/30 transition-all text-sm font-semibold rounded-[20px] bg-transparent"
                   >
-                    <Plus className="w-4 h-4" />
-                    Initialize Task
+                    <Plus className="w-5 h-5" />
+                    Add Task
                   </button>
                 )}
               </div>

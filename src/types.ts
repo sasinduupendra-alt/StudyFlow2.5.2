@@ -155,3 +155,20 @@ export interface Toast {
   message: string;
   type: 'success' | 'error' | 'info';
 }
+
+export interface Notification {
+  id: string;
+  title: string;
+  message: string;
+  type: 'system' | 'ai' | 'reminder';
+  timestamp: string;
+  read: boolean;
+  link?: string;
+}
+
+export interface NotificationPreferences {
+  systemAlerts: boolean;
+  aiRecommendations: boolean;
+  reviewReminders: boolean;
+  emailNotifications: boolean;
+}

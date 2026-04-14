@@ -17,16 +17,16 @@ export default function AIInsights({ recommendations, onLike, onDismiss, isLoadi
     <div className="p-6 md:p-10 space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-700">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div>
-          <h2 className="text-3xl font-mono text-white uppercase tracking-widest flex items-center gap-4">
-            <Sparkles className="w-8 h-8 text-white" />
+          <h2 className="text-3xl font-bold text-white tracking-tight flex items-center gap-4">
+            <Sparkles className="w-8 h-8 text-brand" />
             AI Insights
           </h2>
-          <p className="text-zinc-500 mt-2 font-mono uppercase tracking-widest text-xs">Personalized recommendations based on your study patterns and performance.</p>
+          <p className="text-[#8E8E93] mt-2 text-sm font-medium">Personalized recommendations based on your study patterns and performance.</p>
         </div>
         {isLoading && (
-          <div className="flex items-center gap-3 text-white bg-transparent px-4 py-2 rounded-none border border-white/20">
+          <div className="flex items-center gap-3 text-white bg-white/5 px-4 py-2 rounded-full border border-white/5">
             <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
-            <span className="text-[10px] font-mono uppercase tracking-widest">Analyzing...</span>
+            <span className="text-xs font-semibold uppercase tracking-wider text-[#8E8E93]">Analyzing...</span>
           </div>
         )}
       </div>
@@ -50,32 +50,32 @@ export default function AIInsights({ recommendations, onLike, onDismiss, isLoadi
                 transition={{ delay: index * 0.1 }}
                 key={rec.id}
                 className={cn(
-                  "group relative bg-transparent border border-white/10 p-8 hover:border-white/30 transition-all duration-500 overflow-hidden rounded-none",
-                  rec.liked && "border-white/50 bg-white/5"
+                  "group relative bg-[#1C1C1E] border border-white/5 p-8 hover:bg-[#2C2C2E] transition-all duration-500 overflow-hidden rounded-[32px]",
+                  rec.liked && "border-brand/30 bg-brand/5"
                 )}
               >
                 <div className="absolute top-0 right-0 p-8 opacity-5 group-hover:opacity-10 transition-opacity">
-                  {rec.priority === 'High' ? <Zap className="w-32 h-32 text-white" /> : <Brain className="w-32 h-32 text-white" />}
+                  {rec.priority === 'High' ? <Zap className="w-32 h-32 text-brand" /> : <Brain className="w-32 h-32 text-brand" />}
                 </div>
 
                 <div className="relative z-10">
                   <div className="flex items-center gap-3 mb-6">
                     <span className={cn(
-                      "px-3 py-1 rounded-none text-[10px] font-mono uppercase tracking-widest",
-                      rec.priority === 'High' ? "bg-transparent text-white border border-white/50" :
-                      rec.priority === 'Medium' ? "bg-transparent text-zinc-300 border border-white/30" :
-                      "bg-transparent text-zinc-500 border border-white/20"
+                      "px-3 py-1 rounded-full text-xs font-semibold",
+                      rec.priority === 'High' ? "bg-brand/10 text-brand border border-brand/20" :
+                      rec.priority === 'Medium' ? "bg-white/10 text-white border border-white/10" :
+                      "bg-white/5 text-[#8E8E93] border border-white/5"
                     )}>
                       {rec.priority} Priority
                     </span>
-                    <span className="text-[10px] font-mono text-zinc-500 uppercase tracking-widest">Recommendation</span>
+                    <span className="text-xs font-semibold text-[#8E8E93] uppercase tracking-wider">Recommendation</span>
                   </div>
 
-                  <h3 className="text-2xl font-mono text-white mb-4 group-hover:text-zinc-300 transition-colors uppercase tracking-widest">{rec.title}</h3>
-                  <p className="text-zinc-400 mb-8 leading-relaxed font-mono text-sm">{rec.description}</p>
+                  <h3 className="text-2xl font-bold text-white mb-4 group-hover:text-brand transition-colors tracking-tight">{rec.title}</h3>
+                  <p className="text-[#8E8E93] mb-8 leading-relaxed text-sm font-medium">{rec.description}</p>
                   
-                  <div className="bg-transparent rounded-none p-5 mb-8 border border-white/10 italic text-sm text-zinc-300 font-mono">
-                    <span className="text-white font-bold not-italic mr-2 uppercase tracking-widest">Why:</span>
+                  <div className="bg-white/5 rounded-[20px] p-5 mb-8 border border-white/5 text-sm text-[#8E8E93] font-medium">
+                    <span className="text-white font-bold mr-2">Why:</span>
                     {rec.reason}
                   </div>
 
@@ -86,8 +86,8 @@ export default function AIInsights({ recommendations, onLike, onDismiss, isLoadi
                         whileTap={{ scale: 0.9 }}
                         onClick={() => onLike(rec.id)}
                         className={cn(
-                          "p-3 rounded-none transition-all border border-transparent",
-                          rec.liked ? "bg-white text-black" : "bg-transparent text-zinc-500 hover:text-white hover:border-white/30 border-white/10"
+                          "p-3 rounded-full transition-all",
+                          rec.liked ? "bg-brand text-white" : "bg-white/5 text-[#8E8E93] hover:text-white hover:bg-white/10"
                         )}
                       >
                         <ThumbsUp className="w-5 h-5" />
@@ -96,14 +96,14 @@ export default function AIInsights({ recommendations, onLike, onDismiss, isLoadi
                         whileHover={{ scale: 1.1 }}
                         whileTap={{ scale: 0.9 }}
                         onClick={() => onDismiss(rec.id)}
-                        className="p-3 bg-transparent border border-white/10 text-zinc-500 hover:text-white hover:border-white/30 rounded-none transition-all"
+                        className="p-3 bg-white/5 text-[#8E8E93] hover:text-[#FF453A] hover:bg-[#FF453A]/10 rounded-full transition-all"
                       >
                         <ThumbsDown className="w-5 h-5" />
                       </motion.button>
                     </div>
                     <motion.button 
                       whileHover={{ x: 4 }}
-                      className="flex items-center gap-2 text-sm font-mono uppercase tracking-widest text-white hover:text-zinc-300 group/btn"
+                      className="flex items-center gap-2 text-sm font-semibold text-brand hover:opacity-80 group/btn"
                     >
                       Take Action
                       <ChevronRight className="w-4 h-4 group-hover/btn:translate-x-1 transition-transform" />
@@ -117,28 +117,28 @@ export default function AIInsights({ recommendations, onLike, onDismiss, isLoadi
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <div className="lg:col-span-2 bg-transparent border border-white/10 p-8 rounded-none">
-          <h3 className="text-xl font-mono text-white mb-8 flex items-center gap-3 uppercase tracking-widest">
-            <Target className="w-5 h-5 text-white" />
+        <div className="lg:col-span-2 bg-[#1C1C1E] border border-white/5 p-8 rounded-[32px]">
+          <h3 className="text-xl font-bold text-white mb-8 flex items-center gap-3 tracking-tight">
+            <Target className="w-6 h-6 text-brand" />
             Learning Pattern Analysis
           </h3>
           <div className="space-y-8">
             {[
-              { label: 'Morning Retention', value: 85, color: 'bg-white' },
-              { label: 'Afternoon Focus', value: 42, color: 'bg-zinc-400' },
-              { label: 'Night Recall', value: 68, color: 'bg-zinc-600' },
+              { label: 'Morning Retention', value: 85, color: 'bg-[#32D74B]' },
+              { label: 'Afternoon Focus', value: 42, color: 'bg-[#FF9F0A]' },
+              { label: 'Night Recall', value: 68, color: 'bg-brand' },
             ].map((item) => (
               <div key={item.label} className="space-y-3">
-                <div className="flex justify-between text-[10px] font-mono uppercase tracking-widest text-zinc-500">
+                <div className="flex justify-between text-xs font-semibold text-[#8E8E93] uppercase tracking-wider">
                   <span>{item.label}</span>
-                  <span className="text-white">{item.value}%</span>
+                  <span className="text-white tabular-nums">{item.value}%</span>
                 </div>
-                <div className="h-1 bg-white/10 rounded-none overflow-hidden">
+                <div className="h-2 bg-white/10 rounded-full overflow-hidden">
                   <motion.div 
                     initial={{ width: 0 }}
                     animate={{ width: `${item.value}%` }}
                     transition={{ duration: 1, delay: 0.5 }}
-                    className={cn("h-full rounded-none", item.color)} 
+                    className={cn("h-full rounded-full", item.color)} 
                   />
                 </div>
               </div>
@@ -146,13 +146,13 @@ export default function AIInsights({ recommendations, onLike, onDismiss, isLoadi
           </div>
         </div>
 
-        <div className="bg-transparent border border-white/10 p-8 flex flex-col justify-center text-center rounded-none">
-          <div className="w-16 h-16 bg-transparent rounded-none flex items-center justify-center mx-auto mb-6 border border-white/20">
-            <Sparkles className="w-8 h-8 text-white" />
+        <div className="bg-[#1C1C1E] border border-white/5 p-8 flex flex-col justify-center text-center rounded-[32px]">
+          <div className="w-16 h-16 bg-brand/10 rounded-[20px] flex items-center justify-center mx-auto mb-6">
+            <Sparkles className="w-8 h-8 text-brand" />
           </div>
-          <h4 className="text-xl font-mono text-white mb-3 uppercase tracking-widest">Pro Tip</h4>
-          <p className="text-sm text-zinc-400 leading-relaxed font-mono uppercase tracking-widest">
-            Your focus peaks between 5:00 AM and 7:30 AM. Schedule your most difficult Pure Maths topics during this window.
+          <h4 className="text-xl font-bold text-white mb-3 tracking-tight">Pro Tip: The Syllabus Audit</h4>
+          <p className="text-sm text-[#8E8E93] leading-relaxed font-medium">
+            Don't just follow tuition notes. Print the official NIE syllabus. Place a single checkmark when theory is covered, and a double checkmark only after 5+ years of past papers. If it's not in the syllabus, it's noise.
           </p>
         </div>
       </div>

@@ -1,31 +1,29 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@300;400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
 @import "tailwindcss";
 @plugin "@tailwindcss/typography";
 
 @theme {
-  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
-  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+  --font-sans: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
   
-  --color-brand: #00e5ff;
-  --color-brand-glow: rgba(0, 229, 255, 0.15);
-  --color-brand-dim: rgba(0, 229, 255, 0.05);
-  --color-brand-bright: #80f2ff;
+  --color-brand: #0A84FF;
+  --color-brand-glow: rgba(10, 132, 255, 0.15);
+  --color-brand-dim: rgba(10, 132, 255, 0.05);
+  --color-brand-bright: #5E5CE6;
   
   --color-surface: #000000;
-  --color-surface-raised: #050505;
-  --color-surface-elevated: #0a0a0a;
+  --color-surface-raised: #1C1C1E;
+  --color-surface-elevated: #2C2C2E;
   
-  --color-border-dim: #1a1a1a;
-  --color-border-bright: #333333;
+  --color-border-dim: rgba(255, 255, 255, 0.1);
+  --color-border-bright: rgba(255, 255, 255, 0.2);
   
-  --color-success: #10b981;
-  --color-warning: #f59e0b;
-  --color-danger: #ef4444;
+  --color-success: #32D74B;
+  --color-warning: #FF9F0A;
+  --color-danger: #FF453A;
 
-  --backdrop-blur-3xl: blur(24px); /* Reduced from 64px to 24px for massive performance gain */
+  --backdrop-blur-3xl: blur(24px);
 
-  --animate-neural-pulse: neural-pulse 8s ease-in-out infinite;
-  --animate-scan: scan 4s linear infinite;
   --animate-float: float 6s ease-in-out infinite;
   --ease-expo: cubic-bezier(0.16, 1, 0.3, 1);
 
@@ -34,24 +32,9 @@
   }
 }
 
-@keyframes neural-pulse {
-  0%, 100% { opacity: 0.1; transform: scale(1) translateZ(0); }
-  50% { opacity: 0.2; transform: scale(1.1) translateZ(0); }
-}
-
-@keyframes scan {
-  0% { transform: translateY(-100%) translateZ(0); }
-  100% { transform: translateY(100%) translateZ(0); }
-}
-
 @keyframes float {
   0%, 100% { transform: translateY(0) translateZ(0); }
   50% { transform: translateY(-10px) translateZ(0); }
-}
-
-@keyframes grid-move {
-  0% { transform: translateY(0) translateZ(0); }
-  100% { transform: translateY(40px) translateZ(0); }
 }
 
 @layer base {
@@ -60,12 +43,11 @@
   }
 
   body {
-    @apply bg-surface text-zinc-50 font-sans selection:bg-white selection:text-black antialiased overflow-x-hidden;
-    font-feature-settings: "cv02", "cv03", "cv04", "tnum";
+    @apply bg-surface text-zinc-50 font-sans selection:bg-brand selection:text-white antialiased overflow-x-hidden;
   }
 
   h1, h2, h3, h4, h5, h6 {
-    @apply font-sans font-bold tracking-[0.15em] uppercase;
+    @apply font-sans font-bold tracking-tight;
   }
 
   ::-webkit-scrollbar {
@@ -78,51 +60,51 @@
   }
 
   ::-webkit-scrollbar-thumb {
-    @apply bg-zinc-800 rounded-none;
+    @apply bg-[#3A3A3C] rounded-full;
   }
 
   ::-webkit-scrollbar-thumb:hover {
-    @apply bg-zinc-600;
+    @apply bg-[#48484A];
   }
 }
 
 @layer components {
   .enterprise-card {
-    @apply bg-[#1c1c1e]/80 backdrop-blur-2xl border border-white/10 rounded-3xl overflow-hidden transition-all duration-500 hover:border-white/20 hover:bg-[#2c2c2e]/80 shadow-lg;
+    @apply bg-[#1C1C1E] border border-white/5 rounded-[24px] overflow-hidden transition-all duration-300 hover:bg-[#2C2C2E] shadow-sm;
   }
 
   .enterprise-card-premium {
-    @apply bg-black/50 backdrop-blur-3xl border border-white/10 rounded-3xl overflow-hidden transition-all duration-500 hover:border-white/20 shadow-[0_8px_30px_rgb(0,0,0,0.5)];
+    @apply bg-[#1C1C1E]/80 backdrop-blur-xl border border-white/10 rounded-[24px] overflow-hidden transition-all duration-300 shadow-lg;
   }
 
   .enterprise-button {
-    @apply px-6 py-3 bg-white/10 border border-white/10 text-white font-medium rounded-full transition-all duration-300 active:scale-95 disabled:opacity-50 disabled:pointer-events-none flex items-center justify-center gap-2 hover:bg-white/20;
+    @apply px-6 py-3 bg-brand text-white font-semibold rounded-full transition-all duration-200 active:scale-95 disabled:opacity-50 disabled:pointer-events-none flex items-center justify-center gap-2 hover:opacity-90;
   }
 
   .enterprise-button-primary {
-    @apply px-6 py-3 bg-white text-black font-semibold rounded-full transition-all duration-300 active:scale-95 disabled:opacity-50 disabled:pointer-events-none flex items-center justify-center gap-2 hover:bg-zinc-200 shadow-md;
+    @apply px-6 py-3 bg-white text-black font-semibold rounded-full transition-all duration-200 active:scale-95 disabled:opacity-50 disabled:pointer-events-none flex items-center justify-center gap-2 hover:bg-zinc-200 shadow-sm;
   }
 
   .enterprise-button-secondary {
-    @apply px-6 py-3 bg-transparent border border-white/10 text-zinc-400 font-medium rounded-full transition-all duration-500 hover:border-white/30 hover:text-white active:scale-95 flex items-center justify-center gap-2;
+    @apply px-6 py-3 bg-[#2C2C2E] text-white font-medium rounded-full transition-all duration-200 hover:bg-[#3A3A3C] active:scale-95 flex items-center justify-center gap-2;
   }
 
   .enterprise-button-ghost {
-    @apply px-6 py-3 text-zinc-500 font-medium rounded-full transition-all duration-300 hover:text-white hover:bg-white/5 flex items-center justify-center gap-2;
+    @apply px-6 py-3 text-brand font-medium rounded-full transition-all duration-200 hover:bg-brand/10 flex items-center justify-center gap-2;
   }
 
   .enterprise-input {
-    @apply w-full bg-[#1c1c1e]/80 backdrop-blur-xl border border-white/10 rounded-2xl px-5 py-4 text-base text-white focus:outline-none focus:border-white/30 focus:ring-4 focus:ring-white/5 transition-all placeholder:text-zinc-500;
+    @apply w-full bg-[#2C2C2E] border-none rounded-[12px] px-4 py-3 text-base text-white focus:outline-none focus:ring-2 focus:ring-brand transition-all placeholder:text-[#8E8E93];
   }
 
   .badge {
-    @apply px-3 py-1 rounded-full text-xs font-medium border backdrop-blur-md;
+    @apply px-3 py-1 rounded-full text-xs font-medium;
   }
 
-  .badge-brand { @apply bg-brand/10 text-brand border-brand/30 shadow-[0_0_10px_var(--color-brand-glow)]; }
-  .badge-zinc { @apply bg-zinc-900/50 text-zinc-500 border-zinc-800; }
-  .badge-success { @apply bg-success/5 text-success border-success/30 shadow-[0_0_10px_rgba(16,185,129,0.1)]; }
-  .badge-danger { @apply bg-danger/5 text-danger border-danger/30 shadow-[0_0_10px_rgba(239,68,68,0.1)]; }
+  .badge-brand { @apply bg-brand/10 text-brand; }
+  .badge-zinc { @apply bg-[#2C2C2E] text-[#EBEBF5]; }
+  .badge-success { @apply bg-success/10 text-success; }
+  .badge-danger { @apply bg-danger/10 text-danger; }
 
   .brand-glow {
     @apply shadow-[0_0_20px_var(--color-brand-glow)];
@@ -133,34 +115,11 @@
   }
 
   .neural-field {
-    @apply fixed inset-0 -z-10 overflow-hidden pointer-events-none bg-[#050505];
-    background-image: radial-gradient(circle at 50% 0%, #111111 0%, #000000 70%);
-  }
-
-  .neural-grid {
-    @apply absolute inset-0 opacity-[0.015];
-    background-image: 
-      linear-gradient(to right, #ffffff 1px, transparent 1px),
-      linear-gradient(to bottom, #ffffff 1px, transparent 1px);
-    background-size: 40px 40px;
-    /* Removed expensive grid-move animation, keeping it static for performance */
-  }
-
-  .neural-orb {
-    @apply absolute rounded-full blur-[80px] opacity-20 animate-neural-pulse;
-  }
-
-  .scan-line {
-    @apply absolute inset-0 pointer-events-none overflow-hidden;
-  }
-
-  .scan-line::after {
-    content: "";
-    @apply absolute inset-x-0 h-[2px] bg-gradient-to-r from-transparent via-white/20 to-transparent animate-scan;
+    @apply fixed inset-0 -z-10 overflow-hidden pointer-events-none bg-black;
   }
 
   .glass-panel {
-    @apply bg-white/[0.02] backdrop-blur-3xl border border-white/10;
+    @apply bg-[#1C1C1E]/70 backdrop-blur-2xl border-t border-white/10;
   }
 }
 

@@ -23,21 +23,21 @@ export default function LogHistory({
   setConfirmModal
 }: LogHistoryProps) {
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <h3 className="text-sm font-mono uppercase tracking-widest flex items-center gap-2 text-white">
-          <History className="w-4 h-4 text-white" />
-          CHRONO_LOG_HISTORY_INTERFACE
+        <h3 className="text-lg font-bold flex items-center gap-2 text-white tracking-tight">
+          <History className="w-5 h-5 text-brand" />
+          Log History
         </h3>
-        <div className="flex items-center gap-4">
-          <div className="relative flex-1 md:w-64">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-700" />
+        <div className="flex flex-col md:flex-row items-center gap-4 w-full md:w-auto">
+          <div className="relative w-full md:w-72">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[#8E8E93]" />
             <input 
               type="text" 
-              placeholder="SEARCH_LOGS..." 
+              placeholder="Search logs..." 
               value={logsSearch} 
               onChange={(e) => setLogsSearch(e.target.value)} 
-              className="w-full bg-transparent border border-white/20 pl-10 pr-4 py-2 text-[10px] font-mono uppercase tracking-widest text-white outline-none focus:border-white transition-colors rounded-none" 
+              className="w-full bg-[#1C1C1E] border border-white/5 pl-11 pr-4 py-3 text-sm font-medium text-white outline-none focus:border-brand transition-all rounded-full placeholder:text-[#8E8E93]" 
             />
           </div>
           <button 
@@ -47,9 +47,9 @@ export default function LogHistory({
               message: 'Clear all history?', 
               onConfirm: onClearLogs 
             })} 
-            className="text-[9px] font-mono text-red-500 uppercase tracking-widest hover:underline"
+            className="text-sm font-semibold text-[#FF453A] hover:text-[#FF453A]/80 transition-colors w-full md:w-auto text-center"
           >
-            PURGE_ALL
+            Clear All
           </button>
         </div>
       </div>
@@ -63,18 +63,18 @@ export default function LogHistory({
           const subject = subjects.find(s => s.id === log.subjectId);
           const topic = subject?.topics.find(t => t.id === log.topicId);
           return (
-            <div key={log.id} className="bg-transparent border border-white/10 p-6 flex items-center justify-between group rounded-none">
-              <div className="flex items-center gap-6">
-                <div className="w-12 h-12 border border-white/20 flex items-center justify-center text-[10px] font-mono text-zinc-500 rounded-none">
+            <div key={log.id} className="bg-[#1C1C1E] border border-white/5 p-6 flex items-center justify-between group rounded-[24px] hover:bg-white/5 transition-colors shadow-sm">
+              <div className="flex items-center gap-5">
+                <div className="w-12 h-12 bg-black border border-white/5 flex items-center justify-center text-lg font-bold text-[#8E8E93] rounded-[16px]">
                   {subject?.name[0] || '?'}
                 </div>
                 <div>
-                  <h4 className="text-sm font-mono uppercase tracking-widest text-white">{subject?.name} <span className="text-zinc-600 mx-1">•</span> {topic?.title || 'GENERAL'}</h4>
-                  <div className="flex items-center gap-4 mt-1">
-                    <span className="text-[10px] font-mono text-zinc-500 flex items-center gap-1 uppercase tracking-widest">
-                      <Clock className="w-3 h-3" /> {log.duration}_MIN
+                  <h4 className="text-base font-semibold text-white">{subject?.name} <span className="text-[#8E8E93] mx-1.5">•</span> <span className="text-[#8E8E93] font-medium">{topic?.title || 'General'}</span></h4>
+                  <div className="flex items-center gap-4 mt-1.5">
+                    <span className="text-sm font-medium text-[#8E8E93] flex items-center gap-1.5">
+                      <Clock className="w-4 h-4" /> {log.duration} min
                     </span>
-                    <span className="text-[10px] font-mono text-zinc-500 uppercase tracking-widest tabular-nums">
+                    <span className="text-sm font-medium text-[#8E8E93] tabular-nums">
                       {new Date(log.timestamp).toLocaleDateString()}
                     </span>
                   </div>
@@ -87,9 +87,9 @@ export default function LogHistory({
                   message: 'Delete log?', 
                   onConfirm: () => onDeleteLog(log.id) 
                 })} 
-                className="p-3 text-zinc-600 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-all rounded-none"
+                className="p-3 text-[#8E8E93] hover:text-[#FF453A] hover:bg-[#FF453A]/10 opacity-0 group-hover:opacity-100 transition-all rounded-full"
               >
-                <Trash2 className="w-4 h-4" />
+                <Trash2 className="w-5 h-5" />
               </button>
             </div>
           );

@@ -40,6 +40,16 @@ export default function WeakAreas() {
     mutationFn: async () => {
       const prompt = `Analyze this A/L student's study data and provide 2-3 actionable recommendations. 
       Subjects: ${JSON.stringify(subjects.map(s => ({ name: s.name, readiness: s.readiness, weakCount: s.weakCount })))}
+      
+      IMPORTANT DIRECTIVES:
+      Base your recommendations on these high-signal strategies:
+      1. The Syllabus Audit: Use the official NIE syllabus. 1 check = theory covered, 2 checks = 5+ years past papers done.
+      2. The Blurt Method: Active recall on a blank sheet, correct with red pen.
+      3. Spaced Repetition (2-3-5-7 Rule): Day 1 (Summarize), Day 3 (Answer from memory), Day 5 (3 past paper MCQs), Day 7 (Feynman Technique).
+      4. Combined Maths: Concept > Quantity. Combine units.
+      5. Physics: Check Units & Dimensions. Focus on Practicals.
+      6. Chemistry: The Organic Chain. Create a Reaction Map.
+
       Return a JSON array of objects with fields: id, title, description, priority (High/Medium/Low), reason.`;
 
       const ai = getAI();

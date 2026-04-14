@@ -72,15 +72,15 @@ const SortableActivity = ({ activity, day, onEdit, tasks, subjects, onToggleTask
       ref={setNodeRef}
       style={style}
       className={cn(
-        "relative p-6 enterprise-card transition-all duration-300 group overflow-hidden",
+        "relative p-6 bg-[#1C1C1E] border border-white/5 rounded-[24px] transition-all duration-300 group overflow-hidden",
         activity.type === 'study' 
-          ? "bg-white/[0.02] border-white/20 hover:border-white/40" 
-          : "bg-transparent border-white/5 opacity-60 hover:opacity-100",
-        isDragging && "bg-black border-white shadow-2xl scale-[1.02] z-50"
+          ? "hover:bg-[#2C2C2E]" 
+          : "opacity-80 hover:opacity-100",
+        isDragging && "bg-[#2C2C2E] border-white/20 shadow-2xl scale-[1.02] z-50"
       )}
     >
       <div className="flex items-start gap-6 relative z-10">
-        <div {...attributes} {...listeners} className="mt-1 cursor-grab active:cursor-grabbing text-zinc-800 hover:text-white transition-colors">
+        <div {...attributes} {...listeners} className="mt-1 cursor-grab active:cursor-grabbing text-[#8E8E93] hover:text-white transition-colors">
           <GripVertical className="w-5 h-5" />
         </div>
         
@@ -88,26 +88,26 @@ const SortableActivity = ({ activity, day, onEdit, tasks, subjects, onToggleTask
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-4">
               <div className={cn(
-                "badge",
-                activity.type === 'study' ? "badge-brand" : "badge-zinc"
+                "px-3 py-1 text-xs font-semibold rounded-full",
+                activity.type === 'study' ? "bg-brand/20 text-brand" : "bg-white/10 text-white"
               )}>
-                {activity.type}
+                {activity.type.charAt(0).toUpperCase() + activity.type.slice(1)}
               </div>
-              <span className="text-[10px] font-mono text-zinc-500 tabular-nums uppercase tracking-[0.2em]">{activity.time}</span>
+              <span className="text-sm font-medium text-[#8E8E93] tabular-nums">{activity.time}</span>
             </div>
             <div className="flex items-center gap-4">
               {activity.type === 'study' && <BookOpen className="w-4 h-4 text-brand" />}
               {activity.type === 'tuition' && <Zap className="w-4 h-4 text-brand" />}
-              {activity.type === 'break' && <Clock className="w-4 h-4 text-zinc-500" />}
+              {activity.type === 'break' && <Clock className="w-4 h-4 text-[#8E8E93]" />}
               <button 
                 onClick={() => onEdit(activity)}
-                className="opacity-0 group-hover:opacity-100 p-2 hover:bg-white/10 rounded-none transition-all border border-white/10"
+                className="opacity-0 group-hover:opacity-100 p-2 hover:bg-white/10 rounded-full transition-all"
               >
-                <Edit2 className="w-3.5 h-3.5 text-zinc-500" />
+                <Edit2 className="w-4 h-4 text-[#8E8E93]" />
               </button>
             </div>
           </div>
-          <h4 className="text-lg font-black text-white group-hover:text-white transition-colors mb-1 uppercase tracking-widest">
+          <h4 className="text-lg font-bold text-white mb-1">
             {activity.description}
           </h4>
         </div>
@@ -115,8 +115,8 @@ const SortableActivity = ({ activity, day, onEdit, tasks, subjects, onToggleTask
 
       {relevantTasks.length > 0 && (
         <div className="mt-6 pl-11 space-y-4">
-          <div className="flex items-center gap-2 text-[9px] font-mono text-zinc-600 uppercase tracking-[0.2em]">
-            <Sparkles className="w-3 h-3" />
+          <div className="flex items-center gap-2 text-xs font-semibold text-[#8E8E93]">
+            <Sparkles className="w-4 h-4" />
             Suggested Objectives
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -124,11 +124,11 @@ const SortableActivity = ({ activity, day, onEdit, tasks, subjects, onToggleTask
               <button
                 key={task.id}
                 onClick={() => onToggleTask(task.id)}
-                className="w-full text-left p-4 bg-transparent border border-white/5 rounded-none hover:border-white/20 transition-all flex items-center gap-4 group/task"
+                className="w-full text-left p-4 bg-white/5 border border-white/5 rounded-[20px] hover:bg-white/10 transition-all flex items-center gap-4 group/task"
               >
-                <Circle className="w-2 h-2 text-zinc-800 group-hover/task:text-white" />
-                <span className="text-[10px] font-mono text-zinc-500 uppercase tracking-widest truncate flex-1">{task.title}</span>
-                <span className="text-[9px] font-mono text-zinc-700 tabular-nums">SNR: {calculateSNR(task, subjects.find(s => s.id === task.subjectId)).toFixed(1)}</span>
+                <Circle className="w-4 h-4 text-[#8E8E93] group-hover/task:text-white" />
+                <span className="text-sm font-medium text-white truncate flex-1">{task.title}</span>
+                <span className="text-xs font-semibold text-[#8E8E93] tabular-nums">SNR: {calculateSNR(task, subjects.find(s => s.id === task.subjectId)).toFixed(1)}</span>
               </button>
             ))}
           </div>
@@ -336,52 +336,50 @@ export default function ScheduleView({ schedule, onManageSchedule }: ScheduleVie
   return (
     <div className="p-8 md:p-12 space-y-12 pb-32 relative min-h-screen max-w-7xl mx-auto">
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-12 mb-16">
-        <div className="space-y-6">
+        <div className="space-y-4">
           <div className="flex items-center gap-4">
-            <div className="w-10 h-10 rounded-none bg-brand/10 border border-brand/30 flex items-center justify-center text-brand shadow-[0_0_20px_var(--color-brand-glow)]">
-              <Calendar className="w-5 h-5" />
+            <div className="w-12 h-12 rounded-[20px] bg-brand/20 flex items-center justify-center text-brand">
+              <Calendar className="w-6 h-6" />
             </div>
-            <span className="text-[9px] font-mono text-brand uppercase tracking-[0.4em]">Temporal Matrix</span>
+            <span className="text-sm font-semibold text-brand uppercase tracking-wider">Temporal Matrix</span>
           </div>
-          <h2 className="text-5xl md:text-8xl font-black text-white tracking-tighter uppercase leading-none">
-            Daily <span className="text-brand drop-shadow-[0_0_15px_var(--color-brand-glow)]">Schedule</span>
+          <h2 className="text-4xl md:text-6xl font-bold text-white tracking-tight">
+            Daily Schedule
           </h2>
-          <p className="text-zinc-600 text-[10px] font-mono uppercase tracking-[0.2em] max-w-xl leading-relaxed">
+          <p className="text-[#8E8E93] text-base max-w-xl leading-relaxed">
             Neural-synchronized study protocols and tuition alignment for the current operational cycle.
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-6">
-          <div className="flex items-center gap-6 px-8 py-4 bg-transparent border border-white/5 rounded-none">
+          <div className="flex items-center gap-6 px-8 py-6 bg-[#1C1C1E] border border-white/5 rounded-[32px]">
             <div className="text-right">
-              <p className="text-[8px] font-mono text-zinc-600 uppercase tracking-[0.2em] mb-1">Progress</p>
-              <p className="text-2xl font-black text-white tabular-nums tracking-tighter">{Math.round(dailyProgress)}%</p>
+              <p className="text-sm font-medium text-[#8E8E93] mb-1">Progress</p>
+              <p className="text-3xl font-bold text-white tabular-nums tracking-tight">{Math.round(dailyProgress)}%</p>
             </div>
-            <div className="w-12 h-12 rounded-none border border-white/10 relative flex items-center justify-center">
+            <div className="w-14 h-14 rounded-full border border-white/10 relative flex items-center justify-center bg-white/5">
               <svg className="w-full h-full -rotate-90">
                 <circle
-                  cx="24"
-                  cy="24"
-                  r="20"
-                  fill="transparent"
-                  stroke="currentColor"
-                  strokeWidth="1"
-                  className="text-white/5"
-                />
-                <circle
-                  cx="24"
-                  cy="24"
-                  r="20"
+                  cx="28"
+                  cy="28"
+                  r="24"
                   fill="transparent"
                   stroke="currentColor"
                   strokeWidth="2"
-                  className="text-white"
-                  strokeDasharray={125.6}
-                  strokeDashoffset={125.6 - (125.6 * dailyProgress) / 100}
+                  className="text-white/10"
+                />
+                <circle
+                  cx="28"
+                  cy="28"
+                  r="24"
+                  fill="transparent"
+                  stroke="currentColor"
+                  strokeWidth="4"
+                  className="text-brand"
+                  strokeDasharray={150.7}
+                  strokeDashoffset={150.7 - (150.7 * dailyProgress) / 100}
+                  strokeLinecap="round"
                 />
               </svg>
-              <div className="absolute inset-0 flex items-center justify-center">
-                <div className="w-1 h-1 bg-white animate-pulse shadow-[0_0_8px_rgba(255,255,255,0.8)]" />
-              </div>
             </div>
           </div>
           
@@ -389,25 +387,25 @@ export default function ScheduleView({ schedule, onManageSchedule }: ScheduleVie
             <button 
               onClick={handleOptimize}
               disabled={isOptimizing}
-              className="enterprise-button px-10 py-4"
+              className="px-8 py-4 bg-brand text-white font-semibold rounded-full hover:opacity-90 transition-opacity flex items-center justify-center gap-2"
             >
-              <Sparkles className={cn("w-4 h-4", isOptimizing && "animate-spin")} />
+              <Sparkles className={cn("w-5 h-5", isOptimizing && "animate-spin")} />
               {isOptimizing ? 'Optimizing...' : 'Neural Optimize'}
             </button>
             <div className="flex gap-4">
               <button 
                 onClick={handleSyncCalendar}
                 disabled={isSyncing}
-                className="enterprise-button-secondary flex-1 py-4"
+                className="px-6 py-3 bg-white/10 text-white font-semibold rounded-full hover:bg-white/20 transition-colors flex items-center justify-center gap-2 flex-1"
               >
-                <Calendar className={cn("w-4 h-4", isSyncing && "animate-spin")} />
+                <Calendar className={cn("w-5 h-5", isSyncing && "animate-spin")} />
                 {isSyncing ? 'Syncing...' : 'Sync Calendar'}
               </button>
               <button 
                 onClick={handleExportText}
-                className="enterprise-button-secondary flex-1 py-4"
+                className="px-6 py-3 bg-white/10 text-white font-semibold rounded-full hover:bg-white/20 transition-colors flex items-center justify-center gap-2 flex-1"
               >
-                <Download className="w-4 h-4" />
+                <Download className="w-5 h-5" />
                 Export TXT
               </button>
             </div>
@@ -416,21 +414,21 @@ export default function ScheduleView({ schedule, onManageSchedule }: ScheduleVie
       </div>
 
       {/* Day Selector */}
-      <div className="flex overflow-x-auto scrollbar-hide gap-2 p-1 bg-transparent border border-white/5 rounded-full w-fit max-w-full">
+      <div className="flex overflow-x-auto scrollbar-hide gap-2 p-1.5 bg-[#1C1C1E] border border-white/5 rounded-full w-fit max-w-full">
         {days.map((day) => (
           <button
             key={day}
             onClick={() => setSelectedDay(day)}
             className={cn(
-              "px-6 py-3 rounded-full text-[10px] font-mono uppercase tracking-[0.2em] transition-all whitespace-nowrap relative overflow-hidden group",
+              "px-6 py-2.5 rounded-full text-sm font-semibold transition-all whitespace-nowrap relative overflow-hidden",
               selectedDay === day 
                 ? "text-black bg-white" 
-                : "text-zinc-600 hover:text-white hover:bg-white/5"
+                : "text-[#8E8E93] hover:text-white hover:bg-white/10"
             )}
           >
             <span className="relative z-10">{day}</span>
             {day === currentDayName && selectedDay !== day && (
-              <span className="absolute top-2 right-2 w-1.5 h-1.5 bg-white rounded-none shadow-[0_0_8px_rgba(255,255,255,0.8)]" />
+              <span className="absolute top-2 right-2 w-1.5 h-1.5 bg-brand rounded-full" />
             )}
           </button>
         ))}
@@ -439,60 +437,60 @@ export default function ScheduleView({ schedule, onManageSchedule }: ScheduleVie
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
         {/* Daily Tasks Sidebar */}
         <div className="lg:col-span-4 space-y-10">
-          <div className="enterprise-card p-10 space-y-10 relative overflow-hidden">
-            <div className="absolute top-0 right-0 w-48 h-48 bg-white/[0.02] blur-3xl -mr-24 -mt-24" />
+          <div className="bg-[#1C1C1E] border border-white/5 rounded-[32px] p-10 space-y-10 relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-48 h-48 bg-brand/10 blur-3xl -mr-24 -mt-24 rounded-full" />
             
             <div className="flex items-center gap-6 relative z-10">
-              <div className="w-12 h-12 rounded-none bg-transparent border border-white/10 flex items-center justify-center text-white">
-                <ListTodo className="w-6 h-6" />
+              <div className="w-14 h-14 rounded-[20px] bg-white/10 flex items-center justify-center text-white">
+                <ListTodo className="w-7 h-7" />
               </div>
               <div>
-                <h3 className="text-[9px] font-mono uppercase tracking-[0.3em] text-zinc-600 mb-1">Mission Objectives</h3>
-                <p className="text-xl font-black text-white tracking-widest uppercase">Daily Protocols</p>
+                <h3 className="text-sm font-semibold text-[#8E8E93] mb-1">Mission Objectives</h3>
+                <p className="text-2xl font-bold text-white tracking-tight">Daily Protocols</p>
               </div>
             </div>
 
             <div className="space-y-6 relative z-10">
               <div className="flex items-end justify-between mb-2">
-                <span className="text-[9px] font-mono uppercase tracking-[0.2em] text-zinc-600">Sync Status</span>
+                <span className="text-sm font-semibold text-[#8E8E93]">Sync Status</span>
                 <div className="flex items-baseline gap-2">
-                  <span className="text-3xl font-black tabular-nums text-white tracking-tighter">{completedDaily}</span>
-                  <span className="text-[10px] font-mono text-zinc-700 uppercase tracking-widest">/ {dailyTasks.length}</span>
+                  <span className="text-3xl font-bold tabular-nums text-white tracking-tight">{completedDaily}</span>
+                  <span className="text-sm font-medium text-[#8E8E93]">/ {dailyTasks.length}</span>
                 </div>
               </div>
-              <div className="h-[2px] w-full bg-white/5 rounded-none overflow-hidden">
+              <div className="h-2 w-full bg-white/10 rounded-full overflow-hidden">
                 <motion.div 
                   initial={{ width: 0 }}
                   animate={{ width: `${dailyProgress}%` }}
-                  className="h-full bg-white"
+                  className="h-full bg-brand"
                 />
               </div>
             </div>
 
-            <div className="space-y-2 relative z-10">
+            <div className="space-y-3 relative z-10">
               {dailyTasks.map((task) => (
                 <div 
                   key={task.id}
                   className={cn(
-                    "p-5 rounded-none border transition-all flex items-center gap-6 group/task",
+                    "p-5 rounded-[20px] border transition-all flex items-center gap-6 group/task",
                     task.completed 
-                      ? "bg-white/[0.02] border-white/5 opacity-40" 
-                      : "bg-transparent border-white/5 hover:border-white/20"
+                      ? "bg-white/5 border-white/5" 
+                      : "bg-transparent border-white/10 hover:bg-white/5"
                   )}
                 >
                   <button 
                     onClick={() => handleToggleTask(task.id)}
                     className={cn(
                       "shrink-0 transition-transform group-hover/task:scale-110",
-                      task.completed ? "text-white" : "text-zinc-800 hover:text-white"
+                      task.completed ? "text-brand" : "text-[#8E8E93] hover:text-white"
                     )}
                   >
-                    {task.completed ? <CheckCircle2 className="w-5 h-5" /> : <Circle className="w-5 h-5" />}
+                    {task.completed ? <CheckCircle2 className="w-6 h-6" /> : <Circle className="w-6 h-6" />}
                   </button>
                   <div className="min-w-0 flex-1">
                     <p className={cn(
-                      "text-[10px] font-mono uppercase tracking-[0.15em] truncate",
-                      task.completed ? "line-through text-zinc-700" : "text-zinc-400"
+                      "text-sm font-medium truncate",
+                      task.completed ? "line-through text-[#8E8E93]" : "text-white"
                     )}>
                       {task.title}
                     </p>
@@ -504,18 +502,18 @@ export default function ScheduleView({ schedule, onManageSchedule }: ScheduleVie
 
           {/* Tuition Summary for Day */}
           {schedule[selectedDay].filter(a => a.type === 'tuition').length > 0 && (
-            <div className="enterprise-card p-10 border-white/10 bg-white/[0.02]">
+            <div className="bg-[#1C1C1E] border border-white/5 rounded-[32px] p-10">
               <div className="flex items-center gap-6 mb-8">
-                <div className="w-10 h-10 rounded-none bg-transparent border border-white/10 flex items-center justify-center text-white">
-                  <Zap className="w-5 h-5" />
+                <div className="w-12 h-12 rounded-[20px] bg-white/10 flex items-center justify-center text-white">
+                  <Zap className="w-6 h-6" />
                 </div>
-                <h3 className="text-[9px] font-mono uppercase tracking-[0.3em] text-zinc-600">Tuition Sync</h3>
+                <h3 className="text-sm font-semibold text-[#8E8E93]">Tuition Sync</h3>
               </div>
               <div className="space-y-3">
                 {schedule[selectedDay].filter(a => a.type === 'tuition').map(s => (
-                  <div key={s.id} className="flex items-center justify-between p-5 bg-transparent border border-white/5 rounded-none hover:border-white/20 transition-all">
-                    <span className="text-[10px] font-mono uppercase tracking-[0.15em] text-zinc-400 truncate max-w-[150px]">{s.description}</span>
-                    <span className="text-[10px] font-mono text-white tabular-nums tracking-tighter">{s.time}</span>
+                  <div key={s.id} className="flex items-center justify-between p-5 bg-white/5 rounded-[20px] hover:bg-white/10 transition-all">
+                    <span className="text-sm font-medium text-white truncate max-w-[150px]">{s.description}</span>
+                    <span className="text-sm font-semibold text-[#8E8E93] tabular-nums">{s.time}</span>
                   </div>
                 ))}
               </div>
@@ -527,18 +525,18 @@ export default function ScheduleView({ schedule, onManageSchedule }: ScheduleVie
         <div className="lg:col-span-8 space-y-10">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-6">
-              <h3 className="text-3xl font-black text-white tracking-tighter uppercase">{selectedDay}</h3>
+              <h3 className="text-3xl font-bold text-white tracking-tight">{selectedDay}</h3>
               <div className="h-8 w-[1px] bg-white/10" />
-              <p className="text-[9px] font-mono text-zinc-600 uppercase tracking-[0.3em]">
+              <p className="text-sm font-medium text-[#8E8E93]">
                 {schedule[selectedDay].length} Active Blocks
               </p>
             </div>
             <button 
               onClick={handleOptimize}
               disabled={isOptimizing}
-              className="enterprise-button px-6 py-3 text-[9px] flex items-center gap-3"
+              className="px-6 py-3 bg-white/10 text-white font-semibold rounded-full hover:bg-white/20 transition-colors flex items-center gap-2"
             >
-              <Sparkles className={cn("w-4 h-4", isOptimizing && "animate-spin")} />
+              <Sparkles className={cn("w-5 h-5", isOptimizing && "animate-spin")} />
               {isOptimizing ? 'Analyzing...' : 'Neural Optimize'}
             </button>
           </div>
@@ -582,30 +580,27 @@ export default function ScheduleView({ schedule, onManageSchedule }: ScheduleVie
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={() => setEditingActivity(null)}
-              className="absolute inset-0 bg-black/90 backdrop-blur-sm"
+              className="absolute inset-0 bg-black/80 backdrop-blur-sm"
             />
             <motion.div 
-              initial={{ opacity: 0, scale: 0.98, y: 10 }}
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.98, y: 10 }}
-              className="relative w-full max-w-[320px] enterprise-card p-5 bg-black border-white/20 shadow-2xl rounded-2xl"
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              className="relative w-full max-w-md bg-[#1C1C1E] border border-white/10 shadow-2xl rounded-[32px] p-8"
             >
-              <div className="flex items-center justify-between mb-4">
-                <div className="space-y-1">
-                  <div className="flex items-center gap-2">
-                    <div className="w-6 h-[1px] bg-white" />
-                    <span className="text-[7px] font-mono text-white uppercase tracking-[0.4em]">Adjustment</span>
-                  </div>
-                  <h3 className="text-lg font-black text-white tracking-tighter uppercase">Edit Activity</h3>
+              <div className="flex items-center justify-between mb-8">
+                <div>
+                  <h3 className="text-2xl font-bold text-white tracking-tight">Edit Activity</h3>
+                  <p className="text-sm font-medium text-[#8E8E93] mt-1">Adjust schedule block</p>
                 </div>
-                <button onClick={() => setEditingActivity(null)} className="p-1.5 hover:bg-white/10 rounded-lg transition-colors border border-white/10">
-                  <CloseIcon className="w-4 h-4 text-zinc-500" />
+                <button onClick={() => setEditingActivity(null)} className="p-2 bg-white/5 hover:bg-white/10 rounded-full transition-colors">
+                  <CloseIcon className="w-5 h-5 text-white" />
                 </button>
               </div>
 
-              <div className="space-y-4">
+              <div className="space-y-6">
                 <div className="space-y-2">
-                  <label className="text-[8px] font-mono uppercase tracking-[0.3em] text-zinc-600 block">Description</label>
+                  <label className="text-sm font-semibold text-[#8E8E93] block">Description</label>
                   <input 
                     type="text"
                     value={editingActivity.activity.description}
@@ -613,13 +608,13 @@ export default function ScheduleView({ schedule, onManageSchedule }: ScheduleVie
                       ...editingActivity,
                       activity: { ...editingActivity.activity, description: e.target.value }
                     })}
-                    className="enterprise-input py-2 text-xs rounded-lg"
+                    className="w-full bg-black border border-white/10 px-4 py-3 text-base font-medium rounded-[20px] text-white focus:border-brand outline-none transition-colors"
                   />
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <label className="text-[8px] font-mono uppercase tracking-[0.3em] text-zinc-600 block">Start Time</label>
+                    <label className="text-sm font-semibold text-[#8E8E93] block">Start Time</label>
                     <input 
                       type="text"
                       placeholder="08:00 AM"
@@ -631,11 +626,11 @@ export default function ScheduleView({ schedule, onManageSchedule }: ScheduleVie
                           activity: { ...editingActivity.activity, time: `${e.target.value} – ${end}` }
                         });
                       }}
-                      className="enterprise-input py-2 text-xs rounded-lg tabular-nums"
+                      className="w-full bg-black border border-white/10 px-4 py-3 text-base font-medium rounded-[20px] text-white focus:border-brand outline-none transition-colors tabular-nums"
                     />
                   </div>
                   <div className="space-y-2">
-                    <label className="text-[8px] font-mono uppercase tracking-[0.3em] text-zinc-600 block">End Time</label>
+                    <label className="text-sm font-semibold text-[#8E8E93] block">End Time</label>
                     <input 
                       type="text"
                       placeholder="09:00 AM"
@@ -647,14 +642,14 @@ export default function ScheduleView({ schedule, onManageSchedule }: ScheduleVie
                           activity: { ...editingActivity.activity, time: `${start} – ${e.target.value}` }
                         });
                       }}
-                      className="enterprise-input py-2 text-xs rounded-lg tabular-nums"
+                      className="w-full bg-black border border-white/10 px-4 py-3 text-base font-medium rounded-[20px] text-white focus:border-brand outline-none transition-colors tabular-nums"
                     />
                   </div>
                 </div>
 
                 <div className="space-y-2">
-                  <label className="text-[8px] font-mono uppercase tracking-[0.3em] text-zinc-600 block">Classification</label>
-                  <div className="grid grid-cols-2 gap-2">
+                  <label className="text-sm font-semibold text-[#8E8E93] block">Classification</label>
+                  <div className="grid grid-cols-2 gap-3">
                     {['study', 'tuition', 'break', 'rest'].map(type => (
                       <button
                         key={type}
@@ -663,10 +658,10 @@ export default function ScheduleView({ schedule, onManageSchedule }: ScheduleVie
                           activity: { ...editingActivity.activity, type: type as Activity['type'] }
                         })}
                         className={cn(
-                          "px-2 py-1 text-[8px] font-mono uppercase tracking-[0.2em] rounded-md border transition-all",
+                          "px-4 py-3 text-sm font-semibold rounded-[20px] transition-all capitalize",
                           editingActivity.activity.type === type 
-                            ? "bg-white text-black border-white font-bold" 
-                            : "bg-transparent text-zinc-600 border-white/10 hover:border-white/30"
+                            ? "bg-white text-black" 
+                            : "bg-white/5 text-[#8E8E93] hover:bg-white/10 hover:text-white"
                         )}
                       >
                         {type}
@@ -675,22 +670,22 @@ export default function ScheduleView({ schedule, onManageSchedule }: ScheduleVie
                   </div>
                 </div>
 
-                <div className="flex gap-3 pt-2">
+                <div className="flex gap-4 pt-6 mt-6 border-t border-white/5">
                   <button 
                     onClick={() => setEditingActivity(null)}
-                    className="flex-1 py-2 bg-transparent hover:bg-white/5 text-zinc-600 hover:text-white transition-all font-mono uppercase tracking-[0.2em] text-[8px] rounded-lg border border-white/10"
+                    className="flex-1 py-4 bg-white/5 hover:bg-white/10 text-white font-semibold rounded-full transition-colors"
                   >
-                    Abort
+                    Cancel
                   </button>
                   <button 
                     onClick={() => {
                       updateActivity(editingActivity.day, editingActivity.activity.id, editingActivity.activity);
                       setEditingActivity(null);
                     }}
-                    className="flex-1 py-2 bg-white text-black font-bold hover:bg-zinc-200 transition-all flex items-center justify-center gap-2 uppercase tracking-[0.2em] text-[8px] rounded-lg"
+                    className="flex-1 py-4 bg-brand text-white font-semibold rounded-full hover:opacity-90 transition-opacity flex items-center justify-center gap-2"
                   >
-                    <Save className="w-3 h-3" />
-                    Commit
+                    <Save className="w-5 h-5" />
+                    Save Changes
                   </button>
                 </div>
               </div>

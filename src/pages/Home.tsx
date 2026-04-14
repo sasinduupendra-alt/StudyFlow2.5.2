@@ -72,11 +72,11 @@ export default function Home() {
   if (subjects.length === 0 && !searchQuery) {
     return (
       <div className="h-[80vh] flex flex-col items-center justify-center text-center p-8 space-y-6">
-        <div className="w-24 h-24 bg-zinc-900 border border-zinc-800 flex items-center justify-center mb-6 rounded-3xl">
-          <BookOpen className="w-10 h-10 text-zinc-600" />
+        <div className="w-24 h-24 bg-[#1C1C1E] border border-white/5 flex items-center justify-center mb-6 rounded-full">
+          <BookOpen className="w-10 h-10 text-[#8E8E93]" />
         </div>
         <h2 className="text-3xl font-bold text-white tracking-tight">No Subjects Detected</h2>
-        <p className="text-zinc-500 max-w-md mx-auto text-sm leading-relaxed">Your study flow is currently empty. Initialize your syllabus to begin tracking your progress and generating AI insights.</p>
+        <p className="text-[#8E8E93] max-w-md mx-auto text-base leading-relaxed">Your study flow is currently empty. Initialize your syllabus to begin tracking your progress and generating AI insights.</p>
         <button 
           onClick={() => navigate('/manage')}
           className="enterprise-button px-10 py-4"
@@ -119,43 +119,43 @@ export default function Home() {
       variants={containerVariants}
       initial="hidden"
       animate="show"
-      className="p-8 space-y-10 max-w-7xl mx-auto"
+      className="p-6 md:p-10 space-y-10 max-w-7xl mx-auto"
     >
       {/* Welcome Header */}
-      <motion.header variants={itemVariants} className="flex flex-col md:flex-row md:items-end justify-between gap-12 pb-8 border-b border-white/10">
+      <motion.header variants={itemVariants} className="flex flex-col md:flex-row md:items-end justify-between gap-8 pb-8 border-b border-white/10">
         <div className="flex-1">
-          <h1 className="text-4xl md:text-6xl font-black text-white uppercase tracking-tighter leading-none">
-            Welcome, <span className="text-brand drop-shadow-[0_0_15px_var(--color-brand-glow)]">{user?.displayName?.split(' ')[0] || 'Scholar'}</span>
+          <h1 className="text-4xl md:text-5xl font-bold text-white tracking-tight leading-tight">
+            Welcome back, <br className="md:hidden" /><span className="text-brand">{user?.displayName?.split(' ')[0] || 'Scholar'}</span>
           </h1>
-          <p className="text-zinc-500 text-[10px] font-mono uppercase tracking-[0.3em] mt-4 flex items-center gap-3">
-            <span className="w-1.5 h-1.5 bg-brand rounded-full animate-pulse shadow-[0_0_8px_var(--color-brand-glow)]" />
-            Neural Link: {user ? 'Established // Protocol 01' : 'Awaiting Connection // Protocol 00'}
+          <p className="text-[#8E8E93] text-sm font-medium mt-3 flex items-center gap-2">
+            <span className="w-2 h-2 bg-brand rounded-full shadow-[0_0_8px_var(--color-brand-glow)]" />
+            {user ? 'Ready to study' : 'Sign in to sync your progress'}
           </p>
         </div>
 
         {!user ? (
           <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
             onClick={handleLogin}
-            className="enterprise-button px-10 py-5 flex items-center gap-3"
+            className="enterprise-button px-8 py-4 flex items-center gap-3"
           >
             <LogIn className="w-5 h-5" />
-            Establish Neural Link
+            Sign In
           </motion.button>
         ) : (
-          <div className="flex items-center gap-12">
-            <div className="text-right">
-              <p className="text-[9px] font-mono text-zinc-500 uppercase tracking-[0.3em] leading-none mb-2">Streak</p>
-              <p className="text-3xl font-black text-white tabular-nums leading-none tracking-tighter flex items-center justify-end gap-2">
-                {userProfile?.streak || 0} <Flame className="w-5 h-5 text-zinc-600" />
+          <div className="flex items-center gap-8 bg-[#1C1C1E] px-6 py-4 rounded-[20px] border border-white/5">
+            <div className="text-center">
+              <p className="text-xs font-semibold text-[#8E8E93] uppercase tracking-wider mb-1">Streak</p>
+              <p className="text-2xl font-bold text-white flex items-center justify-center gap-1.5">
+                {userProfile?.streak || 0} <Flame className="w-5 h-5 text-[#FF9F0A]" />
               </p>
             </div>
-            <div className="w-[1px] h-12 bg-white/10" />
-            <div className="text-right">
-              <p className="text-[9px] font-mono text-zinc-500 uppercase tracking-[0.3em] leading-none mb-2">Level</p>
-              <p className="text-3xl font-black text-white tabular-nums leading-none tracking-tighter flex items-center justify-end gap-2">
-                {userProfile?.level || 1} <Trophy className="w-5 h-5 text-zinc-600" />
+            <div className="w-[1px] h-10 bg-white/10" />
+            <div className="text-center">
+              <p className="text-xs font-semibold text-[#8E8E93] uppercase tracking-wider mb-1">Level</p>
+              <p className="text-2xl font-bold text-white flex items-center justify-center gap-1.5">
+                {userProfile?.level || 1} <Trophy className="w-5 h-5 text-[#FFD60A]" />
               </p>
             </div>
           </div>
@@ -172,8 +172,8 @@ export default function Home() {
         />
       </motion.div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
-        <div className="lg:col-span-2 space-y-10">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="lg:col-span-2 space-y-8">
           <motion.section variants={itemVariants}>
             <Planner 
               prioritySubject={prioritySubject} 
@@ -189,11 +189,11 @@ export default function Home() {
 
           {recentlyStudied.length > 0 && !searchQuery && (
             <motion.section variants={itemVariants}>
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-xl font-bold text-white">Continue Studying</h2>
-                <button className="text-xs font-bold text-zinc-500 hover:text-brand transition-colors">View All</button>
+              <div className="flex items-center justify-between mb-5">
+                <h2 className="text-xl font-bold text-white tracking-tight">Continue Studying</h2>
+                <button className="text-sm font-semibold text-brand hover:opacity-80 transition-opacity">View All</button>
               </div>
-              <div className="flex gap-6 overflow-x-auto pb-4 scrollbar-hide">
+              <div className="flex gap-5 overflow-x-auto pb-4 scrollbar-hide">
                 {recentlyStudied.map(topicId => {
                   const subject = subjects.find(s => s.topics?.some(t => t.id === topicId));
                   const topic = subject?.topics?.find(t => t.id === topicId);
@@ -213,14 +213,14 @@ export default function Home() {
           )}
         </div>
 
-        <div className="space-y-12">
+        <div className="space-y-8">
           {!searchQuery && (
             <motion.section variants={itemVariants}>
-              <div className="flex items-center justify-between mb-6 pb-4 border-b border-white/5">
-                <h2 className="text-sm font-bold text-white uppercase tracking-[0.2em]">AI Mixes</h2>
-                <Sparkles className="w-3 h-3 text-zinc-500" />
+              <div className="flex items-center justify-between mb-5">
+                <h2 className="text-lg font-bold text-white tracking-tight">Quick Actions</h2>
+                <Sparkles className="w-4 h-4 text-brand" />
               </div>
-              <div className="space-y-2">
+              <div className="space-y-3">
                 {[
                   {
                     id: 'mix-1',
@@ -247,14 +247,16 @@ export default function Home() {
                   <button 
                     key={mix.id}
                     onClick={mix.action}
-                    className="w-full p-4 flex items-center gap-5 hover:bg-white/[0.02] group transition-all border border-transparent hover:border-white/10"
+                    className="w-full p-4 flex items-center gap-4 bg-[#1C1C1E] rounded-[20px] hover:bg-[#2C2C2E] transition-all group"
                   >
-                    <mix.icon className="w-4 h-4 text-zinc-500 group-hover:text-white transition-colors" />
-                    <div className="text-left flex-1">
-                      <h4 className="text-xs font-bold text-white uppercase tracking-widest group-hover:text-zinc-300 transition-colors">{mix.title}</h4>
-                      <p className="text-[9px] font-mono text-zinc-600 uppercase tracking-widest mt-1">{mix.description}</p>
+                    <div className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center group-hover:bg-brand/10 transition-colors">
+                      <mix.icon className="w-5 h-5 text-[#8E8E93] group-hover:text-brand transition-colors" />
                     </div>
-                    <Play className="w-3 h-3 text-zinc-700 group-hover:text-white fill-current opacity-0 group-hover:opacity-100 transition-all" />
+                    <div className="text-left flex-1">
+                      <h4 className="text-base font-semibold text-white">{mix.title}</h4>
+                      <p className="text-sm text-[#8E8E93] mt-0.5">{mix.description}</p>
+                    </div>
+                    <ChevronRight className="w-5 h-5 text-[#8E8E93] opacity-0 group-hover:opacity-100 transition-all transform group-hover:translate-x-1" />
                   </button>
                 ))}
               </div>
@@ -263,11 +265,11 @@ export default function Home() {
 
           {studyLogs.length > 0 && !searchQuery && (
             <motion.section variants={itemVariants}>
-              <div className="flex items-center justify-between mb-6 pb-4 border-b border-white/5">
-                <h2 className="text-sm font-bold text-white uppercase tracking-[0.2em]">Recent Activity</h2>
-                <button onClick={() => navigate('/analytics')} className="text-[9px] font-mono text-zinc-500 hover:text-white uppercase tracking-widest transition-colors">History</button>
+              <div className="flex items-center justify-between mb-5">
+                <h2 className="text-lg font-bold text-white tracking-tight">Recent Activity</h2>
+                <button onClick={() => navigate('/analytics')} className="text-sm font-semibold text-brand hover:opacity-80 transition-opacity">History</button>
               </div>
-              <div className="space-y-1">
+              <div className="space-y-3">
                 {studyLogs.slice(0, 4).map((log) => {
                   const subject = subjects.find(s => s.id === log.subjectId);
                   const topic = subject?.topics?.find(t => t.id === log.topicId);
@@ -275,16 +277,18 @@ export default function Home() {
                     <div
                       key={log.id}
                       onClick={() => navigate(`/session/${log.id}`)}
-                      className="flex items-center gap-5 p-4 hover:bg-white/[0.02] cursor-pointer group transition-all border border-transparent hover:border-white/10"
+                      className="flex items-center gap-4 p-4 bg-[#1C1C1E] rounded-[20px] hover:bg-[#2C2C2E] cursor-pointer group transition-all"
                     >
-                      <Clock className="w-4 h-4 text-zinc-600 group-hover:text-white transition-colors" />
+                      <div className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center">
+                        <Clock className="w-5 h-5 text-[#8E8E93] group-hover:text-white transition-colors" />
+                      </div>
                       <div className="flex-1 min-w-0">
-                        <h4 className="text-[11px] font-bold text-zinc-300 group-hover:text-white uppercase tracking-[0.15em] truncate transition-colors">{topic?.title || 'Study Session'}</h4>
-                        <p className="text-[9px] font-mono text-zinc-600 uppercase tracking-widest truncate mt-1">{subject?.name}</p>
+                        <h4 className="text-base font-semibold text-white truncate">{topic?.title || 'Study Session'}</h4>
+                        <p className="text-sm text-[#8E8E93] truncate mt-0.5">{subject?.name}</p>
                       </div>
                       <div className="text-right">
-                        <p className="text-[10px] font-mono text-white tracking-widest">{log.duration}m</p>
-                        <p className="text-[8px] text-zinc-600 font-mono uppercase tracking-[0.2em] mt-1">{new Date(log.timestamp).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}</p>
+                        <p className="text-sm font-semibold text-white">{log.duration}m</p>
+                        <p className="text-xs text-[#8E8E93] mt-0.5">{new Date(log.timestamp).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}</p>
                       </div>
                     </div>
                   );
@@ -297,8 +301,8 @@ export default function Home() {
 
       {/* Subject Catalog */}
       <motion.section variants={itemVariants}>
-        <div className="flex items-center justify-between mb-8">
-          <h2 className="text-2xl font-bold text-white uppercase tracking-widest">
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="text-2xl font-bold text-white tracking-tight">
             {searchQuery ? `Search Results for "${searchQuery}"` : 'Your Subjects'}
           </h2>
           {!searchQuery && (
@@ -322,34 +326,34 @@ export default function Home() {
       {/* Analytics CTA */}
       <motion.section 
         variants={itemVariants}
-        className="enterprise-card p-12 relative group"
+        className="enterprise-card p-10 relative group overflow-hidden"
       >
-        <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-white/5 rounded-full blur-[120px] -translate-y-1/2 translate-x-1/3 group-hover:bg-white/10 transition-all duration-1000 pointer-events-none" />
-        <div className="relative flex flex-col lg:flex-row items-center gap-12">
-          <div className="flex-1 space-y-6 text-center lg:text-left">
-            <div className="inline-flex items-center gap-2 px-3 py-1 bg-transparent border border-white/30 rounded-none text-white text-[10px] font-mono uppercase tracking-widest">
-              <Sparkles className="w-3 h-3" />
+        <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-brand/10 rounded-full blur-[100px] -translate-y-1/2 translate-x-1/3 group-hover:bg-brand/20 transition-all duration-1000 pointer-events-none" />
+        <div className="relative flex flex-col lg:flex-row items-center gap-10">
+          <div className="flex-1 space-y-5 text-center lg:text-left">
+            <div className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white/5 rounded-full text-white text-xs font-semibold">
+              <Sparkles className="w-3.5 h-3.5 text-brand" />
               Advanced Insights
             </div>
-            <h2 className="text-4xl font-bold text-white uppercase tracking-[0.15em]">Deep Dive Analytics</h2>
-            <p className="text-zinc-400 text-sm font-mono uppercase tracking-widest max-w-xl leading-relaxed">Our AI has processed your recent study patterns. We've identified several areas where you can optimize your focus for maximum retention.</p>
-            <div className="flex flex-wrap justify-center lg:justify-start gap-4 pt-4">
+            <h2 className="text-3xl font-bold text-white tracking-tight">Deep Dive Analytics</h2>
+            <p className="text-[#8E8E93] text-base max-w-xl leading-relaxed">Our AI has processed your recent study patterns. We've identified several areas where you can optimize your focus for maximum retention.</p>
+            <div className="flex flex-wrap justify-center lg:justify-start gap-4 pt-2">
               <button 
                 onClick={() => navigate('/weak-areas')}
-                className="enterprise-button px-8 py-3"
+                className="enterprise-button px-8 py-3.5"
               >
                 Generate Insights
               </button>
               <button 
                 onClick={() => navigate('/analytics')}
-                className="enterprise-button-secondary px-8 py-3"
+                className="enterprise-button-secondary px-8 py-3.5"
               >
                 View Full Data
               </button>
             </div>
           </div>
-          <div className="w-full lg:w-1/3 aspect-square bg-transparent border border-white/20 rounded-none flex items-center justify-center relative overflow-hidden group-hover:border-white/50 transition-all duration-700 shadow-2xl">
-            <TrendingUp className="w-24 h-24 text-white animate-pulse" />
+          <div className="w-full lg:w-1/4 aspect-square bg-white/5 rounded-[32px] flex items-center justify-center relative group-hover:bg-white/10 transition-all duration-500">
+            <TrendingUp className="w-16 h-16 text-brand" />
           </div>
         </div>
       </motion.section>

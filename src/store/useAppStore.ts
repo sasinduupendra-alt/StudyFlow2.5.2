@@ -4,8 +4,9 @@ import { AuthSlice, createAuthSlice } from './slices/authSlice';
 import { StudySlice, createStudySlice } from './slices/studySlice';
 import { UISlice, createUISlice } from './slices/uiSlice';
 import { TaskSlice, createTaskSlice } from './slices/taskSlice';
+import { NotificationSlice, createNotificationSlice } from './slices/notificationSlice';
 
-export type AppState = AuthSlice & StudySlice & UISlice & TaskSlice;
+export type AppState = AuthSlice & StudySlice & UISlice & TaskSlice & NotificationSlice;
 
 export const useAppStore = create<AppState>()(
   persist(
@@ -14,6 +15,7 @@ export const useAppStore = create<AppState>()(
       ...createStudySlice(...a),
       ...createUISlice(...a),
       ...createTaskSlice(...a),
+      ...createNotificationSlice(...a),
     }),
     {
       name: 'studyflow-storage',
@@ -27,6 +29,8 @@ export const useAppStore = create<AppState>()(
         recentlyStudied: state.recentlyStudied,
         aiPlan: state.aiPlan,
         tasks: state.tasks,
+        notifications: state.notifications,
+        notificationPreferences: state.notificationPreferences,
       }),
     }
   )

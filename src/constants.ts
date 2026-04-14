@@ -15,7 +15,7 @@ export const INITIAL_SUBJECTS: Subject[] = [
     gradient: 'from-green-500/20 to-green-900/40',
     image: 'https://images.unsplash.com/photo-1635070041078-e363dbe005cb?auto=format&fit=crop&q=80&w=800',
     examDate: '2026-07-15',
-    notes: 'Weekly: Homework, Paper Review, Past Lesson Review, Missed Lesson Learning.',
+    notes: 'Concept > Quantity. Don\'t do 100 easy problems. Do 10 problems that force you to combine different units (e.g., Trigonometry + Integration). Use your 4:30 AM slot for this.',
     weeklyTasks: [
       { id: 'm1', title: 'Homework', completed: false },
       { id: 'm2', title: 'Paper Review (with past papers)', completed: false },
@@ -51,7 +51,7 @@ export const INITIAL_SUBJECTS: Subject[] = [
     gradient: 'from-blue-500/20 to-blue-900/40',
     image: 'https://images.unsplash.com/photo-1581093458791-9f3c3900df4b?auto=format&fit=crop&q=80&w=800',
     examDate: '2026-07-22',
-    notes: 'Weekly: Homework, Paper Review, Past Lesson Review, Missed Lesson Learning, Practical Lesson.',
+    notes: 'Units & Dimensions. Before solving any long structured question, verify the units. If the units don\'t align, your "Signal" is lost. Focus heavily on the Practicals as they are guaranteed marks.',
     weeklyTasks: [
       { id: 'p1', title: 'Homework', completed: false },
       { id: 'p2', title: 'Paper Review (with past papers)', completed: false },
@@ -85,7 +85,7 @@ export const INITIAL_SUBJECTS: Subject[] = [
     gradient: 'from-purple-500/20 to-purple-900/40',
     image: 'https://images.unsplash.com/photo-1532187875605-2fe358711e24?auto=format&fit=crop&q=80&w=800',
     examDate: '2026-08-01',
-    notes: 'Weekly: Homework, Paper Review, Past Lesson Review, Missed Lesson Learning.',
+    notes: 'The Organic Chain. Chemistry is a story. Create a "Reaction Map" on one large sheet of paper for all Organic reactions. If you can\'t trace the path from one functional group to another, you don\'t know the syllabus yet.',
     weeklyTasks: [
       { id: 'c1', title: 'Homework', completed: false },
       { id: 'c2', title: 'Paper Review (with past papers)', completed: false },

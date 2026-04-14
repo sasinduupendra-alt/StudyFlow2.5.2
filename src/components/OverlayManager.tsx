@@ -41,7 +41,7 @@ export default function OverlayManager({ handleSaveLog, finishSession }: Overlay
       <AnimatePresence>
         {isFocusMode && activeSession && (
           <FocusMode 
-            key="focus-mode-overlay"
+            key={`focus-mode-${activeSession.id}`}
             subject={activeSubject}
             session={activeSession}
             isPaused={isPaused}

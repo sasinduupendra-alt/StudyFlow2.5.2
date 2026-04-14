@@ -12,10 +12,15 @@ export const googleProvider = new GoogleAuthProvider();
 // Test connection to Firestore
 async function testConnection() {
   try {
+    console.log("Attempting to connect to Firestore...");
     await getDocFromServer(doc(db, 'test', 'connection'));
+    console.log("Firestore connection successful.");
   } catch (error) {
-    if (error instanceof Error && error.message.includes('the client is offline')) {
-      console.error("Please check your Firebase configuration. The client is offline.");
+    if (error instanceof Error) {
+      console.error("Firestore connection failed:", error.message);
+      if (error.message.includes('the client is offline') || error.message.includes('unavailable')) {
+        console.error("Please check your Firebase configuration or project status. The backend is currently unreachable.");
+      }
     }
   }
 }

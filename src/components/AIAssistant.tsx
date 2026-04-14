@@ -22,7 +22,7 @@ export default function AIAssistant() {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const chatRef = useRef<any>(null);
 
-  const { subjects, tasks, schedule, userProfile } = useAppStore();
+  const { subjects, tasks, schedule, userProfile, addNotification, notificationPreferences } = useAppStore();
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -37,7 +37,7 @@ export default function AIAssistant() {
     
     const ai = getAI();
     
-    const systemInstruction = `You are an advanced AI study assistant integrated into a sci-fi themed learning platform called "StudyFlow Neural Interface".
+    const systemInstruction = `You are an advanced AI study assistant integrated into a sci-fi themed learning platform called "NeuralStudy".
 Your persona is highly intelligent, encouraging, and analytical. You refer to studying as "neural recalibration", "data assimilation", or "knowledge synthesis".
 You have access to the user's current context:
 - Level: ${userProfile?.level || 1}
@@ -45,7 +45,16 @@ You have access to the user's current context:
 - Subjects: ${subjects.map(s => s.name).join(', ')}
 - Tasks pending: ${tasks.filter(t => !t.completed).length}
 
-Provide concise, actionable, and highly relevant advice. Use markdown for formatting.`;
+Core Directives (High-Signal Strategies):
+1. The Syllabus Audit: Advise users to use the official NIE syllabus as a map and past papers as a compass. Use the checkmark system (1 check for theory, 2 for 5+ years of past papers).
+2. The Blurt Method: Encourage active recall. Tell users to "blurt" out everything they remember on a blank sheet, then use a red pen to fill in gaps from notes.
+3. Spaced Repetition (2-3-5-7 Rule): Day 1 (Summarize & 5 Master Qs), Day 3 (Answer from memory), Day 5 (3 past paper MCQs), Day 7 (Feynman Technique).
+4. Subject Tactics:
+   - Combined Maths: Concept > Quantity. Combine units (e.g., Trig + Integration).
+   - Physics: Units & Dimensions check before solving. Focus on Practicals.
+   - Chemistry: The Organic Chain. Create a Reaction Map for all organic reactions.
+
+Provide concise, actionable, and highly relevant advice based on these principles. Use markdown for formatting.`;
 
     chatRef.current = ai.chats.create({
       model: "gemini-2.5-flash",
@@ -77,6 +86,15 @@ Provide concise, actionable, and highly relevant advice. Use markdown for format
       };
       
       setMessages(prev => [...prev, modelMessage]);
+
+      // Add notification if preferences allow
+      if (notificationPreferences.aiRecommendations && !isOpen) {
+        addNotification({
+          title: 'Neural Assistant Response',
+          message: 'Your assistant has processed your request and provided new insights.',
+          type: 'ai'
+        });
+      }
     } catch (error) {
       console.error("Chat error:", error);
       const errorMessage: Message = { 
@@ -100,8 +118,8 @@ Provide concise, actionable, and highly relevant advice. Use markdown for format
         whileTap={{ scale: 0.95 }}
         onClick={() => setIsOpen(true)}
         className={cn(
-          "fixed bottom-6 right-6 z-50 w-14 h-14 rounded-full flex items-center justify-center shadow-[0_0_20px_var(--color-brand-glow)] transition-all",
-          isOpen ? "opacity-0 pointer-events-none" : "opacity-100 bg-brand text-black hover:bg-brand-bright"
+          "fixed bottom-6 right-6 z-50 w-14 h-14 rounded-full flex items-center justify-center shadow-lg transition-all",
+          isOpen ? "opacity-0 pointer-events-none" : "opacity-100 bg-brand text-white hover:opacity-90"
         )}
       >
         <Bot className="w-6 h-6" />
@@ -114,32 +132,32 @@ Provide concise, actionable, and highly relevant advice. Use markdown for format
             initial={{ opacity: 0, y: 20, scale: 0.95 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 20, scale: 0.95 }}
-            className="fixed bottom-6 right-6 z-[60] w-[380px] h-[600px] max-h-[80vh] enterprise-card-premium flex flex-col overflow-hidden border-brand/30 shadow-[0_10px_40px_var(--color-brand-glow)]"
+            className="fixed bottom-6 right-6 z-[60] w-[380px] h-[600px] max-h-[80vh] bg-[#1C1C1E] flex flex-col overflow-hidden border border-white/10 shadow-2xl rounded-[32px]"
           >
             {/* Header */}
-            <div className="p-4 border-b border-white/10 bg-brand/5 flex items-center justify-between shrink-0">
-              <div className="flex items-center gap-3">
-                <div className="w-8 h-8 rounded-full bg-brand/20 flex items-center justify-center text-brand border border-brand/30">
-                  <Bot className="w-4 h-4" />
+            <div className="p-5 border-b border-white/5 bg-white/5 flex items-center justify-between shrink-0">
+              <div className="flex items-center gap-4">
+                <div className="w-10 h-10 rounded-full bg-brand/20 flex items-center justify-center text-brand">
+                  <Bot className="w-5 h-5" />
                 </div>
                 <div>
-                  <h3 className="text-sm font-bold text-white uppercase tracking-widest">Neural Assistant</h3>
+                  <h3 className="text-base font-bold text-white tracking-tight">Neural Assistant</h3>
                   <div className="flex items-center gap-2">
-                    <span className="w-1.5 h-1.5 bg-brand rounded-full animate-pulse shadow-[0_0_8px_var(--color-brand-glow)]" />
-                    <span className="text-[9px] font-mono text-brand uppercase tracking-widest">Online</span>
+                    <span className="w-2 h-2 bg-brand rounded-full animate-pulse" />
+                    <span className="text-xs font-semibold text-brand">Online</span>
                   </div>
                 </div>
               </div>
               <button 
                 onClick={() => setIsOpen(false)}
-                className="p-2 text-zinc-400 hover:text-white hover:bg-white/10 rounded-full transition-colors"
+                className="p-2 text-[#8E8E93] hover:text-white hover:bg-white/10 rounded-full transition-colors"
               >
-                <X className="w-4 h-4" />
+                <X className="w-5 h-5" />
               </button>
             </div>
 
             {/* Messages */}
-            <div className="flex-1 overflow-y-auto p-4 space-y-4 scrollbar-hide">
+            <div className="flex-1 overflow-y-auto p-5 space-y-5 scrollbar-hide">
               {messages.map((msg) => (
                 <div 
                   key={msg.id} 
@@ -149,16 +167,16 @@ Provide concise, actionable, and highly relevant advice. Use markdown for format
                   )}
                 >
                   <div className={cn(
-                    "w-6 h-6 rounded-full flex items-center justify-center shrink-0 mt-1",
-                    msg.role === 'user' ? "bg-white/10 text-white" : "bg-brand/20 text-brand border border-brand/30"
+                    "w-8 h-8 rounded-full flex items-center justify-center shrink-0 mt-1",
+                    msg.role === 'user' ? "bg-white/10 text-white" : "bg-brand/20 text-brand"
                   )}>
-                    {msg.role === 'user' ? <User className="w-3 h-3" /> : <Sparkles className="w-3 h-3" />}
+                    {msg.role === 'user' ? <User className="w-4 h-4" /> : <Sparkles className="w-4 h-4" />}
                   </div>
                   <div className={cn(
-                    "p-3 rounded-2xl text-sm",
+                    "p-4 rounded-[20px] text-sm",
                     msg.role === 'user' 
-                      ? "bg-white/10 text-white rounded-tr-sm" 
-                      : "bg-brand/10 text-zinc-200 border border-brand/20 rounded-tl-sm"
+                      ? "bg-brand text-white rounded-tr-sm" 
+                      : "bg-[#2C2C2E] text-white border border-white/5 rounded-tl-sm shadow-sm"
                   )}>
                     <div className="markdown-body prose prose-invert prose-sm max-w-none">
                       <Markdown>{msg.text}</Markdown>
@@ -168,12 +186,12 @@ Provide concise, actionable, and highly relevant advice. Use markdown for format
               ))}
               {isLoading && (
                 <div className="flex gap-3 max-w-[85%]">
-                  <div className="w-6 h-6 rounded-full bg-brand/20 flex items-center justify-center shrink-0 mt-1 text-brand border border-brand/30">
-                    <Sparkles className="w-3 h-3" />
+                  <div className="w-8 h-8 rounded-full bg-brand/20 flex items-center justify-center shrink-0 mt-1 text-brand">
+                    <Sparkles className="w-4 h-4" />
                   </div>
-                  <div className="p-3 rounded-2xl bg-brand/5 border border-brand/10 rounded-tl-sm flex items-center gap-2">
+                  <div className="p-4 rounded-[20px] bg-[#2C2C2E] border border-white/5 rounded-tl-sm flex items-center gap-3 shadow-sm">
                     <Loader2 className="w-4 h-4 text-brand animate-spin" />
-                    <span className="text-[10px] font-mono text-brand uppercase tracking-widest">Processing...</span>
+                    <span className="text-sm font-medium text-[#8E8E93]">Processing...</span>
                   </div>
                 </div>
               )}
@@ -181,19 +199,19 @@ Provide concise, actionable, and highly relevant advice. Use markdown for format
             </div>
 
             {/* Input */}
-            <form onSubmit={handleSendMessage} className="p-4 border-t border-white/10 bg-black/40 shrink-0">
+            <form onSubmit={handleSendMessage} className="p-5 border-t border-white/5 bg-white/5 shrink-0">
               <div className="relative flex items-center">
                 <input
                   type="text"
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
                   placeholder="Ask your neural assistant..."
-                  className="w-full bg-white/5 border border-white/10 rounded-full py-3 pl-4 pr-12 text-sm text-white placeholder:text-zinc-500 focus:outline-none focus:border-brand/50 focus:ring-1 focus:ring-brand/50 transition-all"
+                  className="w-full bg-[#2C2C2E] border border-white/5 rounded-full py-3 pl-5 pr-12 text-sm font-medium text-white placeholder:text-[#8E8E93] focus:outline-none focus:border-brand/50 transition-all shadow-sm"
                 />
                 <button
                   type="submit"
                   disabled={!input.trim() || isLoading}
-                  className="absolute right-1.5 p-2 bg-brand text-black rounded-full disabled:opacity-50 disabled:cursor-not-allowed hover:bg-brand-bright transition-colors"
+                  className="absolute right-1.5 p-2 bg-brand text-white rounded-full disabled:opacity-50 disabled:cursor-not-allowed hover:opacity-90 transition-opacity"
                 >
                   <Send className="w-4 h-4" />
                 </button>
