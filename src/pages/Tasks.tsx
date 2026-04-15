@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { 
   Plus, CheckCircle2, Circle, Trash2, Calendar, 
   Clock, AlertCircle, Filter, ChevronRight, ListTodo,
-  LayoutGrid, List, MoreVertical, Edit2
+  LayoutGrid, List, MoreVertical, Edit2, Target
 } from 'lucide-react';
 import { useAppStore } from '../store/useAppStore';
 import { Task, TaskFrequency, Subject } from '../types';
@@ -12,9 +12,9 @@ import { db, handleFirestoreError, OperationType } from '../firebase';
 import { doc, setDoc, deleteDoc, updateDoc, collection } from 'firebase/firestore';
 
 export default function Tasks() {
-  const { tasks, addTask, toggleTask, deleteTask, subjects, user } = useAppStore();
+  const { tasks, addTask, toggleTask, deleteTask, subjects, user, addToast } = useAppStore();
   const [activeTab, setActiveTab] = useState<TaskFrequency>('Daily');
-  const [viewMode, setViewMode] = useState<'Cycle' | 'Subject' | 'Optimization'>('Cycle');
+  const [viewMode, setViewMode] = useState<'Cycle' | 'Subject' | 'Optimization' | 'Execution'>('Execution');
   const [isAddingTask, setIsAddingTask] = useState(false);
   const [newTaskTitle, setNewTaskTitle] = useState('');
   const [newTaskDesc, setNewTaskDesc] = useState('');
@@ -40,6 +40,12 @@ export default function Tasks() {
       const snrB = calculateSNR(b, subjectB);
       return snrB - snrA;
     });
+
+  const executionTasks = tasks.filter(t => 
+    !t.completed && 
+    t.frequency === 'Daily' && 
+    (!t.dueDate || t.dueDate <= todayStr)
+  );
 
   const completedCount = filteredTasks.filter(t => t.completed).length;
   const progress = filteredTasks.length > 0 ? (completedCount / filteredTasks.length) * 100 : 0;
@@ -182,7 +188,7 @@ export default function Tasks() {
       {/* Tabs */}
       <div className="flex flex-col md:flex-row gap-6 items-start md:items-center justify-between">
         <div className="flex gap-2 p-1 bg-transparent border border-white/10 rounded-full w-fit">
-          {['Cycle', 'Subject', 'Optimization'].map((mode) => (
+          {['Execution', 'Cycle', 'Subject', 'Optimization'].map((mode) => (
             <button
               key={mode}
               onClick={() => setViewMode(mode as any)}
@@ -222,7 +228,133 @@ export default function Tasks() {
         className="grid grid-cols-1 gap-12"
       >
         <AnimatePresence mode="popLayout">
-          {viewMode === 'Cycle' ? (
+          {viewMode === 'Execution' ? (
+            <div className="space-y-8">
+              {/* Quick Capture */}
+              <div className="bg-white/5 border border-white/10 rounded-2xl p-4 flex items-center gap-4">
+                <div className="w-10 h-10 bg-brand/20 rounded-xl flex items-center justify-center shrink-0">
+                  <Plus className="w-5 h-5 text-brand" />
+                </div>
+                <div className="flex-1">
+                  <input 
+                    type="text" 
+                    placeholder="Quick Capture: Phenomenal Ideas (Noise for now, save for later)..."
+                    className="w-full bg-transparent border-none text-sm text-white placeholder:text-zinc-600 focus:outline-none focus:ring-0"
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' && e.currentTarget.value.trim()) {
+                        const id = Math.random().toString(36).substring(2, 9);
+                        const taskData: Task = {
+                          id,
+                          title: e.currentTarget.value.trim(),
+                          frequency: 'Daily',
+                          completed: false,
+                          createdAt: new Date().toISOString(),
+                          impact: 3, // Default to noise
+                          effort: 5,
+                        };
+                        addTask(taskData);
+                        if (user) {
+                          setDoc(doc(collection(db, 'users', user.uid, 'tasks'), id), taskData).catch(err => console.error(err));
+                        }
+                        e.currentTarget.value = '';
+                        addToast('Idea captured to Noise column', 'info');
+                      }
+                    }}
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                {/* SIGNAL Column */}
+              <div className="space-y-6">
+                <div className="flex items-center justify-between border-b border-brand/30 pb-4">
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 bg-brand/20 rounded-lg flex items-center justify-center">
+                      <Target className="w-4 h-4 text-brand" />
+                    </div>
+                    <div>
+                      <h3 className="text-xl font-black text-white uppercase tracking-tighter">SIGNAL</h3>
+                      <p className="text-[9px] font-mono text-brand uppercase tracking-[0.2em]">Focus here 80%</p>
+                    </div>
+                  </div>
+                  <span className="text-xs font-mono text-zinc-500">{executionTasks.filter(t => t.impact >= 7).length} Tasks</span>
+                </div>
+                <div className="space-y-4">
+                  {executionTasks.filter(t => t.impact >= 7).map(task => (
+                    <TaskItem 
+                      key={task.id} 
+                      task={task} 
+                      subjects={subjects} 
+                      tomorrowStr={tomorrowStr}
+                      onToggle={handleToggleTask}
+                      onDelete={handleDeleteTask}
+                    />
+                  ))}
+                  {executionTasks.filter(t => t.impact >= 7).length === 0 && (
+                    <div className="p-8 text-center border border-dashed border-white/10 bg-white/5 rounded-xl">
+                      <p className="text-xs font-mono text-zinc-500 uppercase tracking-[0.2em]">No high-signal tasks.</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* NOISE Column */}
+              <div className="space-y-6">
+                <div className="flex items-center justify-between border-b border-zinc-800 pb-4">
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 bg-zinc-900 rounded-lg flex items-center justify-center">
+                      <List className="w-4 h-4 text-zinc-500" />
+                    </div>
+                    <div>
+                      <h3 className="text-xl font-black text-zinc-400 uppercase tracking-tighter">NOISE</h3>
+                      <p className="text-[9px] font-mono text-zinc-600 uppercase tracking-[0.2em]">Avoid/Batch 20%</p>
+                    </div>
+                  </div>
+                  <span className="text-xs font-mono text-zinc-600">{executionTasks.filter(t => t.impact < 7).length} Tasks</span>
+                </div>
+                <div className="space-y-4 opacity-70 hover:opacity-100 transition-opacity">
+                  {executionTasks.filter(t => t.impact < 7).map(task => (
+                    <TaskItem 
+                      key={task.id} 
+                      task={task} 
+                      subjects={subjects} 
+                      tomorrowStr={tomorrowStr}
+                      onToggle={handleToggleTask}
+                      onDelete={handleDeleteTask}
+                    />
+                  ))}
+                  {executionTasks.filter(t => t.impact < 7).length === 0 && (
+                    <div className="p-8 text-center border border-dashed border-white/10 bg-white/5 rounded-xl">
+                      <p className="text-xs font-mono text-zinc-500 uppercase tracking-[0.2em]">No noise tasks.</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+
+              {/* Signal Check Reference */}
+              <div className="bg-white/5 border border-white/10 rounded-2xl p-6 mt-8">
+                <h4 className="text-sm font-bold text-white uppercase tracking-widest mb-4 flex items-center gap-2">
+                  <AlertCircle className="w-4 h-4 text-brand" />
+                  Daily Signal Check
+                </h4>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="p-4 bg-black/50 rounded-xl border border-white/5">
+                    <h5 className="text-xs font-bold text-white mb-2">Combined Maths</h5>
+                    <p className="text-[10px] font-mono text-zinc-400 leading-relaxed">Is your pen moving? (If no, it's Noise). Focus on problem-solving volume.</p>
+                  </div>
+                  <div className="p-4 bg-black/50 rounded-xl border border-white/5">
+                    <h5 className="text-xs font-bold text-white mb-2">Physics</h5>
+                    <p className="text-[10px] font-mono text-zinc-400 leading-relaxed">Can you explain the concept to a 10-year-old? (If no, it's Noise). Focus on conceptual visualization.</p>
+                  </div>
+                  <div className="p-4 bg-black/50 rounded-xl border border-white/5">
+                    <h5 className="text-xs font-bold text-white mb-2">Chemistry</h5>
+                    <p className="text-[10px] font-mono text-zinc-400 leading-relaxed">Can you draw the mechanism/reaction on a blank wall? (If no, it's Noise). Focus on active recall.</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          ) : viewMode === 'Cycle' ? (
             filteredTasks.length > 0 ? (
               filteredTasks.map((task) => (
                 <TaskItem 

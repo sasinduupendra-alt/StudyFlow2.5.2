@@ -17,6 +17,7 @@ export default function AIStudyPlanner() {
   const [editTitle, setEditTitle] = useState<string>('');
   const [editReason, setEditReason] = useState<string>('');
   const [editPriority, setEditPriority] = useState<'High' | 'Medium' | 'Low'>('Medium');
+  const [energyLevel, setEnergyLevel] = useState<'High' | 'Medium' | 'Low'>('High');
 
   const handleEditClick = (task: AIPlanTask) => {
     setEditingTask(task.id);
@@ -104,19 +105,29 @@ export default function AIStudyPlanner() {
         Student Data:
         ${JSON.stringify(subjectData, null, 2)}
         
+        Current User Energy Level: ${energyLevel}
+        
         IMPORTANT DIRECTIVES (High-Signal Strategies):
         1. The Syllabus Audit: Focus only on topics officially in the NIE syllabus.
         2. The Blurt Method: Suggest active recall sessions where the student "blurts" out memory onto a blank sheet.
         3. Spaced Repetition (2-3-5-7 Rule): Suggest tasks like "Summarize & 5 Master Qs" (Day 1), "Answer from memory" (Day 3), "3 past paper MCQs" (Day 5), or "Feynman Technique" (Day 7).
-        4. Combined Maths (Ruwan Darshana): 04:30-06:30 Deep Work for his homework. Post-tuition: re-do 3 hardest problems without looking at steps.
-        5. Physics (Anuradha Perera): Prioritize his Unit-wise Questions during 06:45-08:45 blocks.
-        6. Chemistry (Amila Dasanayake): Post-tuition: first 30 mins for Active Recall. Mid-day: ECHEM theory Tutes. Saturday 14:45: timed MCQ practice.
+        4. Combined Maths Signal: Almost exclusively problem-solving volume. Timed Practice (5-10 problems without notes), Structure Building (mapping steps for long-form questions), Pure Logic Check (deriving theorems). Noise: Formula listing, reading solved examples.
+        5. Physics Signal: Conceptual visualization and unit accuracy. Unit/Dimension Audit, Variable Manipulation (solving with variables before numbers), Practical Logic (limitations/errors for experiments). Noise: Passive video watching, definition cramming.
+        6. Chemistry Signal: Reaction mechanisms (drawing from memory), Inorganic Trends (logical deduction), Calculation Drills (balancing equations, pH). Noise: Color-coding notes, general reading, flashcard hoarding.
+        7. 15-Hour Grind Structure: 
+           - Morning (0-5 hours): 100% Signal. Hardest Math/Physics problems.
+           - Afternoon (5-10 hours): 70% Signal / 30% Noise. Chemistry theory and mid-level problems.
+           - Night (10-15 hours): Review "Noise" (organize logs, prep for tomorrow).
+        8. Cognitive Load & Energy Levels: Dynamically adjust task duration and time slots based on the user's current energy level (${energyLevel}). 
+           - If Energy is High: Schedule high-cognitive-load, high-priority tasks (e.g., Deep Work, difficult topics, long durations).
+           - If Energy is Medium: Balance between moderate theory review and standard practice.
+           - If Energy is Low: Schedule shorter, lower-cognitive-load tasks (e.g., Active Recall, light review, organizing notes).
 
         Guidelines:
         1. Prioritize subjects with upcoming exams (closer dates).
         2. Focus on topics with low mastery in subjects where the overall score is low.
         3. Suggest 3-5 specific tasks for today incorporating the strategies above.
-        4. Each task should have a clear title, duration (in minutes), priority, and a brief reason why it was chosen.
+        4. Each task should have a clear title, duration (in minutes), a specific startTime (in HH:MM format, 24-hour), priority, and a brief reason why it was chosen and placed at that time.
         5. Provide a short encouraging summary for the day.
       `;
 
@@ -138,10 +149,11 @@ export default function AIStudyPlanner() {
                     subjectId: { type: Type.STRING },
                     topicId: { type: Type.STRING },
                     duration: { type: Type.NUMBER },
+                    startTime: { type: Type.STRING },
                     priority: { type: Type.STRING, enum: ['High', 'Medium', 'Low'] },
                     reason: { type: Type.STRING }
                   },
-                  required: ['title', 'duration', 'priority', 'reason']
+                  required: ['title', 'duration', 'startTime', 'priority', 'reason']
                 }
               }
             },
@@ -163,9 +175,16 @@ export default function AIStudyPlanner() {
         date: new Date().toISOString(),
         summary: result.summary,
         tasks: result.tasks.map((t: any) => {
-          const startTime = `${currentTime.getHours().toString().padStart(2, '0')}:${currentTime.getMinutes().toString().padStart(2, '0')}`;
-          currentTime.setMinutes(currentTime.getMinutes() + t.duration);
-          const endTime = `${currentTime.getHours().toString().padStart(2, '0')}:${currentTime.getMinutes().toString().padStart(2, '0')}`;
+          let startTime = t.startTime;
+          if (!startTime || !startTime.includes(':')) {
+            startTime = `${currentTime.getHours().toString().padStart(2, '0')}:${currentTime.getMinutes().toString().padStart(2, '0')}`;
+            currentTime.setMinutes(currentTime.getMinutes() + t.duration);
+          }
+          
+          const [hours, minutes] = startTime.split(':').map(Number);
+          const endObj = new Date();
+          endObj.setHours(hours, minutes + t.duration, 0, 0);
+          const endTime = `${endObj.getHours().toString().padStart(2, '0')}:${endObj.getMinutes().toString().padStart(2, '0')}`;
           
           return {
             ...t,
@@ -175,7 +194,7 @@ export default function AIStudyPlanner() {
             startTime,
             endTime
           };
-        })
+        }).sort((a: any, b: any) => a.startTime.localeCompare(b.startTime))
       };
 
       setAIPlan(newPlan);
@@ -190,7 +209,7 @@ export default function AIStudyPlanner() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="flex items-center gap-4">
           <div className="w-12 h-12 bg-brand/10 rounded-[16px] flex items-center justify-center">
             <Brain className="w-6 h-6 text-brand" />
@@ -200,21 +219,35 @@ export default function AIStudyPlanner() {
             <p className="text-sm font-medium text-[#8E8E93]">Personalized study schedule</p>
           </div>
         </div>
-        <button
-          onClick={generatePlan}
-          disabled={isGenerating}
-          className={cn(
-            "px-6 py-2.5 text-sm font-semibold bg-white/5 border border-white/10 text-white hover:bg-white/10 transition-colors rounded-full flex items-center shadow-sm",
-            isGenerating && "opacity-50 cursor-not-allowed"
-          )}
-        >
-          {isGenerating ? (
-            <RefreshCw className="w-4 h-4 animate-spin mr-2" />
-          ) : (
-            <Sparkles className="w-4 h-4 mr-2" />
-          )}
-          {aiPlan ? 'Regenerate Plan' : 'Generate Plan'}
-        </button>
+        <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 bg-white/5 border border-white/10 rounded-full px-3 py-1.5">
+            <span className="text-xs font-medium text-[#8E8E93]">Energy:</span>
+            <select
+              value={energyLevel}
+              onChange={(e) => setEnergyLevel(e.target.value as any)}
+              className="bg-transparent text-xs font-semibold text-white outline-none cursor-pointer"
+            >
+              <option value="High" className="bg-[#1C1C1E]">High ⚡</option>
+              <option value="Medium" className="bg-[#1C1C1E]">Medium 🔋</option>
+              <option value="Low" className="bg-[#1C1C1E]">Low 🪫</option>
+            </select>
+          </div>
+          <button
+            onClick={generatePlan}
+            disabled={isGenerating}
+            className={cn(
+              "px-6 py-2.5 text-sm font-semibold bg-white/5 border border-white/10 text-white hover:bg-white/10 transition-colors rounded-full flex items-center shadow-sm",
+              isGenerating && "opacity-50 cursor-not-allowed"
+            )}
+          >
+            {isGenerating ? (
+              <RefreshCw className="w-4 h-4 animate-spin mr-2" />
+            ) : (
+              <Sparkles className="w-4 h-4 mr-2" />
+            )}
+            {aiPlan ? 'Regenerate Plan' : 'Generate Plan'}
+          </button>
+        </div>
       </div>
 
       <AnimatePresence mode="wait">
