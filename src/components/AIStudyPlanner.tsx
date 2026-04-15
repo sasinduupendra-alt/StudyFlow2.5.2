@@ -108,9 +108,9 @@ export default function AIStudyPlanner() {
         1. The Syllabus Audit: Focus only on topics officially in the NIE syllabus.
         2. The Blurt Method: Suggest active recall sessions where the student "blurts" out memory onto a blank sheet.
         3. Spaced Repetition (2-3-5-7 Rule): Suggest tasks like "Summarize & 5 Master Qs" (Day 1), "Answer from memory" (Day 3), "3 past paper MCQs" (Day 5), or "Feynman Technique" (Day 7).
-        4. Combined Maths: Concept > Quantity. Suggest combining units (e.g., Trig + Integration).
-        5. Physics: Emphasize Units & Dimensions checks and Practicals.
-        6. Chemistry: Emphasize "The Organic Chain" and Reaction Maps.
+        4. Combined Maths (Ruwan Darshana): 04:30-06:30 Deep Work for his homework. Post-tuition: re-do 3 hardest problems without looking at steps.
+        5. Physics (Anuradha Perera): Prioritize his Unit-wise Questions during 06:45-08:45 blocks.
+        6. Chemistry (Amila Dasanayake): Post-tuition: first 30 mins for Active Recall. Mid-day: ECHEM theory Tutes. Saturday 14:45: timed MCQ practice.
 
         Guidelines:
         1. Prioritize subjects with upcoming exams (closer dates).

@@ -93,6 +93,11 @@ const SortableActivity = ({ activity, day, onEdit, tasks, subjects, onToggleTask
               )}>
                 {activity.type.charAt(0).toUpperCase() + activity.type.slice(1)}
               </div>
+              {activity.focusMode && (
+                <div className="px-3 py-1 text-xs font-semibold rounded-full bg-red-500/20 text-red-500 border border-red-500/30 animate-pulse">
+                  Focus Mode
+                </div>
+              )}
               <span className="text-sm font-medium text-[#8E8E93] tabular-nums">{activity.time}</span>
             </div>
             <div className="flex items-center gap-4">
@@ -303,6 +308,80 @@ export default function ScheduleView({ schedule, onManageSchedule }: ScheduleVie
     }
   };
 
+  const [isImporting, setIsImporting] = useState(false);
+
+  const handleImportCalendar = async () => {
+    setIsImporting(true);
+    try {
+      googleProvider.addScope('https://www.googleapis.com/auth/calendar.readonly');
+      
+      const result = await signInWithPopup(auth, googleProvider);
+      const credential = GoogleAuthProvider.credentialFromResult(result);
+      const token = credential?.accessToken;
+
+      if (!token) {
+        throw new Error("Failed to get Google Calendar access token.");
+      }
+
+      const timeMin = new Date().toISOString();
+      const timeMax = new Date();
+      timeMax.setDate(timeMax.getDate() + 7); // Fetch next 7 days
+
+      const response = await fetch(`https://www.googleapis.com/calendar/v3/calendars/primary/events?timeMin=${timeMin}&timeMax=${timeMax.toISOString()}&singleEvents=true&orderBy=startTime`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+
+      const data = await response.json();
+      
+      if (data.items && data.items.length > 0) {
+        const importedTasks = data.items.map((event: any) => {
+          const { classifyEvent } = require('../lib/utils');
+          const classification = classifyEvent(event.summary || '');
+          
+          return {
+            id: `cal-${event.id}`,
+            title: event.summary || 'Untitled Event',
+            description: event.description || `Focus on ${classification.subject} theory.`,
+            frequency: 'Once',
+            completed: false,
+            subjectId: subjects.find(s => s.name === classification.subject)?.id || subjects[0].id,
+            createdAt: new Date().toISOString(),
+            dueDate: event.start.dateTime || event.start.date,
+            impact: 8,
+            effort: 5,
+            isTuition: (event.summary || '').toLowerCase().includes('tuition') || (event.summary || '').toLowerCase().includes('class'),
+            focusMode: (event.summary || '').toLowerCase().includes('past paper') || (event.summary || '').toLowerCase().includes('deep work')
+          };
+        });
+
+        // Add imported tasks to the store
+        setTasks([...tasks, ...importedTasks]);
+        
+        if (user) {
+          const { writeBatch } = require('firebase/firestore');
+          const batch = writeBatch(db);
+          importedTasks.forEach((task: any) => {
+            const taskRef = doc(db, 'users', user.uid, 'tasks', task.id);
+            batch.set(taskRef, task);
+          });
+          await batch.commit();
+        }
+
+        addToast(`Successfully imported ${importedTasks.length} events as tasks`, 'success');
+      } else {
+        addToast('No upcoming events found in calendar', 'info');
+      }
+
+    } catch (error) {
+      console.error("Calendar import error:", error);
+      addToast('Failed to import from Google Calendar', 'error');
+    } finally {
+      setIsImporting(false);
+    }
+  };
+
   const handleExportText = () => {
     const daysOfWeek = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
     let content = "=========================================\n";
@@ -400,6 +479,14 @@ export default function ScheduleView({ schedule, onManageSchedule }: ScheduleVie
               >
                 <Calendar className={cn("w-5 h-5", isSyncing && "animate-spin")} />
                 {isSyncing ? 'Syncing...' : 'Sync Calendar'}
+              </button>
+              <button 
+                onClick={handleImportCalendar}
+                disabled={isImporting}
+                className="px-6 py-3 bg-white/10 text-white font-semibold rounded-full hover:bg-white/20 transition-colors flex items-center justify-center gap-2 flex-1"
+              >
+                <Download className={cn("w-5 h-5", isImporting && "animate-spin")} />
+                {isImporting ? 'Importing...' : 'Import Events'}
               </button>
               <button 
                 onClick={handleExportText}

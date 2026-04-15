@@ -42,6 +42,7 @@ export interface Task {
   effort: number; // 1-10 (Noise)
   lastReviewed?: string; // ISO Date for spaced repetition
   difficulty?: number; // 1-10 for practice tasks
+  focusMode?: boolean;
 }
 
 export interface Subject {
@@ -98,6 +99,7 @@ export interface Activity {
   time: string;
   description: string;
   type: 'study' | 'tuition' | 'break' | 'rest';
+  focusMode?: boolean;
 }
 
 export type WeeklySchedule = {

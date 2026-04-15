@@ -61,3 +61,49 @@ export function calculateSNR(task: Task, subject?: Subject) {
 
   return baseSNR * urgencyFactor * subjectFactor * frequencyFactor * recencyFactor * difficultyFactor;
 }
+
+export const classifyEvent = (title: string) => {
+  const t = title.toLowerCase();
+  
+  if (t.includes('math') || t.includes('pure') || t.includes('applied') || t.includes('integration')) {
+    return { subject: 'Combined Maths', color: '#3b82f6' }; // Blue
+  }
+  if (t.includes('phys') || t.includes('mechanics') || t.includes('waves') || t.includes('light')) {
+    return { subject: 'Physics', color: '#ef4444' }; // Red
+  }
+  if (t.includes('chem') || t.includes('organic') || t.includes('inorganic') || t.includes('equil')) {
+    return { subject: 'Chemistry', color: '#10b981' }; // Green
+  }
+  
+  return { subject: 'General Study', color: '#6b7280' }; // Gray
+};
+
+export const processCalendarEvent = (event: any) => {
+  const classification = classifyEvent(event.summary);
+  const isTuition = event.summary.toLowerCase().includes('tuition') || event.summary.toLowerCase().includes('class');
+  const focusMode = event.summary.toLowerCase().includes('past paper') || event.summary.toLowerCase().includes('deep work');
+  
+  // Determine priority based on day of week
+  const date = new Date(event.start.dateTime || event.start.date);
+  const day = date.getDay(); // 0 = Sun, 1 = Mon, ... 6 = Sat
+  let priority = 'Medium';
+  
+  if ((day === 1 || day === 3) && classification.subject === 'Chemistry') {
+    priority = 'High';
+  } else if ((day === 2 || day === 4) && classification.subject === 'Physics') {
+    priority = 'High';
+  } else if ((day === 5 || day === 6 || day === 0) && classification.subject === 'Combined Maths') {
+    priority = 'High';
+  }
+
+  return {
+    title: event.summary,
+    start: event.start.dateTime || event.start.date,
+    subject: classification.subject,
+    themeColor: classification.color,
+    isTuition,
+    focusMode,
+    priority,
+    description: event.description || `Focus on ${classification.subject} theory.`
+  };
+};

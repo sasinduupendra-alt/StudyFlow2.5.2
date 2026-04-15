@@ -46,9 +46,9 @@ export default function WeakAreas() {
       1. The Syllabus Audit: Use the official NIE syllabus. 1 check = theory covered, 2 checks = 5+ years past papers done.
       2. The Blurt Method: Active recall on a blank sheet, correct with red pen.
       3. Spaced Repetition (2-3-5-7 Rule): Day 1 (Summarize), Day 3 (Answer from memory), Day 5 (3 past paper MCQs), Day 7 (Feynman Technique).
-      4. Combined Maths: Concept > Quantity. Combine units.
-      5. Physics: Check Units & Dimensions. Focus on Practicals.
-      6. Chemistry: The Organic Chain. Create a Reaction Map.
+      4. Combined Maths (Ruwan Darshana): 04:30-06:30 Deep Work for his homework. Post-tuition: re-do 3 hardest problems without looking at steps.
+      5. Physics (Anuradha Perera): Prioritize his Unit-wise Questions during 06:45-08:45 blocks.
+      6. Chemistry (Amila Dasanayake): Post-tuition: first 30 mins for Active Recall. Mid-day: ECHEM theory Tutes. Saturday 14:45: timed MCQ practice.
 
       Return a JSON array of objects with fields: id, title, description, priority (High/Medium/Low), reason.`;
 

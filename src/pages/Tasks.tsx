@@ -615,6 +615,11 @@ function TaskItem({ task, subjects, tomorrowStr, onToggle, onDelete }: {
                   Tomorrow
                 </span>
               )}
+              {task.focusMode && (
+                <span className="badge bg-red-500/20 text-red-500 border-red-500/30 animate-pulse">
+                  Focus Mode
+                </span>
+              )}
               {task.subjectId && (
                 <span className="badge badge-zinc">
                   {subjects.find(s => s.id === task.subjectId)?.name}
