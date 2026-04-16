@@ -1,12 +1,33 @@
-import React from 'react';
-import { motion } from 'motion/react';
+import React, { useState } from 'react';
+import { motion, AnimatePresence } from 'motion/react';
 import { useAppStore } from '../store/useAppStore';
-import { Settings as SettingsIcon, User, Bell, Shield, Trash2, LogOut, RefreshCw, Download } from 'lucide-react';
+import { 
+  Settings as SettingsIcon, User, Bell, Shield, Trash2, 
+  LogOut, RefreshCw, Download, Activity, Cpu, 
+  Zap, Check, AlertTriangle, Terminal
+} from 'lucide-react';
 import { auth } from '../firebase';
 import { cn } from '../lib/utils';
 
 export default function Settings() {
-  const { user, userProfile, addToast, subjects, studyLogs, exams } = useAppStore();
+  const { 
+    user, 
+    userProfile, 
+    addToast, 
+    subjects, 
+    studyLogs, 
+    exams,
+    notificationPreferences,
+    updateNotificationPreferences
+  } = useAppStore();
+
+  const [isScanning, setIsScanning] = useState(false);
+  const [scanProgress, setScanProgress] = useState(0);
+  const [scanResult, setScanResult] = useState<null | {
+    integrity: string;
+    latency: string;
+    optimization: string;
+  }>(null);
 
   const handleDownloadData = () => {
     const data = {
@@ -37,6 +58,34 @@ export default function Settings() {
     }
   };
 
+  const runSystemScan = () => {
+    setIsScanning(true);
+    setScanResult(null);
+    setScanProgress(0);
+
+    const interval = setInterval(() => {
+      setScanProgress(prev => {
+        if (prev >= 100) {
+          clearInterval(interval);
+          setTimeout(() => {
+            setIsScanning(false);
+            setScanResult({
+              integrity: "99.98%",
+              latency: "12ms",
+              optimization: "ACTIVE"
+            });
+            addToast("System scan complete. All nodes operational.", "success");
+          }, 500);
+          return 100;
+        }
+        return prev + 2;
+      });
+    }, 30);
+  };
+
+  const nextLevelXP = (userProfile?.level || 1) * 1000;
+  const progress = ((userProfile?.xp || 0) % 1000) / 10;
+
   return (
     <motion.div
       initial={{ opacity: 0, x: 20 }}
@@ -52,11 +101,45 @@ export default function Settings() {
           <span className="text-[10px] font-mono text-white uppercase tracking-[0.4em]">System Configuration</span>
         </div>
         <h1 className="text-5xl md:text-8xl font-black text-white uppercase tracking-tighter leading-none">Neural <span className="text-white">Settings</span></h1>
-        <p className="text-zinc-600 text-[10px] font-mono uppercase tracking-[0.3em] mt-8 flex items-center gap-3">
-          <span className="w-2 h-2 bg-white animate-pulse" />
-          Core Parameters: Accessible // Root Access
-        </p>
+        <div className="flex flex-wrap items-center gap-6 mt-8">
+          <p className="text-zinc-600 text-[10px] font-mono uppercase tracking-[0.3em] flex items-center gap-3">
+            <span className="w-2 h-2 bg-white animate-pulse" />
+            Core Parameters: Accessible // Root Access
+          </p>
+          <button 
+            onClick={runSystemScan}
+            disabled={isScanning}
+            className="flex items-center gap-2 px-4 py-1.5 bg-white/5 border border-white/10 text-[10px] font-bold uppercase tracking-widest text-white hover:bg-white hover:text-black transition-all disabled:opacity-50"
+          >
+            <Terminal className="w-3 h-3" />
+            {isScanning ? `Scanning... ${scanProgress}%` : 'Run System Scan'}
+          </button>
+        </div>
       </div>
+
+      <AnimatePresence>
+        {scanResult && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={{ opacity: 0, height: 0 }}
+            className="grid grid-cols-1 md:grid-cols-3 gap-4"
+          >
+            <div className="p-6 bg-brand/10 border border-brand/30 flex flex-col gap-2">
+              <span className="text-[9px] font-mono text-brand uppercase tracking-widest">Data Integrity</span>
+              <span className="text-2xl font-black text-white">{scanResult.integrity}</span>
+            </div>
+            <div className="p-6 bg-brand/10 border border-brand/30 flex flex-col gap-2">
+              <span className="text-[9px] font-mono text-brand uppercase tracking-widest">Neural Latency</span>
+              <span className="text-2xl font-black text-white">{scanResult.latency}</span>
+            </div>
+            <div className="p-6 bg-brand/10 border border-brand/30 flex flex-col gap-2">
+              <span className="text-[9px] font-mono text-brand uppercase tracking-widest">Optimization</span>
+              <span className="text-2xl font-black text-white">{scanResult.optimization}</span>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       <div className="grid grid-cols-1 gap-12">
         {/* Profile Section */}
@@ -73,11 +156,25 @@ export default function Settings() {
                 </div>
               )}
             </div>
-            <div>
+            <div className="flex-1">
               <h2 className="text-4xl font-black text-white uppercase tracking-tighter leading-none mb-4">{user?.displayName || 'StudyFlow User'}</h2>
-              <div className="flex items-center gap-4">
+              <div className="flex items-center gap-4 mb-6">
                 <p className="text-[10px] font-mono text-zinc-500 uppercase tracking-[0.3em]">{user?.email}</p>
                 <span className="badge badge-brand">Pro Member</span>
+              </div>
+              
+              <div className="space-y-2 max-w-md">
+                <div className="flex justify-between text-[10px] font-mono uppercase tracking-widest">
+                  <span className="text-zinc-500">Neural Sync Progress</span>
+                  <span className="text-white">{progress}%</span>
+                </div>
+                <div className="h-1.5 bg-white/5 border border-white/10 overflow-hidden">
+                  <motion.div 
+                    initial={{ width: 0 }}
+                    animate={{ width: `${progress}%` }}
+                    className="h-full bg-brand shadow-[0_0_10px_rgba(10,132,255,0.5)]"
+                  />
+                </div>
               </div>
             </div>
           </div>
@@ -110,36 +207,68 @@ export default function Settings() {
           <div className="space-y-4">
             <div className="flex items-center justify-between p-8 bg-transparent rounded-none border border-white/10 hover:border-white/20 transition-all">
               <div>
-                <p className="text-base font-bold text-white uppercase tracking-widest">Browser Notifications</p>
-                <p className="text-sm font-mono text-zinc-500 uppercase tracking-widest mt-1">Session completion alerts and mission updates.</p>
+                <p className="text-base font-bold text-white uppercase tracking-widest">System Alerts</p>
+                <p className="text-sm font-mono text-zinc-500 uppercase tracking-widest mt-1">Critical session updates and mission telemetry.</p>
               </div>
               <button 
-                onClick={() => Notification.requestPermission()}
+                onClick={() => updateNotificationPreferences({ systemAlerts: !notificationPreferences.systemAlerts })}
                 className={cn(
-                  "px-8 py-3 rounded-none text-[10px] font-bold uppercase tracking-widest transition-all border",
-                  Notification.permission === 'granted' ? "border-white/30 text-white bg-white/5" : "bg-white text-black hover:bg-zinc-200"
+                  "w-14 h-7 border transition-all relative p-1",
+                  notificationPreferences.systemAlerts ? "bg-brand border-brand" : "bg-white/5 border-white/20"
                 )}
               >
-                {Notification.permission === 'granted' ? 'Active' : 'Initialize'}
+                <motion.div 
+                  animate={{ x: notificationPreferences.systemAlerts ? 28 : 0 }}
+                  className={cn(
+                    "w-5 h-5 shadow-lg",
+                    notificationPreferences.systemAlerts ? "bg-white" : "bg-zinc-600"
+                  )}
+                />
               </button>
             </div>
+
+            <div className="flex items-center justify-between p-8 bg-transparent rounded-none border border-white/10 hover:border-white/20 transition-all">
+              <div>
+                <p className="text-base font-bold text-white uppercase tracking-widest">AI Recommendations</p>
+                <p className="text-sm font-mono text-zinc-500 uppercase tracking-widest mt-1">Neural-driven study path optimizations.</p>
+              </div>
+              <button 
+                onClick={() => updateNotificationPreferences({ aiRecommendations: !notificationPreferences.aiRecommendations })}
+                className={cn(
+                  "w-14 h-7 border transition-all relative p-1",
+                  notificationPreferences.aiRecommendations ? "bg-brand border-brand" : "bg-white/5 border-white/20"
+                )}
+              >
+                <motion.div 
+                  animate={{ x: notificationPreferences.aiRecommendations ? 28 : 0 }}
+                  className={cn(
+                    "w-5 h-5 shadow-lg",
+                    notificationPreferences.aiRecommendations ? "bg-white" : "bg-zinc-600"
+                  )}
+                />
+              </button>
+            </div>
+
             <div className="flex items-center justify-between p-8 bg-transparent rounded-none border border-white/10 hover:border-white/20 transition-all">
               <div>
                 <p className="text-base font-bold text-white uppercase tracking-widest">Email Sync</p>
-                <p className="text-sm font-mono text-zinc-500 uppercase tracking-widest mt-1">Weekly progress telemetry and performance reports.</p>
+                <p className="text-sm font-mono text-zinc-500 uppercase tracking-widest mt-1">Weekly performance telemetry reports.</p>
               </div>
-              <div className="w-14 h-7 bg-white/20 border border-white/40 rounded-none relative cursor-pointer p-1">
-                <div className="absolute right-1 top-1 bottom-1 aspect-square bg-white rounded-none shadow-[0_0_10px_rgba(255,255,255,0.5)]" />
-              </div>
-            </div>
-            <div className="flex items-center justify-between p-8 bg-transparent rounded-none border border-white/10 hover:border-white/20 transition-all">
-              <div>
-                <p className="text-base font-bold text-white uppercase tracking-widest">Focus Audio</p>
-                <p className="text-sm font-mono text-zinc-500 uppercase tracking-widest mt-1">Neural-sync ambient soundscapes for deep work.</p>
-              </div>
-              <div className="w-14 h-7 bg-transparent border border-white/20 rounded-none relative cursor-pointer p-1">
-                <div className="absolute left-1 top-1 bottom-1 aspect-square bg-zinc-600 rounded-none" />
-              </div>
+              <button 
+                onClick={() => updateNotificationPreferences({ emailNotifications: !notificationPreferences.emailNotifications })}
+                className={cn(
+                  "w-14 h-7 border transition-all relative p-1",
+                  notificationPreferences.emailNotifications ? "bg-brand border-brand" : "bg-white/5 border-white/20"
+                )}
+              >
+                <motion.div 
+                  animate={{ x: notificationPreferences.emailNotifications ? 28 : 0 }}
+                  className={cn(
+                    "w-5 h-5 shadow-lg",
+                    notificationPreferences.emailNotifications ? "bg-white" : "bg-zinc-600"
+                  )}
+                />
+              </button>
             </div>
           </div>
         </section>

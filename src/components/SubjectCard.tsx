@@ -41,7 +41,7 @@ export const SubjectCard = React.memo(({ subject, onStartFocus }: SubjectCardPro
       {/* Background Image & Gradient */}
       <div className="absolute inset-0 z-0">
         <ImageWithFallback
-          src={subject.image}
+          src={`https://picsum.photos/seed/tech-${subject.name.replace(/\s+/g, '-').toLowerCase()}/800/600?grayscale`}
           alt={subject.name}
           containerClassName="w-full h-full"
           className="opacity-10 group-hover:opacity-20 transition-opacity duration-500"

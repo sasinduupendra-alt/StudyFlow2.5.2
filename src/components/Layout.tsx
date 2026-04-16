@@ -239,9 +239,7 @@ export default function Layout() {
       )}>
         <div className="flex flex-col h-full p-6">
           <div className="flex items-center gap-4 mb-10 px-2">
-            <div className="w-10 h-10 bg-white rounded-[12px] flex items-center justify-center shrink-0 shadow-sm">
-              <Logo className="w-6 h-6 text-black" />
-            </div>
+            <Logo className="w-10 h-10 text-brand" size={40} />
             <AnimatePresence mode="wait">
               {isSidebarOpen && (
                 <motion.div

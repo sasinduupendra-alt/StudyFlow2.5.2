@@ -23,6 +23,8 @@ import { auth, onAuthStateChanged } from './firebase';
 import { doc, setDoc, writeBatch } from 'firebase/firestore';
 import { db } from './firebase';
 
+import LandingPage from './pages/LandingPage';
+
 export default function App() {
   const { user, isAuthReady, setAuth, schedule, tasks, setTasks, resetToDefault } = useAppStore();
 
@@ -48,7 +50,7 @@ export default function App() {
 
   // Migration & Daily Reset
   useEffect(() => {
-    if (isAuthReady) {
+    if (isAuthReady && user) {
       // Check for old schedule description
       const firstMondayActivity = schedule.Monday?.[0]?.description;
       const isOldSchedule = firstMondayActivity === 'Deep Work: Pure Maths (core practice)';
@@ -102,25 +104,40 @@ export default function App() {
     }
   }, [isAuthReady, schedule.Monday?.[0]?.description, tasks.length, setTasks, resetToDefault, user]);
 
+  if (!isAuthReady) {
+    return (
+      <div className="h-screen w-screen bg-black flex items-center justify-center">
+        <div className="w-12 h-12 border-4 border-brand border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
+
   return (
     <ErrorBoundary>
       <BrowserRouter>
         <Routes>
-          <Route path="/" element={<Layout />}>
-            <Route index element={<Home />} />
-            <Route path="syllabus" element={<ProtectedRoute><Syllabus /></ProtectedRoute>} />
-            <Route path="schedule" element={<ProtectedRoute><Schedule /></ProtectedRoute>} />
-            <Route path="analytics" element={<ProtectedRoute><Analytics /></ProtectedRoute>} />
-            <Route path="tasks" element={<ProtectedRoute><Tasks /></ProtectedRoute>} />
-            <Route path="review" element={<ProtectedRoute><Review /></ProtectedRoute>} />
-            <Route path="practice" element={<ProtectedRoute><Practice /></ProtectedRoute>} />
-            <Route path="manage" element={<ProtectedRoute><Manage /></ProtectedRoute>} />
-            <Route path="weak-areas" element={<ProtectedRoute><WeakAreas /></ProtectedRoute>} />
-            <Route path="achievements" element={<ProtectedRoute><Achievements /></ProtectedRoute>} />
-            <Route path="settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
-            <Route path="session/:id" element={<ProtectedRoute><SessionDetail /></ProtectedRoute>} />
-            <Route path="*" element={<Navigate to="/" replace />} />
-          </Route>
+          {!user ? (
+            <>
+              <Route path="/" element={<LandingPage />} />
+              <Route path="*" element={<Navigate to="/" replace />} />
+            </>
+          ) : (
+            <Route path="/" element={<Layout />}>
+              <Route index element={<Home />} />
+              <Route path="syllabus" element={<ProtectedRoute><Syllabus /></ProtectedRoute>} />
+              <Route path="schedule" element={<ProtectedRoute><Schedule /></ProtectedRoute>} />
+              <Route path="analytics" element={<ProtectedRoute><Analytics /></ProtectedRoute>} />
+              <Route path="tasks" element={<ProtectedRoute><Tasks /></ProtectedRoute>} />
+              <Route path="review" element={<ProtectedRoute><Review /></ProtectedRoute>} />
+              <Route path="practice" element={<ProtectedRoute><Practice /></ProtectedRoute>} />
+              <Route path="manage" element={<ProtectedRoute><Manage /></ProtectedRoute>} />
+              <Route path="weak-areas" element={<ProtectedRoute><WeakAreas /></ProtectedRoute>} />
+              <Route path="achievements" element={<ProtectedRoute><Achievements /></ProtectedRoute>} />
+              <Route path="settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
+              <Route path="session/:id" element={<ProtectedRoute><SessionDetail /></ProtectedRoute>} />
+              <Route path="*" element={<Navigate to="/" replace />} />
+            </Route>
+          )}
         </Routes>
       </BrowserRouter>
     </ErrorBoundary>

@@ -156,8 +156,16 @@ export default function Home() {
       className="p-6 md:p-10 space-y-10 max-w-7xl mx-auto"
     >
       {/* Welcome Header */}
-      <motion.header variants={itemVariants} className="flex flex-col md:flex-row md:items-end justify-between gap-8 pb-8 border-b border-white/10">
-        <div className="flex-1">
+      <motion.header variants={itemVariants} className="flex flex-col md:flex-row md:items-end justify-between gap-8 pb-8 border-b border-white/10 relative overflow-hidden">
+        <div className="absolute inset-0 pointer-events-none opacity-5">
+          <img 
+            src="https://picsum.photos/seed/neural-welcome/1200/400?grayscale&blur=5" 
+            className="w-full h-full object-cover"
+            alt=""
+            referrerPolicy="no-referrer"
+          />
+        </div>
+        <div className="flex-1 relative z-10">
           <h1 className="text-4xl md:text-5xl font-bold text-white tracking-tight leading-tight">
             Welcome back, <br className="md:hidden" /><span className="text-brand">{user?.displayName?.split(' ')[0] || 'Scholar'}</span>
           </h1>
@@ -172,13 +180,13 @@ export default function Home() {
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
             onClick={handleLogin}
-            className="enterprise-button px-8 py-4 flex items-center gap-3"
+            className="enterprise-button px-8 py-4 flex items-center gap-3 relative z-10"
           >
             <LogIn className="w-5 h-5" />
             Sign In
           </motion.button>
         ) : (
-          <div className="flex items-center gap-8 bg-[#1C1C1E] px-6 py-4 rounded-[20px] border border-white/5">
+          <div className="flex items-center gap-8 bg-[#1C1C1E] px-6 py-4 rounded-[20px] border border-white/5 relative z-10">
             <div className="text-center">
               <p className="text-xs font-semibold text-[#8E8E93] uppercase tracking-wider mb-1">Streak</p>
               <p className="text-2xl font-bold text-white flex items-center justify-center gap-1.5">
@@ -421,6 +429,14 @@ export default function Home() {
         variants={itemVariants}
         className="enterprise-card p-10 relative group overflow-hidden"
       >
+        <div className="absolute inset-0 pointer-events-none opacity-10 group-hover:opacity-20 transition-opacity">
+          <img 
+            src="https://picsum.photos/seed/analytics-tech/1200/600?grayscale" 
+            className="w-full h-full object-cover"
+            alt=""
+            referrerPolicy="no-referrer"
+          />
+        </div>
         <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-brand/10 rounded-full blur-[100px] -translate-y-1/2 translate-x-1/3 group-hover:bg-brand/20 transition-all duration-1000 pointer-events-none" />
         <div className="relative flex flex-col lg:flex-row items-center gap-10">
           <div className="flex-1 space-y-5 text-center lg:text-left">
