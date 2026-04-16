@@ -12,6 +12,7 @@ const studyLogSchema = z.object({
   hours: z.number().min(0),
   minutes: z.number().min(0).max(59),
   focusLevel: z.number().min(1).max(5),
+  performance: z.number().min(1).max(5),
   notes: z.string().optional(),
   sessionType: z.enum(['self-study', 'tuition', 'exam']),
 }).refine((data) => (data.hours * 60 + data.minutes) > 0, {
@@ -29,7 +30,7 @@ interface StudyLogFormProps {
     duration: number;
     sessionType?: 'self-study' | 'tuition' | 'exam';
   };
-  onSave: (log: { subjectId: string, topicIds: string[], duration: number, focusLevel: number, notes: string, sessionType: 'self-study' | 'tuition' | 'exam' }) => void;
+  onSave: (log: { subjectId: string, topicIds: string[], duration: number, focusLevel: number, performance: number, notes: string, sessionType: 'self-study' | 'tuition' | 'exam' }) => void;
   onClose: () => void;
 }
 
@@ -42,6 +43,7 @@ export default function StudyLogForm({ subjects, initialData, onSave, onClose }:
       hours: initialData ? Math.floor(initialData.duration / 60) : 1,
       minutes: initialData ? initialData.duration % 60 : 30,
       focusLevel: 4,
+      performance: 3,
       notes: '',
       sessionType: initialData?.sessionType || 'self-study',
     }
@@ -56,6 +58,7 @@ export default function StudyLogForm({ subjects, initialData, onSave, onClose }:
       topicIds: data.topicIds,
       duration: (data.hours * 60) + data.minutes,
       focusLevel: data.focusLevel,
+      performance: data.performance,
       notes: data.notes || '',
       sessionType: data.sessionType as 'self-study' | 'tuition' | 'exam',
     });
@@ -177,6 +180,19 @@ export default function StudyLogForm({ subjects, initialData, onSave, onClose }:
                 />
               </div>
             </div>
+          </div>
+
+          <div className="space-y-2">
+            <label className="text-xs font-semibold text-[#8E8E93] uppercase tracking-wider">Performance / Recall (1-5)</label>
+            <div className="relative">
+              <Star className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[#8E8E93]" />
+              <input 
+                type="number"
+                {...register('performance', { valueAsNumber: true })}
+                className="w-full bg-black border border-white/5 pl-11 pr-4 py-3 text-sm font-medium text-white outline-none focus:border-brand transition-colors rounded-[16px]"
+              />
+            </div>
+            <p className="text-xs text-[#8E8E93] font-medium mt-1">1: Complete blackout, 3: Hard but remembered, 5: Perfect recall</p>
           </div>
 
           <div className="space-y-2">

@@ -1,6 +1,6 @@
 import React, { useMemo, useCallback } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Zap, Clock, Target, Flame, Coffee, Play, Sparkles, TrendingUp, BookOpen, Brain, ChevronRight, Trophy, LogIn } from 'lucide-react';
+import { Zap, Clock, Target, Flame, Coffee, Play, Sparkles, TrendingUp, BookOpen, Brain, ChevronRight, Trophy, LogIn, List, CheckCircle2 } from 'lucide-react';
 import { useAppStore } from '../store/useAppStore';
 import { cn } from '../lib/utils';
 import { useNavigate } from 'react-router-dom';
@@ -27,6 +27,40 @@ export default function Home() {
   const userProfile = useAppStore(state => state.userProfile);
   const studyLogs = useAppStore(state => state.studyLogs);
   const startFocusSession = useAppStore(state => state.startFocusSession);
+  const tasks = useAppStore(state => state.tasks);
+  const toggleTask = useAppStore(state => state.toggleTask);
+
+  const handleToggleTask = async (id: string) => {
+    const task = tasks.find(t => t.id === id);
+    if (!task) return;
+
+    const newCompleted = !task.completed;
+    toggleTask(id);
+
+    if (user) {
+      try {
+        const { doc, updateDoc } = await import('firebase/firestore');
+        const { db, handleFirestoreError, OperationType } = await import('../firebase');
+        await updateDoc(doc(db, 'users', user.uid, 'tasks', id), { completed: newCompleted });
+      } catch (error) {
+        const { handleFirestoreError, OperationType } = await import('../firebase');
+        handleFirestoreError(error, OperationType.WRITE, `users/${user.uid}/tasks/${id}`);
+      }
+    }
+  };
+
+  const todayStr = new Date().toISOString().split('T')[0];
+
+  const executionTasks = useMemo(() => {
+    return tasks.filter(t => 
+      !t.completed && 
+      t.frequency === 'Daily' && 
+      (!t.dueDate || t.dueDate <= todayStr)
+    );
+  }, [tasks, todayStr]);
+
+  const signalTasks = useMemo(() => executionTasks.filter(t => t.impact >= 7), [executionTasks]);
+  const noiseTasks = useMemo(() => executionTasks.filter(t => t.impact < 7), [executionTasks]);
 
   const processedSubjects = useMemo(() => {
     return subjects.map(s => {
@@ -214,6 +248,65 @@ export default function Home() {
         </div>
 
         <div className="space-y-8">
+          {/* Mini Execution Tab */}
+          {!searchQuery && (
+            <motion.section variants={itemVariants}>
+              <div className="flex items-center justify-between mb-5">
+                <h2 className="text-lg font-bold text-white tracking-tight">Today's Execution</h2>
+                <button onClick={() => navigate('/tasks')} className="text-sm font-semibold text-brand hover:opacity-80 transition-opacity">View All</button>
+              </div>
+              <div className="space-y-4">
+                {/* Signal */}
+                <div className="bg-[#1C1C1E] rounded-[20px] p-5 border border-brand/30 hover:border-brand/50 transition-colors">
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="flex items-center gap-2">
+                      <Target className="w-4 h-4 text-brand" />
+                      <h3 className="text-sm font-bold text-white uppercase tracking-wider">Signal</h3>
+                    </div>
+                    <span className="text-xs font-mono text-brand">{signalTasks.length}</span>
+                  </div>
+                  <div className="space-y-3">
+                    {signalTasks.slice(0, 3).map(task => (
+                      <div key={task.id} className="flex items-start gap-3 group">
+                        <button onClick={() => handleToggleTask(task.id)} className="mt-0.5 shrink-0 text-zinc-600 hover:text-brand transition-colors">
+                          <CheckCircle2 className="w-4 h-4" />
+                        </button>
+                        <p className="text-sm text-white line-clamp-2 leading-tight group-hover:text-brand transition-colors">{task.title}</p>
+                      </div>
+                    ))}
+                    {signalTasks.length === 0 && (
+                      <p className="text-xs text-[#8E8E93] italic">No active signal tasks.</p>
+                    )}
+                  </div>
+                </div>
+
+                {/* Noise */}
+                <div className="bg-[#1C1C1E] rounded-[20px] p-5 border border-white/5 hover:border-white/10 transition-colors">
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="flex items-center gap-2">
+                      <List className="w-4 h-4 text-[#8E8E93]" />
+                      <h3 className="text-sm font-bold text-[#8E8E93] uppercase tracking-wider">Noise</h3>
+                    </div>
+                    <span className="text-xs font-mono text-[#8E8E93]">{noiseTasks.length}</span>
+                  </div>
+                  <div className="space-y-3">
+                    {noiseTasks.slice(0, 2).map(task => (
+                      <div key={task.id} className="flex items-start gap-3 opacity-70 hover:opacity-100 transition-opacity group">
+                        <button onClick={() => handleToggleTask(task.id)} className="mt-0.5 shrink-0 text-zinc-600 hover:text-white transition-colors">
+                          <CheckCircle2 className="w-4 h-4" />
+                        </button>
+                        <p className="text-sm text-[#8E8E93] line-clamp-2 leading-tight group-hover:text-white transition-colors">{task.title}</p>
+                      </div>
+                    ))}
+                    {noiseTasks.length === 0 && (
+                      <p className="text-xs text-[#8E8E93] italic">No active noise tasks.</p>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </motion.section>
+          )}
+
           {!searchQuery && (
             <motion.section variants={itemVariants}>
               <div className="flex items-center justify-between mb-5">

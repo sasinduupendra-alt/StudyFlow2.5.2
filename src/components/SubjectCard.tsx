@@ -67,7 +67,15 @@ export const SubjectCard = React.memo(({ subject, onStartFocus }: SubjectCardPro
 
         <div className="flex-1">
           <h3 className="text-2xl font-bold text-white mb-1 tracking-tight">{subject.name}</h3>
-          <p className="text-sm text-[#8E8E93] mb-8">{subject.topics?.length || 0} Modules</p>
+          <div className="flex items-center gap-2 text-sm text-[#8E8E93] mb-8">
+            <span>{subject.topics?.length || 0} Modules</span>
+            {subject.totalStudyTime !== undefined && (
+              <>
+                <span>•</span>
+                <span>{Math.round(subject.totalStudyTime / 60)}h {subject.totalStudyTime % 60}m studied</span>
+              </>
+            )}
+          </div>
           
           <div className="flex items-center gap-6 mb-8">
             <div className="relative w-16 h-16">

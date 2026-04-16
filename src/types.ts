@@ -60,6 +60,7 @@ export interface Subject {
   examDate?: string;
   notes?: string;
   weeklyTasks?: WeeklyTask[];
+  totalStudyTime?: number; // Total time spent studying this subject in minutes
 }
 
 export interface AIPlanTask {
@@ -88,6 +89,7 @@ export interface StudyLog {
   topicIds?: string[]; // Array of topics covered (useful for tuition)
   duration: number;
   focusLevel: number;
+  performance?: number; // 1-5 rating for SRS
   notes: string;
   timestamp: string;
   resources?: string[];

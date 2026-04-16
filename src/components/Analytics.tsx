@@ -1,11 +1,11 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { 
   LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, 
-  RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar, PieChart, Pie, Cell, AreaChart, Area
+  RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar, PieChart, Pie, Cell, AreaChart, Area, Legend
 } from 'recharts';
 import { Subject, StudyLog, ExamRecord } from '../types';
-import { TrendingUp, Clock, Star, Target, Zap, CheckCircle2, AlertTriangle, Trophy, BarChart2 } from 'lucide-react';
-import { motion } from 'motion/react';
+import { TrendingUp, Clock, Star, Target, Zap, CheckCircle2, AlertTriangle, Trophy, BarChart2, Activity } from 'lucide-react';
+import { motion, AnimatePresence } from 'motion/react';
 
 interface AnalyticsProps {
   subjects: Subject[];
@@ -14,6 +14,8 @@ interface AnalyticsProps {
 }
 
 export default function Analytics({ subjects, studyLogs, exams }: AnalyticsProps) {
+  const [hoveredSubject, setHoveredSubject] = useState<string | null>(null);
+
   const totalStudyTime = studyLogs.reduce((acc, log) => acc + log.duration, 0);
   const avgFocus = studyLogs.length > 0 
     ? (studyLogs.reduce((acc, log) => acc + log.focusLevel, 0) / studyLogs.length).toFixed(1)
@@ -33,9 +35,10 @@ export default function Analytics({ subjects, studyLogs, exams }: AnalyticsProps
     { name: 'Learning', value: subjects.reduce((acc, s) => acc + s.topics.filter(t => t.mastery < 50).length, 0), color: '#ef4444' },
   ];
 
-  const focusTrendData = studyLogs.slice(-7).map((log, i) => ({
-    name: `Session ${i + 1}`,
-    focus: log.focusLevel
+  const focusTrendData = studyLogs.slice(-14).map((log, i) => ({
+    name: `S${i + 1}`,
+    focus: log.focusLevel,
+    duration: log.duration
   }));
 
   const last14Days = Array.from({ length: 14 }, (_, i) => {
@@ -65,6 +68,28 @@ export default function Analytics({ subjects, studyLogs, exams }: AnalyticsProps
 
   const SUBJECT_COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899'];
 
+  // Heatmap Data Preparation
+  const heatmapData = subjects.map((subject, index) => {
+    return {
+      id: subject.id,
+      name: subject.name,
+      color: SUBJECT_COLORS[index % SUBJECT_COLORS.length],
+      days: last14Days.map(date => {
+        const logs = studyLogs.filter(log => log.subjectId === subject.id && log.timestamp.split('T')[0] === date);
+        const totalTime = logs.reduce((acc, log) => acc + log.duration, 0);
+        return { date, totalTime };
+      })
+    };
+  });
+
+  const getHeatmapOpacity = (time: number) => {
+    if (time === 0) return 0.05;
+    if (time < 30) return 0.3;
+    if (time < 60) return 0.6;
+    if (time < 120) return 0.8;
+    return 1;
+  };
+
   const examTrendData = exams.map(exam => ({
     name: exam.title,
     average: exam.averageScore,
@@ -90,15 +115,31 @@ export default function Analytics({ subjects, studyLogs, exams }: AnalyticsProps
     hidden: { opacity: 0 },
     show: {
       opacity: 1,
-      transition: {
-        staggerChildren: 0.1
-      }
+      transition: { staggerChildren: 0.1 }
     }
   };
 
   const itemVariants = {
     hidden: { opacity: 0, y: 20 },
-    show: { opacity: 1, y: 0 }
+    show: { opacity: 1, y: 0, transition: { type: 'spring' as const, stiffness: 300, damping: 24 } }
+  };
+
+  const CustomTooltip = ({ active, payload, label }: any) => {
+    if (active && payload && payload.length) {
+      return (
+        <div className="bg-[#1C1C1E]/95 backdrop-blur-md border border-white/10 p-4 rounded-2xl shadow-2xl">
+          <p className="text-white font-bold mb-2">{label}</p>
+          {payload.map((entry: any, index: number) => (
+            <div key={index} className="flex items-center gap-2 mb-1">
+              <div className="w-2 h-2 rounded-full" style={{ backgroundColor: entry.color }} />
+              <span className="text-[#8E8E93] text-sm">{entry.name}:</span>
+              <span className="text-white font-mono font-bold">{entry.value}</span>
+            </div>
+          ))}
+        </div>
+      );
+    }
+    return null;
   };
 
   return (
@@ -109,9 +150,9 @@ export default function Analytics({ subjects, studyLogs, exams }: AnalyticsProps
       className="space-y-10 p-6 md:p-10 max-w-7xl mx-auto"
     >
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <motion.div variants={itemVariants} className="bg-[#1C1C1E] border border-white/5 rounded-[32px] p-8 group">
+        <motion.div variants={itemVariants} whileHover={{ scale: 1.02 }} className="bg-[#1C1C1E] border border-white/5 rounded-[32px] p-8 group transition-all hover:border-brand/30">
           <div className="flex items-center gap-4 mb-6">
-            <div className="w-10 h-10 bg-white/5 rounded-full flex items-center justify-center text-[#8E8E93] group-hover:text-white transition-colors">
+            <div className="w-10 h-10 bg-white/5 rounded-full flex items-center justify-center text-[#8E8E93] group-hover:text-brand transition-colors">
               <Clock className="w-5 h-5" />
             </div>
             <span className="text-xs font-semibold text-[#8E8E93] uppercase tracking-wider">Total Study Time</span>
@@ -119,9 +160,9 @@ export default function Analytics({ subjects, studyLogs, exams }: AnalyticsProps
           <p className="text-4xl font-bold text-white tracking-tight">{Math.floor(totalStudyTime / 60)}h {totalStudyTime % 60}m</p>
         </motion.div>
 
-        <motion.div variants={itemVariants} className="bg-[#1C1C1E] border border-white/5 rounded-[32px] p-8 group">
+        <motion.div variants={itemVariants} whileHover={{ scale: 1.02 }} className="bg-[#1C1C1E] border border-white/5 rounded-[32px] p-8 group transition-all hover:border-brand/30">
           <div className="flex items-center gap-4 mb-6">
-            <div className="w-10 h-10 bg-white/5 rounded-full flex items-center justify-center text-[#8E8E93] group-hover:text-white transition-colors">
+            <div className="w-10 h-10 bg-white/5 rounded-full flex items-center justify-center text-[#8E8E93] group-hover:text-brand transition-colors">
               <Star className="w-5 h-5" />
             </div>
             <span className="text-xs font-semibold text-[#8E8E93] uppercase tracking-wider">Avg Focus Level</span>
@@ -129,9 +170,9 @@ export default function Analytics({ subjects, studyLogs, exams }: AnalyticsProps
           <p className="text-4xl font-bold text-white tracking-tight">{avgFocus}/5.0</p>
         </motion.div>
 
-        <motion.div variants={itemVariants} className="bg-[#1C1C1E] border border-white/5 rounded-[32px] p-8 group">
+        <motion.div variants={itemVariants} whileHover={{ scale: 1.02 }} className="bg-[#1C1C1E] border border-white/5 rounded-[32px] p-8 group transition-all hover:border-brand/30">
           <div className="flex items-center gap-4 mb-6">
-            <div className="w-10 h-10 bg-white/5 rounded-full flex items-center justify-center text-[#8E8E93] group-hover:text-white transition-colors">
+            <div className="w-10 h-10 bg-white/5 rounded-full flex items-center justify-center text-[#8E8E93] group-hover:text-brand transition-colors">
               <Target className="w-5 h-5" />
             </div>
             <span className="text-xs font-semibold text-[#8E8E93] uppercase tracking-wider">Readiness Avg</span>
@@ -141,9 +182,9 @@ export default function Analytics({ subjects, studyLogs, exams }: AnalyticsProps
           </p>
         </motion.div>
 
-        <motion.div variants={itemVariants} className="bg-[#1C1C1E] border border-white/5 rounded-[32px] p-8 group">
+        <motion.div variants={itemVariants} whileHover={{ scale: 1.02 }} className="bg-[#1C1C1E] border border-white/5 rounded-[32px] p-8 group transition-all hover:border-brand/30">
           <div className="flex items-center gap-4 mb-6">
-            <div className="w-10 h-10 bg-white/5 rounded-full flex items-center justify-center text-[#8E8E93] group-hover:text-white transition-colors">
+            <div className="w-10 h-10 bg-white/5 rounded-full flex items-center justify-center text-[#8E8E93] group-hover:text-brand transition-colors">
               <Zap className="w-5 h-5" />
             </div>
             <span className="text-xs font-semibold text-[#8E8E93] uppercase tracking-wider">Sessions Logged</span>
@@ -151,6 +192,56 @@ export default function Analytics({ subjects, studyLogs, exams }: AnalyticsProps
           <p className="text-4xl font-bold text-white tracking-tight">{studyLogs.length}</p>
         </motion.div>
       </div>
+
+      {/* Heatmap Section */}
+      <motion.div variants={itemVariants} className="bg-[#1C1C1E] border border-white/5 rounded-[32px] p-10">
+        <h3 className="text-lg font-bold text-white tracking-tight mb-8 flex items-center gap-3">
+          <Activity className="w-5 h-5 text-brand" />
+          Study Intensity Heatmap (Last 14 Days)
+        </h3>
+        <div className="overflow-x-auto pb-4">
+          <div className="min-w-[600px]">
+            <div className="flex mb-2">
+              <div className="w-32 shrink-0"></div>
+              <div className="flex-1 grid grid-cols-14 gap-2">
+                {last14Days.map((date, i) => (
+                  <div key={date} className="text-[10px] font-mono text-[#8E8E93] text-center">
+                    {i % 2 === 0 ? new Date(date).toLocaleDateString(undefined, { day: 'numeric', month: 'short' }) : ''}
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div className="space-y-3">
+              {heatmapData.map((subject) => (
+                <div key={subject.id} className="flex items-center group">
+                  <div className="w-32 shrink-0 text-xs font-bold text-white truncate pr-4 transition-colors group-hover:text-brand">
+                    {subject.name}
+                  </div>
+                  <div className="flex-1 grid grid-cols-14 gap-2">
+                    {subject.days.map((day, i) => (
+                      <motion.div
+                        key={day.date}
+                        initial={{ scale: 0, opacity: 0 }}
+                        animate={{ scale: 1, opacity: 1 }}
+                        transition={{ delay: i * 0.05 + 0.2, type: 'spring' }}
+                        className="aspect-square rounded-md relative group/cell cursor-pointer"
+                        style={{ 
+                          backgroundColor: subject.color,
+                          opacity: getHeatmapOpacity(day.totalTime)
+                        }}
+                      >
+                        <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-2 bg-[#2C2C2E] text-white text-xs rounded-lg opacity-0 group-hover/cell:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-10 shadow-xl border border-white/10">
+                          <span className="font-bold">{day.totalTime} mins</span> on {new Date(day.date).toLocaleDateString()}
+                        </div>
+                      </motion.div>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </motion.div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
         <motion.div 
@@ -167,12 +258,9 @@ export default function Analytics({ subjects, studyLogs, exams }: AnalyticsProps
                 <PolarGrid stroke="#2C2C2E" strokeWidth={1} />
                 <PolarAngleAxis dataKey="subject" tick={{ fill: '#8E8E93', fontSize: 12, fontWeight: 600 }} />
                 <PolarRadiusAxis angle={30} domain={[0, 100]} tick={{ fill: '#48484A', fontSize: 10 }} />
-                <Radar name="Performance" dataKey="Score" stroke="#fff" fill="#fff" fillOpacity={0.05} strokeWidth={2} />
-                <Radar name="Readiness" dataKey="Readiness" stroke="#0A84FF" fill="#0A84FF" fillOpacity={0.2} strokeWidth={2} />
-                <Tooltip 
-                  contentStyle={{ backgroundColor: '#1C1C1E', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '16px', padding: '12px' }}
-                  itemStyle={{ color: '#fff', fontSize: '13px', fontWeight: 600 }}
-                />
+                <Radar name="Performance" dataKey="Score" stroke="#fff" fill="#fff" fillOpacity={0.05} strokeWidth={2} isAnimationActive={true} animationDuration={1500} animationEasing="ease-out" />
+                <Radar name="Readiness" dataKey="Readiness" stroke="#0A84FF" fill="#0A84FF" fillOpacity={0.2} strokeWidth={2} isAnimationActive={true} animationDuration={1500} animationEasing="ease-out" />
+                <Tooltip content={<CustomTooltip />} />
               </RadarChart>
             </ResponsiveContainer>
           </div>
@@ -199,15 +287,15 @@ export default function Analytics({ subjects, studyLogs, exams }: AnalyticsProps
                   dataKey="value"
                   stroke="none"
                   cornerRadius={8}
+                  isAnimationActive={true}
+                  animationDuration={1500}
+                  animationEasing="ease-out"
                 >
                   {pieData.map((entry, index) => (
                     <Cell key={`cell-${index}`} fill={entry.color} fillOpacity={0.9} />
                   ))}
                 </Pie>
-                <Tooltip 
-                  contentStyle={{ backgroundColor: '#1C1C1E', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '16px', padding: '12px' }}
-                  itemStyle={{ color: '#fff', fontSize: '13px', fontWeight: 600 }}
-                />
+                <Tooltip content={<CustomTooltip />} />
               </PieChart>
             </ResponsiveContainer>
             <div className="space-y-6 sm:pr-12 w-full sm:w-auto">
@@ -245,11 +333,8 @@ export default function Analytics({ subjects, studyLogs, exams }: AnalyticsProps
               <CartesianGrid strokeDasharray="3 3" stroke="#2C2C2E" vertical={false} />
               <XAxis dataKey="name" stroke="#8E8E93" fontSize={12} fontWeight={500} axisLine={false} tickLine={false} dy={10} />
               <YAxis stroke="#8E8E93" fontSize={12} fontWeight={500} domain={[0, 5]} axisLine={false} tickLine={false} dx={-10} />
-              <Tooltip 
-                contentStyle={{ backgroundColor: '#1C1C1E', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '16px', padding: '12px' }}
-                itemStyle={{ color: '#fff', fontSize: '13px', fontWeight: 600 }}
-              />
-              <Area type="monotone" dataKey="focus" stroke="#0A84FF" fillOpacity={1} fill="url(#focusGradient)" strokeWidth={3} />
+              <Tooltip content={<CustomTooltip />} />
+              <Area type="monotone" dataKey="focus" stroke="#0A84FF" fillOpacity={1} fill="url(#focusGradient)" strokeWidth={3} isAnimationActive={true} animationDuration={1500} animationEasing="ease-out" />
             </AreaChart>
           </ResponsiveContainer>
         </div>
@@ -265,23 +350,25 @@ export default function Analytics({ subjects, studyLogs, exams }: AnalyticsProps
         </h3>
         <div className="h-[400px]">
           <ResponsiveContainer width="100%" height="100%">
-            <LineChart data={masteryTrendData}>
+            <LineChart data={masteryTrendData} onMouseLeave={() => setHoveredSubject(null)}>
               <CartesianGrid strokeDasharray="3 3" stroke="#2C2C2E" vertical={false} />
               <XAxis dataKey="name" stroke="#8E8E93" fontSize={11} fontWeight={500} />
               <YAxis stroke="#8E8E93" fontSize={11} fontWeight={500} domain={[0, 100]} />
-              <Tooltip 
-                contentStyle={{ backgroundColor: '#1C1C1E', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '16px' }}
-                itemStyle={{ color: '#fff', fontSize: '13px', fontWeight: 600 }}
-              />
+              <Tooltip content={<CustomTooltip />} />
               {subjects.map((subject, index) => (
                 <Line 
                   key={subject.id} 
                   type="monotone" 
                   dataKey={subject.name} 
                   stroke={SUBJECT_COLORS[index % SUBJECT_COLORS.length]} 
-                  strokeWidth={3} 
+                  strokeWidth={hoveredSubject === subject.name ? 5 : 3} 
+                  strokeOpacity={hoveredSubject && hoveredSubject !== subject.name ? 0.2 : 1}
                   dot={false}
                   activeDot={{ r: 6, strokeWidth: 0 }}
+                  isAnimationActive={true} 
+                  animationDuration={1500} 
+                  animationEasing="ease-out"
+                  onMouseEnter={() => setHoveredSubject(subject.name)}
                 />
               ))}
             </LineChart>
@@ -289,7 +376,13 @@ export default function Analytics({ subjects, studyLogs, exams }: AnalyticsProps
         </div>
         <div className="flex flex-wrap gap-6 mt-10 justify-center">
           {subjects.map((subject, index) => (
-            <div key={subject.id} className="flex items-center gap-3">
+            <div 
+              key={subject.id} 
+              className="flex items-center gap-3 cursor-pointer transition-opacity"
+              style={{ opacity: hoveredSubject && hoveredSubject !== subject.name ? 0.4 : 1 }}
+              onMouseEnter={() => setHoveredSubject(subject.name)}
+              onMouseLeave={() => setHoveredSubject(null)}
+            >
               <div className="w-3 h-3 rounded-full" style={{ backgroundColor: SUBJECT_COLORS[index % SUBJECT_COLORS.length] }} />
               <span className="text-xs font-semibold text-[#8E8E93] uppercase tracking-wider">{subject.name}</span>
             </div>
@@ -309,11 +402,8 @@ export default function Analytics({ subjects, studyLogs, exams }: AnalyticsProps
                 <CartesianGrid strokeDasharray="3 3" stroke="#2C2C2E" vertical={false} />
                 <XAxis dataKey="name" stroke="#8E8E93" fontSize={11} fontWeight={500} />
                 <YAxis stroke="#8E8E93" fontSize={11} fontWeight={500} domain={[0, 100]} />
-                <Tooltip 
-                  contentStyle={{ backgroundColor: '#1C1C1E', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '16px' }}
-                  itemStyle={{ color: '#fff', fontSize: '13px', fontWeight: 600 }}
-                />
-                <Line type="monotone" dataKey="average" stroke="#0A84FF" strokeWidth={3} dot={{ r: 5, fill: '#0A84FF', strokeWidth: 0 }} activeDot={{ r: 8, strokeWidth: 0 }} />
+                <Tooltip content={<CustomTooltip />} />
+                <Line type="monotone" dataKey="average" stroke="#0A84FF" strokeWidth={3} dot={{ r: 5, fill: '#0A84FF', strokeWidth: 0 }} activeDot={{ r: 8, strokeWidth: 0 }} isAnimationActive={true} animationDuration={1500} animationEasing="ease-out" />
               </LineChart>
             </ResponsiveContainer>
           </div>
@@ -337,10 +427,7 @@ export default function Analytics({ subjects, studyLogs, exams }: AnalyticsProps
                 <CartesianGrid strokeDasharray="3 3" stroke="#2C2C2E" vertical={false} />
                 <XAxis dataKey="name" stroke="#8E8E93" fontSize={11} fontWeight={500} />
                 <YAxis stroke="#8E8E93" fontSize={11} fontWeight={500} domain={[0, 100]} />
-                <Tooltip 
-                  contentStyle={{ backgroundColor: '#1C1C1E', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '16px' }}
-                  itemStyle={{ color: '#fff', fontSize: '13px', fontWeight: 600 }}
-                />
+                <Tooltip content={<CustomTooltip />} />
                 {subjects.map((subject, index) => (
                   <Bar 
                     key={subject.id} 
@@ -348,6 +435,9 @@ export default function Analytics({ subjects, studyLogs, exams }: AnalyticsProps
                     fill={SUBJECT_COLORS[index % SUBJECT_COLORS.length]} 
                     fillOpacity={0.8}
                     radius={[4, 4, 0, 0]}
+                    isAnimationActive={true} 
+                    animationDuration={1500} 
+                    animationEasing="ease-out"
                   />
                 ))}
               </BarChart>

@@ -3,19 +3,24 @@ import { motion, AnimatePresence } from 'motion/react';
 import { 
   Plus, CheckCircle2, Circle, Trash2, Calendar, 
   Clock, AlertCircle, Filter, ChevronRight, ListTodo,
-  LayoutGrid, List, MoreVertical, Edit2, Target
+  LayoutGrid, List, MoreVertical, Edit2, Target, Sparkles, RefreshCw
 } from 'lucide-react';
 import { useAppStore } from '../store/useAppStore';
 import { Task, TaskFrequency, Subject } from '../types';
 import { cn, calculateSNR } from '../lib/utils';
 import { db, handleFirestoreError, OperationType } from '../firebase';
 import { doc, setDoc, deleteDoc, updateDoc, collection } from 'firebase/firestore';
+import { getAI } from '../services/gemini';
+import { Type } from '@google/genai';
+import WeeklyTaskChecklist from '../components/WeeklyTaskChecklist';
 
 export default function Tasks() {
-  const { tasks, addTask, toggleTask, deleteTask, subjects, user, addToast } = useAppStore();
+  const { tasks, addTask, toggleTask, deleteTask, subjects, user, addToast, updateTask } = useAppStore();
   const [activeTab, setActiveTab] = useState<TaskFrequency>('Daily');
   const [viewMode, setViewMode] = useState<'Cycle' | 'Subject' | 'Optimization' | 'Execution'>('Execution');
   const [isAddingTask, setIsAddingTask] = useState(false);
+  const [editingTask, setEditingTask] = useState<Task | null>(null);
+  const [isAuditing, setIsAuditing] = useState(false);
   const [newTaskTitle, setNewTaskTitle] = useState('');
   const [newTaskDesc, setNewTaskDesc] = useState('');
   const [newTaskSubject, setNewTaskSubject] = useState('');
@@ -54,35 +59,63 @@ export default function Tasks() {
     e.preventDefault();
     if (!newTaskTitle.trim()) return;
 
-    const id = Math.random().toString(36).substring(2, 9);
-    const createdAt = new Date().toISOString();
-    const taskData: Task = {
-      id,
-      title: newTaskTitle,
-      description: newTaskDesc,
-      frequency: activeTab,
-      subjectId: newTaskSubject || undefined,
-      completed: false,
-      createdAt,
-      dueDate: isForTomorrow ? tomorrowStr : todayStr,
-      impact: newTaskImpact,
-      effort: newTaskEffort,
-      difficulty: newTaskDifficulty,
-      lastReviewed: newTaskLastReviewed || undefined,
-    };
+    if (editingTask) {
+      const updatedTask: Partial<Task> = {
+        title: newTaskTitle,
+        description: newTaskDesc,
+        frequency: activeTab,
+        subjectId: newTaskSubject || undefined,
+        dueDate: isForTomorrow ? tomorrowStr : todayStr,
+        impact: newTaskImpact,
+        effort: newTaskEffort,
+        difficulty: newTaskDifficulty,
+        lastReviewed: newTaskLastReviewed || undefined,
+      };
 
-    // Update local store
-    addTask(taskData);
+      updateTask(editingTask.id, updatedTask);
 
-    // Update Firestore if logged in
-    if (user) {
-      try {
-        await setDoc(doc(collection(db, 'users', user.uid, 'tasks'), id), taskData);
-      } catch (error) {
-        handleFirestoreError(error, OperationType.WRITE, `users/${user.uid}/tasks/${id}`);
+      if (user) {
+        try {
+          await updateDoc(doc(db, 'users', user.uid, 'tasks', editingTask.id), updatedTask);
+        } catch (error) {
+          handleFirestoreError(error, OperationType.WRITE, `users/${user.uid}/tasks/${editingTask.id}`);
+        }
+      }
+    } else {
+      const id = Math.random().toString(36).substring(2, 9);
+      const createdAt = new Date().toISOString();
+      const taskData: Task = {
+        id,
+        title: newTaskTitle,
+        description: newTaskDesc,
+        frequency: activeTab,
+        subjectId: newTaskSubject || undefined,
+        completed: false,
+        createdAt,
+        dueDate: isForTomorrow ? tomorrowStr : todayStr,
+        impact: newTaskImpact,
+        effort: newTaskEffort,
+        difficulty: newTaskDifficulty,
+        lastReviewed: newTaskLastReviewed || undefined,
+      };
+
+      // Update local store
+      addTask(taskData);
+
+      // Update Firestore if logged in
+      if (user) {
+        try {
+          await setDoc(doc(collection(db, 'users', user.uid, 'tasks'), id), taskData);
+        } catch (error) {
+          handleFirestoreError(error, OperationType.WRITE, `users/${user.uid}/tasks/${id}`);
+        }
       }
     }
 
+    resetForm();
+  };
+
+  const resetForm = () => {
     setNewTaskTitle('');
     setNewTaskDesc('');
     setNewTaskSubject('');
@@ -92,6 +125,21 @@ export default function Tasks() {
     setNewTaskLastReviewed('');
     setIsForTomorrow(false);
     setIsAddingTask(false);
+    setEditingTask(null);
+  };
+
+  const handleEditTask = (task: Task) => {
+    setEditingTask(task);
+    setNewTaskTitle(task.title);
+    setNewTaskDesc(task.description || '');
+    setNewTaskSubject(task.subjectId || '');
+    setNewTaskImpact(task.impact || 5);
+    setNewTaskEffort(task.effort || 5);
+    setNewTaskDifficulty(task.difficulty || 5);
+    setNewTaskLastReviewed(task.lastReviewed || '');
+    setIsForTomorrow(task.dueDate === tomorrowStr);
+    setActiveTab(task.frequency);
+    setIsAddingTask(true);
   };
 
   const handleToggleTask = async (id: string) => {
@@ -107,6 +155,70 @@ export default function Tasks() {
       } catch (error) {
         handleFirestoreError(error, OperationType.WRITE, `users/${user.uid}/tasks/${id}`);
       }
+    }
+  };
+
+  const handleAuditTasks = async () => {
+    setIsAuditing(true);
+    try {
+      const ai = getAI();
+      const tasksToAudit = tasks.map(t => ({
+        id: t.id,
+        title: t.title,
+        description: t.description,
+        subject: subjects.find(s => s.id === t.subjectId)?.name || 'Unknown'
+      }));
+
+      const prompt = `
+        You are an expert academic study planner. Evaluate the following tasks and categorize them as "Signal" or "Noise" based on the following rules:
+        
+        1. Combined Maths: Signal is problem-solving volume (Timed Practice, Structure Building, Pure Logic Check). Noise is formula listing, reading solved examples, organization.
+        2. Physics: Signal is conceptual visualization and unit accuracy (Unit/Dimension Audit, Variable Manipulation, Practical Logic). Noise is passive video watching, definition cramming.
+        3. Chemistry: Signal is reaction mechanisms, Inorganic Trends, Calculation Drills. Noise is color-coding notes, general reading, flashcard hoarding.
+        4. General: Signal is active recall, problem solving, and application. Noise is passive reading, organizing, making things look pretty, or watching videos without solving.
+
+        For each task, assign an "impact" score from 1 to 10. 
+        - Signal tasks MUST have an impact score between 7 and 10.
+        - Noise tasks MUST have an impact score between 1 and 6.
+
+        Tasks to evaluate:
+        ${JSON.stringify(tasksToAudit, null, 2)}
+      `;
+
+      const response = await ai.models.generateContent({
+        model: "gemini-3-flash-preview",
+        contents: prompt,
+        config: {
+          responseMimeType: "application/json",
+          responseSchema: {
+            type: Type.ARRAY,
+            items: {
+              type: Type.OBJECT,
+              properties: {
+                id: { type: Type.STRING },
+                impact: { type: Type.NUMBER }
+              },
+              required: ['id', 'impact']
+            }
+          }
+        }
+      });
+
+      const result = JSON.parse(response.text);
+      
+      for (const update of result) {
+        updateTask(update.id, { impact: update.impact });
+        if (user) {
+          updateDoc(doc(db, 'users', user.uid, 'tasks', update.id), { impact: update.impact }).catch(err => console.error(err));
+        }
+      }
+
+      addToast('Tasks successfully audited and categorized!', 'success');
+    } catch (error) {
+      console.error('Failed to audit tasks:', error);
+      addToast('Failed to audit tasks. Please try again.', 'error');
+    } finally {
+      setIsAuditing(false);
     }
   };
 
@@ -166,13 +278,25 @@ export default function Tasks() {
             <p className="text-[9px] font-mono text-zinc-500 uppercase tracking-[0.2em] mb-2">Completion Rate</p>
             <p className="text-4xl font-black text-white tabular-nums tracking-tighter leading-none">{Math.round(progress)}%</p>
           </div>
-          <button 
-            onClick={() => setIsAddingTask(true)}
-            className="enterprise-button px-10 py-5"
-          >
-            <Plus className="w-5 h-5" />
-            Initialize Objective
-          </button>
+          <div className="flex flex-col gap-2">
+            <button 
+              onClick={() => setIsAddingTask(true)}
+              className="enterprise-button px-10 py-5"
+            >
+              <Plus className="w-5 h-5" />
+              Initialize Objective
+            </button>
+            {viewMode === 'Execution' && (
+              <button 
+                onClick={handleAuditTasks}
+                disabled={isAuditing}
+                className="px-4 py-2 bg-brand/10 text-brand border border-brand/30 hover:bg-brand/20 transition-colors rounded-lg flex items-center justify-center gap-2 text-xs font-bold uppercase tracking-widest disabled:opacity-50"
+              >
+                {isAuditing ? <RefreshCw className="w-3 h-3 animate-spin" /> : <Sparkles className="w-3 h-3" />}
+                Audit Tasks (AI)
+              </button>
+            )}
+          </div>
         </div>
       </motion.div>
 
@@ -288,6 +412,7 @@ export default function Tasks() {
                       tomorrowStr={tomorrowStr}
                       onToggle={handleToggleTask}
                       onDelete={handleDeleteTask}
+                      onEdit={handleEditTask}
                     />
                   ))}
                   {executionTasks.filter(t => t.impact >= 7).length === 0 && (
@@ -321,6 +446,7 @@ export default function Tasks() {
                       tomorrowStr={tomorrowStr}
                       onToggle={handleToggleTask}
                       onDelete={handleDeleteTask}
+                      onEdit={handleEditTask}
                     />
                   ))}
                   {executionTasks.filter(t => t.impact < 7).length === 0 && (
@@ -355,7 +481,11 @@ export default function Tasks() {
               </div>
             </div>
           ) : viewMode === 'Cycle' ? (
-            filteredTasks.length > 0 ? (
+            activeTab === 'Weekly' ? (
+              <div className="-mx-6 md:-mx-12 -mt-6 md:-mt-12">
+                <WeeklyTaskChecklist />
+              </div>
+            ) : filteredTasks.length > 0 ? (
               filteredTasks.map((task) => (
                 <TaskItem 
                   key={task.id} 
@@ -364,6 +494,7 @@ export default function Tasks() {
                   tomorrowStr={tomorrowStr}
                   onToggle={handleToggleTask}
                   onDelete={handleDeleteTask}
+                  onEdit={handleEditTask}
                 />
               ))
             ) : (
@@ -389,6 +520,7 @@ export default function Tasks() {
                         tomorrowStr={tomorrowStr}
                         onToggle={handleToggleTask}
                         onDelete={handleDeleteTask}
+                        onEdit={handleEditTask}
                       />
                     ))}
                   </div>
@@ -519,6 +651,7 @@ export default function Tasks() {
                     tomorrowStr={tomorrowStr}
                     onToggle={handleToggleTask}
                     onDelete={handleDeleteTask}
+                    onEdit={handleEditTask}
                   />
                 ))}
               </div>
@@ -681,7 +814,7 @@ export default function Tasks() {
                 <div className="flex gap-3 pt-2">
                   <button
                     type="button"
-                    onClick={() => setIsAddingTask(false)}
+                    onClick={resetForm}
                     className="flex-1 py-2 text-[8px] font-bold uppercase tracking-[0.3em] text-zinc-600 hover:text-white transition-all"
                   >
                     Abort
@@ -690,7 +823,7 @@ export default function Tasks() {
                     type="submit"
                     className="enterprise-button flex-1 py-2 text-[8px] rounded-lg"
                   >
-                    Commit
+                    {editingTask ? 'Update' : 'Commit'}
                   </button>
                 </div>
               </form>
@@ -702,12 +835,13 @@ export default function Tasks() {
   );
 }
 
-function TaskItem({ task, subjects, tomorrowStr, onToggle, onDelete }: { 
+function TaskItem({ task, subjects, tomorrowStr, onToggle, onDelete, onEdit }: { 
   task: Task, 
   subjects: Subject[], 
   tomorrowStr: string,
   onToggle: (id: string) => void,
-  onDelete: (id: string) => void
+  onDelete: (id: string) => void,
+  onEdit: (task: Task) => void
 }) {
   return (
     <motion.div
@@ -795,6 +929,12 @@ function TaskItem({ task, subjects, tomorrowStr, onToggle, onDelete }: {
         </div>
 
         <div className="flex items-center gap-4 opacity-0 group-hover:opacity-100 transition-all duration-500">
+          <button 
+            onClick={() => onEdit(task)}
+            className="p-3 text-zinc-800 hover:text-white hover:bg-white/5 transition-all"
+          >
+            <Edit2 className="w-5 h-5" />
+          </button>
           <button 
             onClick={() => onDelete(task.id)}
             className="p-3 text-zinc-800 hover:text-white hover:bg-white/5 transition-all"

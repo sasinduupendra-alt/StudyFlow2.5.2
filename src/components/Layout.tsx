@@ -67,26 +67,19 @@ export default function Layout() {
     }
   }, []);
 
-  const updateTopicSRS = useAppStore(state => state.updateTopicSRS);
+  const addStudyLog = useAppStore(state => state.addStudyLog);
 
-  const handleSaveLog = async (log: { subjectId: string, topicIds: string[], duration: number, focusLevel: number, notes: string, sessionType: 'self-study' | 'tuition' | 'exam' }) => {
-    const id = Math.random().toString(36).substr(2, 9);
-    const newLog = {
-      ...log,
-      id,
-      timestamp: new Date().toISOString()
-    };
-
-    // Update local logs
-    setStudyLogs([...studyLogs, newLog]);
-
-    // Update SRS for all covered topics
-    if (log.topicIds && log.topicIds.length > 0) {
-      log.topicIds.forEach(topicId => {
-        // Performance is based on focus level (1-5)
-        updateTopicSRS(log.subjectId, topicId, log.focusLevel);
-      });
-    }
+  const handleSaveLog = async (log: { subjectId: string, topicIds: string[], duration: number, focusLevel: number, performance: number, notes: string, sessionType: 'self-study' | 'tuition' | 'exam' }) => {
+    // Use the new centralized addStudyLog action
+    addStudyLog({
+      subjectId: log.subjectId,
+      topicIds: log.topicIds,
+      duration: log.duration,
+      focusLevel: log.focusLevel,
+      performance: log.performance, // Use actual performance for SRS
+      notes: log.notes,
+      sessionType: log.sessionType
+    });
 
     // Calculate XP and update profile
     const xpEarned = log.duration * log.focusLevel * 10;
@@ -141,10 +134,16 @@ export default function Layout() {
     // Update Firestore if logged in
     if (user) {
       try {
+        const id = Math.random().toString(36).substr(2, 9);
+        const newLog = {
+          ...log,
+          id,
+          timestamp: new Date().toISOString()
+        };
         await setDoc(doc(collection(db, 'users', user.uid, 'study_logs'), id), newLog);
         await updateDoc(doc(db, 'users', user.uid), updatedProfile as any);
       } catch (error) {
-        handleFirestoreError(error, OperationType.WRITE, `users/${user.uid}/study_logs/${id}`);
+        handleFirestoreError(error, OperationType.WRITE, `users/${user.uid}/study_logs`);
       }
     }
   };

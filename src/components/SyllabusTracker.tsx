@@ -119,7 +119,15 @@ const SubjectBlock = React.memo(({ subject, onUpdateMastery, onViewResources, is
           </div>
           <div>
             <h3 className="text-3xl font-bold text-white tracking-tight">{subject.name}</h3>
-            <p className="text-sm font-medium text-[#8E8E93] mt-2">{subject.topics.length} Topics Total</p>
+            <div className="flex items-center gap-2 text-sm font-medium text-[#8E8E93] mt-2">
+              <span>{subject.topics.length} Topics Total</span>
+              {subject.totalStudyTime !== undefined && (
+                <>
+                  <span>•</span>
+                  <span>{Math.round(subject.totalStudyTime / 60)}h {subject.totalStudyTime % 60}m studied</span>
+                </>
+              )}
+            </div>
           </div>
         </div>
         <div className="flex items-center gap-10">

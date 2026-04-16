@@ -44,6 +44,7 @@ export interface StudySlice {
   setSubjects: (subjects: Subject[]) => void;
   studyLogs: StudyLog[];
   setStudyLogs: (logs: StudyLog[]) => void;
+  addStudyLog: (log: Omit<StudyLog, 'id' | 'timestamp'>) => void;
   exams: ExamRecord[];
   setExams: (exams: ExamRecord[]) => void;
   schedule: WeeklySchedule;
@@ -55,6 +56,7 @@ export interface StudySlice {
   updateAIPlanTask: (taskId: string, updates: Partial<AIPlanTask>) => void;
   reorderSchedule: (day: keyof WeeklySchedule, startIndex: number, endIndex: number) => void;
   updateActivity: (day: keyof WeeklySchedule, activityId: string, updates: Partial<Activity>) => void;
+  addActivityToSchedule: (day: keyof WeeklySchedule, activity: Activity) => void;
   optimizeDaySchedule: (day: keyof WeeklySchedule) => void;
   recentlyStudied: string[];
   setRecentlyStudied: (ids: string[]) => void;
@@ -68,6 +70,87 @@ export const createStudySlice: StateCreator<AppState, [], [], StudySlice> = (set
   setSubjects: (subjects) => set({ subjects }),
   studyLogs: [],
   setStudyLogs: (logs) => set({ studyLogs: logs }),
+  addStudyLog: (logData) => set((state) => {
+    const newLog: StudyLog = {
+      ...logData,
+      id: Math.random().toString(36).substring(2, 9),
+      timestamp: new Date().toISOString()
+    };
+
+    const newLogs = [...state.studyLogs, newLog];
+    const newSubjects = [...state.subjects];
+    
+    // Update subject stats
+    const subjectIndex = newSubjects.findIndex(s => s.id === newLog.subjectId);
+    if (subjectIndex !== -1) {
+      const subject = { ...newSubjects[subjectIndex] };
+      
+      // Update total study time
+      subject.totalStudyTime = (subject.totalStudyTime || 0) + newLog.duration;
+      
+      // Update topic SRS and mastery if topicIds are specified
+      if (newLog.topicIds && newLog.topicIds.length > 0) {
+        newLog.topicIds.forEach(topicId => {
+          const topicIndex = subject.topics.findIndex(t => t.id === topicId);
+          if (topicIndex !== -1) {
+            const topic = { ...subject.topics[topicIndex] };
+            
+            // SM-2 Algorithm logic (simplified)
+            let { interval = 0, easeFactor = 2.5, reviewCount = 0 } = topic;
+            const q = newLog.performance || newLog.focusLevel || 3;
+
+            if (q >= 3) {
+              if (reviewCount === 0) interval = 1;
+              else if (reviewCount === 1) interval = 6;
+              else interval = Math.round(interval * easeFactor);
+              
+              easeFactor = easeFactor + (0.1 - (5 - q) * (0.08 + (5 - q) * 0.02));
+              if (easeFactor < 1.3) easeFactor = 1.3;
+              reviewCount++;
+            } else {
+              interval = 1;
+              reviewCount = 0;
+            }
+
+            const now = new Date();
+            const nextReview = new Date();
+            nextReview.setDate(now.getDate() + interval);
+
+            topic.lastReviewed = now.toISOString();
+            topic.nextReview = nextReview.toISOString();
+            topic.interval = interval;
+            topic.easeFactor = easeFactor;
+            topic.reviewCount = reviewCount;
+            
+            // Update mastery based on performance
+            topic.mastery = Math.min(100, Math.max(0, topic.mastery + (q - 3) * 5));
+            
+            subject.topics = [...subject.topics];
+            subject.topics[topicIndex] = topic;
+          }
+        });
+      }
+      
+      // Recalculate subject overall score/mastery based on topics
+      if (subject.topics.length > 0) {
+        const totalMastery = subject.topics.reduce((sum, t) => sum + (t.mastery || 0), 0);
+        subject.score = Math.round(totalMastery / subject.topics.length);
+        
+        // Update weak count
+        subject.weakCount = subject.topics.filter(t => (t.mastery || 0) < 60).length;
+        
+        // Update readiness based on score and weak count
+        subject.readiness = Math.max(0, Math.min(100, subject.score - (subject.weakCount * 5)));
+      }
+
+      newSubjects[subjectIndex] = subject;
+    }
+
+    return { 
+      studyLogs: newLogs,
+      subjects: newSubjects
+    };
+  }),
   exams: [],
   setExams: (exams) => set({ exams }),
   schedule: WEEKLY_BASE_SCHEDULE,
@@ -140,6 +223,25 @@ export const createStudySlice: StateCreator<AppState, [], [], StudySlice> = (set
 
     // If time or duration (implied by start/end) changed, recalculate
     // For simplicity, if any update happens, we can recalculate or just if time changed
+    const updatedActivities = recalculateActivityTimes(newDayActivities);
+
+    return {
+      schedule: {
+        ...state.schedule,
+        [day]: updatedActivities
+      }
+    };
+  }),
+  addActivityToSchedule: (day, activity) => set((state) => {
+    const newDayActivities = [...state.schedule[day], activity];
+    
+    // Sort activities by start time
+    newDayActivities.sort((a, b) => {
+      const startA = parseTimeStr(a.time.split(' – ')[0]);
+      const startB = parseTimeStr(b.time.split(' – ')[0]);
+      return startA - startB;
+    });
+
     const updatedActivities = recalculateActivityTimes(newDayActivities);
 
     return {

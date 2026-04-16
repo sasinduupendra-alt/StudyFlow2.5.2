@@ -20,6 +20,9 @@ import { INITIAL_TASKS } from './constants';
 import { Task } from './types';
 import { auth, onAuthStateChanged } from './firebase';
 
+import { doc, setDoc, writeBatch } from 'firebase/firestore';
+import { db } from './firebase';
+
 export default function App() {
   const { user, isAuthReady, setAuth, schedule, tasks, setTasks, resetToDefault } = useAppStore();
 
@@ -43,8 +46,7 @@ export default function App() {
     };
   }, [setAuth]);
 
-  // Migration: If user is on the old schedule, force reset to the new intensive plan
-  // Also ensure new daily tasks are added
+  // Migration & Daily Reset
   useEffect(() => {
     if (isAuthReady) {
       // Check for old schedule description
@@ -56,16 +58,49 @@ export default function App() {
         resetToDefault();
       }
 
+      const todayStr = new Date().toISOString().split('T')[0];
+      let updatedTasks = [...tasks];
+      let hasUpdates = false;
+      let needsFirestoreUpdate = false;
+
       // Check if new tasks are missing using a stable check
       const existingIds = new Set(tasks.map(t => t.id));
       const missingTasks = (INITIAL_TASKS as Task[]).filter(t => !existingIds.has(t.id));
       
       if (missingTasks.length > 0) {
         console.log('StudyFlow: Missing tasks detected, adding to store...');
-        setTasks([...tasks, ...missingTasks]);
+        updatedTasks = [...updatedTasks, ...missingTasks];
+        hasUpdates = true;
+      }
+
+      // Reset daily tasks if it's a new day
+      updatedTasks = updatedTasks.map(task => {
+        if (task.frequency === 'Daily') {
+          if (!task.dueDate || task.dueDate < todayStr) {
+            hasUpdates = true;
+            needsFirestoreUpdate = true;
+            return { ...task, completed: false, dueDate: todayStr };
+          }
+        }
+        return task;
+      });
+
+      if (hasUpdates) {
+        setTasks(updatedTasks);
+        
+        if (user && needsFirestoreUpdate) {
+          const batch = writeBatch(db);
+          updatedTasks.forEach(task => {
+            if (task.frequency === 'Daily' && task.dueDate === todayStr) {
+              const taskRef = doc(db, 'users', user.uid, 'tasks', task.id);
+              batch.set(taskRef, task, { merge: true });
+            }
+          });
+          batch.commit().catch(err => console.error('Failed to reset daily tasks in cloud:', err));
+        }
       }
     }
-  }, [isAuthReady, schedule.Monday?.[0]?.description, tasks.length, setTasks, resetToDefault]);
+  }, [isAuthReady, schedule.Monday?.[0]?.description, tasks.length, setTasks, resetToDefault, user]);
 
   return (
     <ErrorBoundary>
