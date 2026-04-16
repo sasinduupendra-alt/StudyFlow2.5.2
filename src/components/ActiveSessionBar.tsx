@@ -105,12 +105,25 @@ export default function ActiveSessionBar() {
             <span className="text-xs font-semibold text-[#48484A]">/</span>
             <span className="text-xs font-bold text-white tabular-nums">{formatTime(activeSession.totalSeconds)}</span>
           </div>
-          <button 
-            onClick={() => setIsFocusMode(true)}
-            className="p-2.5 text-[#8E8E93] hover:text-white hover:bg-white/10 rounded-full transition-colors"
-          >
-            <Maximize2 className="w-5 h-5" />
-          </button>
+
+          <div className="flex items-center gap-3">
+            <button 
+              onClick={() => setIsFocusMode(true)}
+              className="p-2.5 text-[#8E8E93] hover:text-white hover:bg-white/10 rounded-full transition-colors"
+              title="Enter Neural Focus"
+            >
+              <Maximize2 className="w-5 h-5" />
+            </button>
+            <button 
+              onClick={() => {
+                setIsPaused(true);
+                setIsFocusMode(false);
+              }}
+              className="px-4 py-2 bg-[#FF453A]/10 text-[#FF453A] border border-[#FF453A]/20 rounded-full text-[10px] font-black uppercase tracking-widest hover:bg-[#FF453A] hover:text-white transition-all"
+            >
+              Terminate Protocol
+            </button>
+          </div>
         </div>
       </div>
     </motion.div>

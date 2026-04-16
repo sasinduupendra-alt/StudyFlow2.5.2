@@ -1,16 +1,18 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Bot, X, Send, Sparkles, User, Loader2, Terminal, Cpu, Activity, Zap } from 'lucide-react';
+import { Bot, X, Send, Sparkles, User, Loader2, Terminal, Cpu, Activity, Zap, Brain, Settings } from 'lucide-react';
 import { useAppStore } from '../store/useAppStore';
-import { getAI } from '../services/gemini';
+import { getAI, MODELS } from '../services/gemini';
 import { cn } from '../lib/utils';
 import Markdown from 'react-markdown';
+import { ThinkingLevel } from '@google/genai';
 
 interface Message {
   id: string;
   role: 'user' | 'model';
   text: string;
   thoughtProcess?: string[];
+  isThinking?: boolean;
 }
 
 export default function AIAssistant() {
@@ -21,6 +23,7 @@ export default function AIAssistant() {
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [thinkingStep, setThinkingStep] = useState<string | null>(null);
+  const [isHighThinking, setIsHighThinking] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const chatRef = useRef<any>(null);
 
@@ -44,8 +47,7 @@ export default function AIAssistant() {
   ];
 
   const initChat = () => {
-    if (chatRef.current) return chatRef.current;
-    
+    // Re-initialize if thinking mode changes
     const ai = getAI();
     
     const systemInstruction = `You are the "StudyFlow Vanguard", a high-performance AI entity integrated into a technical, performance-oriented learning interface.
@@ -70,14 +72,20 @@ Core Directives:
 Format your responses with Markdown. Be the ultimate performance coach for an Advanced Level student.`;
 
     chatRef.current = ai.chats.create({
-      model: "gemini-2.0-flash",
+      model: isHighThinking ? MODELS.COMPLEX : MODELS.GENERAL,
       config: {
         systemInstruction: systemInstruction,
+        ...(isHighThinking ? { thinkingConfig: { thinkingLevel: ThinkingLevel.HIGH } } : {})
       }
     });
     
     return chatRef.current;
   };
+
+  // Reset chat when thinking mode changes
+  useEffect(() => {
+    chatRef.current = null;
+  }, [isHighThinking]);
 
   const handleSendMessage = async (e?: React.FormEvent) => {
     e?.preventDefault();
@@ -100,7 +108,7 @@ Format your responses with Markdown. Be the ultimate performance coach for an Ad
     }, 600);
 
     try {
-      const chat = initChat();
+      const chat = chatRef.current || initChat();
       const response = await chat.sendMessage({ message: userMessage.text });
       
       clearInterval(thinkingInterval);
@@ -109,7 +117,8 @@ Format your responses with Markdown. Be the ultimate performance coach for an Ad
       const modelMessage: Message = { 
         id: (Date.now() + 1).toString(), 
         role: 'model', 
-        text: response.text || "Neural link disrupted. Response integrity compromised." 
+        text: response.text || "Neural link disrupted. Response integrity compromised.",
+        isThinking: isHighThinking
       };
       
       setMessages(prev => [...prev, modelMessage]);
@@ -179,12 +188,27 @@ Format your responses with Markdown. Be the ultimate performance coach for an Ad
                   </div>
                 </div>
               </div>
-              <button 
-                onClick={() => setIsOpen(false)}
-                className="p-2 text-zinc-500 hover:text-white hover:bg-white/5 border border-white/5 transition-all"
-              >
-                <X className="w-4 h-4" />
-              </button>
+              <div className="flex items-center gap-2">
+                <button 
+                  onClick={() => setIsHighThinking(!isHighThinking)}
+                  className={cn(
+                    "p-2 border transition-all flex items-center gap-2",
+                    isHighThinking 
+                      ? "bg-brand/20 border-brand text-brand" 
+                      : "bg-white/5 border-white/5 text-zinc-500 hover:text-white"
+                  )}
+                  title={isHighThinking ? "High Thinking Mode Active" : "Enable High Thinking Mode"}
+                >
+                  <Brain className="w-4 h-4" />
+                  <span className="text-[8px] font-mono font-bold uppercase tracking-widest hidden sm:inline">Thinking</span>
+                </button>
+                <button 
+                  onClick={() => setIsOpen(false)}
+                  className="p-2 text-zinc-500 hover:text-white hover:bg-white/5 border border-white/5 transition-all"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
             </div>
 
             {/* Messages */}

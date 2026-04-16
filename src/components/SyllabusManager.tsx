@@ -107,7 +107,7 @@ function SortableTopicItem({
               </div>
               <div className="space-y-1.5">
                 <label className="text-xs font-medium text-[#8E8E93]">Image URL</label>
-                <input {...editTopicForm.register('image')} placeholder="https://..." className={cn("w-full bg-black border px-4 py-2.5 text-sm font-medium outline-none focus:border-brand transition-colors rounded-[16px]", editTopicForm.formState.errors.image ? "border-[#FF453A]" : "border-white/10")} />
+                <input {...editTopicForm.register('image')} className={cn("w-full bg-black border px-4 py-2.5 text-sm font-medium outline-none focus:border-brand transition-colors rounded-[16px]", editTopicForm.formState.errors.image ? "border-[#FF453A]" : "border-white/10")} />
                 {editTopicForm.formState.errors.image && <p className="text-xs text-[#FF453A] font-medium">{editTopicForm.formState.errors.image.message}</p>}
               </div>
             </div>
@@ -322,7 +322,6 @@ export default function SyllabusManager({
             <label className="text-xs font-semibold text-[#8E8E93] uppercase tracking-wider">Subject Name</label>
             <input 
               {...addSubjectForm.register('name')}
-              placeholder="e.g., Mathematics" 
               className={cn(
                 "w-full bg-black border px-4 py-3 text-sm font-medium outline-none focus:border-brand transition-colors rounded-[20px] text-white shadow-sm",
                 addSubjectForm.formState.errors.name ? "border-[#FF453A]" : "border-white/5"
@@ -334,7 +333,6 @@ export default function SyllabusManager({
             <label className="text-xs font-semibold text-[#8E8E93] uppercase tracking-wider">Image URL</label>
             <input 
               {...addSubjectForm.register('image')}
-              placeholder="https://..." 
               className={cn(
                 "w-full bg-black border px-4 py-3 text-sm font-medium outline-none focus:border-brand transition-colors rounded-[20px] text-white shadow-sm",
                 addSubjectForm.formState.errors.image ? "border-[#FF453A]" : "border-white/5"
@@ -357,7 +355,6 @@ export default function SyllabusManager({
             <label className="text-xs font-semibold text-[#8E8E93] uppercase tracking-wider">Subject Notes</label>
             <textarea 
               {...addSubjectForm.register('notes')}
-              placeholder="Add any additional details..."
               className={cn(
                 "w-full bg-black border px-4 py-3 text-sm font-medium outline-none focus:border-brand transition-colors resize-none h-24 rounded-[20px] text-white shadow-sm",
                 addSubjectForm.formState.errors.notes ? "border-[#FF453A]" : "border-white/5"
@@ -403,7 +400,7 @@ export default function SyllabusManager({
                       </div>
                       <div className="space-y-2">
                         <label className="text-xs font-semibold text-[#8E8E93] uppercase tracking-wider">Image URL</label>
-                        <input {...editSubjectForm.register('image')} placeholder="https://..." className={cn("w-full bg-black border px-4 py-3 text-sm font-medium outline-none focus:border-brand transition-colors rounded-[20px] text-white shadow-sm", editSubjectForm.formState.errors.image ? "border-[#FF453A]" : "border-white/5")} />
+                        <input {...editSubjectForm.register('image')} className={cn("w-full bg-black border px-4 py-3 text-sm font-medium outline-none focus:border-brand transition-colors rounded-[20px] text-white shadow-sm", editSubjectForm.formState.errors.image ? "border-[#FF453A]" : "border-white/5")} />
                         {editSubjectForm.formState.errors.image && <p className="text-xs text-[#FF453A] font-medium">{editSubjectForm.formState.errors.image.message}</p>}
                       </div>
                       <div className="space-y-2 md:col-span-2">
@@ -412,7 +409,7 @@ export default function SyllabusManager({
                       </div>
                       <div className="space-y-2 md:col-span-2">
                         <label className="text-xs font-semibold text-[#8E8E93] uppercase tracking-wider">Subject Notes</label>
-                        <textarea {...editSubjectForm.register('notes')} placeholder="Add notes..." className="w-full bg-black border border-white/5 px-4 py-3 text-sm font-medium outline-none focus:border-brand resize-none h-28 transition-colors rounded-[20px] text-white shadow-sm" />
+                        <textarea {...editSubjectForm.register('notes')} className="w-full bg-black border border-white/5 px-4 py-3 text-sm font-medium outline-none focus:border-brand resize-none h-28 transition-colors rounded-[20px] text-white shadow-sm" />
                       </div>
                     </div>
                   </form>
@@ -517,7 +514,6 @@ function AddTopicForm({ subjectId, onAddTopic, setError }: AddTopicFormProps) {
             <label className="text-xs font-semibold text-[#8E8E93] uppercase tracking-wider">Topic Title</label>
             <input 
               {...register('title')}
-              placeholder="e.g., Algebra Basics" 
               className={cn(
                 "w-full bg-black border px-4 py-3 text-sm font-medium outline-none focus:border-brand transition-colors rounded-[20px] text-white shadow-sm",
                 errors.title ? "border-[#FF453A]" : "border-white/5"
@@ -528,7 +524,6 @@ function AddTopicForm({ subjectId, onAddTopic, setError }: AddTopicFormProps) {
             <label className="text-xs font-semibold text-[#8E8E93] uppercase tracking-wider">Image URL</label>
             <input 
               {...register('image')}
-              placeholder="https://..." 
               className={cn(
                 "w-full bg-black border px-4 py-3 text-sm font-medium outline-none focus:border-brand transition-colors rounded-[20px] text-white shadow-sm",
                 errors.image ? "border-[#FF453A]" : "border-white/5"

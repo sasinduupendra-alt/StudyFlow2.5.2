@@ -217,6 +217,11 @@ export default function Layout() {
 
   return (
     <div className="flex h-[100dvh] bg-black text-zinc-50 overflow-hidden font-sans selection:bg-brand selection:text-white relative">
+      {/* Visual Enhancements */}
+      <div className="atmospheric-bg" />
+      <div className="noise-overlay" />
+      <div className="grid-background fixed inset-0 pointer-events-none opacity-[0.02]" />
+
       {/* Mobile Menu Backdrop */}
       <AnimatePresence>
         {isMobileMenuOpen && (
@@ -231,50 +236,114 @@ export default function Layout() {
       </AnimatePresence>
 
       {/* Sidebar Navigation */}
-      <aside className={cn(
-        "fixed inset-y-0 left-0 z-50 transition-all duration-500 ease-out border-r border-white/5",
-        "bg-[#1C1C1E]/90 backdrop-blur-xl",
-        isSidebarOpen ? "w-72" : "w-24",
-        isMobileMenuOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"
-      )}>
-        <div className="flex flex-col h-full p-6">
-          <div className="flex items-center gap-4 mb-10 px-2">
-            <Logo className="w-10 h-10 text-brand" size={40} />
-            <AnimatePresence mode="wait">
-              {isSidebarOpen && (
-                <motion.div
-                  key="sidebar-logo-text"
-                  initial={{ opacity: 0, x: -10 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: -10 }}
-                  className="overflow-hidden"
-                >
-                  <h1 className="text-xl font-bold tracking-tight leading-none">StudyFlow</h1>
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </div>
-
-          <nav className="flex-1 space-y-1.5 overflow-y-auto scrollbar-hide">
-            {navItems.map((item) => {
-              const isActive = location.pathname === item.path;
-              return (
-                <NavLink
-                  key={item.path}
-                  to={item.path}
-                  end={item.path === '/'}
-                  onClick={() => setIsMobileMenuOpen(false)}
-                  className={({ isActive }) => cn(
-                    "flex items-center gap-4 px-4 py-3 transition-all duration-200 group relative rounded-[14px]",
-                    isActive 
-                      ? "text-white bg-brand shadow-sm" 
-                      : "text-[#8E8E93] hover:text-white hover:bg-white/10"
+      <AnimatePresence>
+        {!isFocusMode && (
+          <motion.aside 
+            initial={{ x: -300 }}
+            animate={{ x: 0 }}
+            exit={{ x: -300 }}
+            className={cn(
+              "fixed inset-y-0 left-0 z-50 transition-all duration-500 ease-out border-r border-white/5",
+              "bg-[#1C1C1E]/90 backdrop-blur-xl",
+              isSidebarOpen ? "w-72" : "w-24",
+              isMobileMenuOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"
+            )}
+          >
+            <div className="flex flex-col h-full p-6">
+              <div className="flex items-center gap-4 mb-10 px-2">
+                <Logo className="w-10 h-10 text-brand" size={40} />
+                <AnimatePresence mode="wait">
+                  {isSidebarOpen && (
+                    <motion.div
+                      key="sidebar-logo-text"
+                      initial={{ opacity: 0, x: -10 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      exit={{ opacity: 0, x: -10 }}
+                      className="overflow-hidden"
+                    >
+                      <h1 className="text-xl font-bold tracking-tight leading-none">StudyFlow</h1>
+                    </motion.div>
                   )}
+                </AnimatePresence>
+              </div>
+
+              <nav className="flex-1 space-y-1.5 overflow-y-auto scrollbar-hide">
+                {navItems.map((item) => {
+                  const isActive = location.pathname === item.path;
+                  return (
+                    <NavLink
+                      key={item.path}
+                      to={item.path}
+                      end={item.path === '/'}
+                      onClick={() => setIsMobileMenuOpen(false)}
+                      className={({ isActive }) => cn(
+                        "flex items-center gap-4 px-4 py-3 transition-all duration-200 group relative rounded-[14px]",
+                        isActive 
+                          ? "text-white bg-brand shadow-sm" 
+                          : "text-[#8E8E93] hover:text-white hover:bg-white/10"
+                      )}
+                    >
+                      <item.icon className={cn(
+                        "w-5 h-5 transition-transform duration-200",
+                        isActive ? "scale-105" : "group-hover:scale-105"
+                      )} />
+                      {isSidebarOpen && (
+                        <motion.span
+                          initial={{ opacity: 0, x: -10 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          exit={{ opacity: 0, x: -10 }}
+                          className="text-[15px] font-medium"
+                        >
+                          {item.label}
+                        </motion.span>
+                      )}
+                    </NavLink>
+                  );
+                })}
+              </nav>
+
+              <div className="pt-6 border-t border-white/5 space-y-2 mt-4">
+                {!user ? (
+                  <button
+                    onClick={handleLogin}
+                    className="w-full flex items-center gap-4 px-4 py-3 text-brand hover:bg-brand/10 rounded-[14px] transition-all duration-200 group"
+                  >
+                    <LogIn className="w-5 h-5 group-hover:scale-110 transition-transform" />
+                    {isSidebarOpen && (
+                      <motion.span
+                        initial={{ opacity: 0, x: -10 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        exit={{ opacity: 0, x: -10 }}
+                        className="text-[15px] font-semibold"
+                      >
+                        Sign In
+                      </motion.span>
+                    )}
+                  </button>
+                ) : (
+                  <button
+                    onClick={handleLogout}
+                    className="w-full flex items-center gap-4 px-4 py-3 text-[#8E8E93] hover:text-[#FF453A] hover:bg-[#FF453A]/10 rounded-[14px] transition-all duration-200 group"
+                  >
+                    <LogOut className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                    {isSidebarOpen && (
+                      <motion.span
+                        initial={{ opacity: 0, x: -10 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        exit={{ opacity: 0, x: -10 }}
+                        className="text-[15px] font-medium"
+                      >
+                        Sign Out
+                      </motion.span>
+                    )}
+                  </button>
+                )}
+                
+                <button
+                  onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+                  className="w-full flex items-center gap-4 px-4 py-3 text-[#8E8E93] hover:text-white hover:bg-white/10 rounded-[14px] transition-all duration-200 group hidden md:flex"
                 >
-                  <item.icon className={cn(
-                    "w-5 h-5 transition-transform duration-200",
-                    isActive ? "scale-105" : "group-hover:scale-105"
-                  )} />
+                  <Menu className="w-5 h-5 group-hover:rotate-180 transition-transform duration-500" />
                   {isSidebarOpen && (
                     <motion.span
                       initial={{ opacity: 0, x: -10 }}
@@ -282,156 +351,110 @@ export default function Layout() {
                       exit={{ opacity: 0, x: -10 }}
                       className="text-[15px] font-medium"
                     >
-                      {item.label}
+                      Collapse
                     </motion.span>
                   )}
-                </NavLink>
-              );
-            })}
-          </nav>
-
-          <div className="pt-6 border-t border-white/5 space-y-2 mt-4">
-            {!user ? (
-              <button
-                onClick={handleLogin}
-                className="w-full flex items-center gap-4 px-4 py-3 text-brand hover:bg-brand/10 rounded-[14px] transition-all duration-200 group"
-              >
-                <LogIn className="w-5 h-5 group-hover:scale-110 transition-transform" />
-                {isSidebarOpen && (
-                  <motion.span
-                    initial={{ opacity: 0, x: -10 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    exit={{ opacity: 0, x: -10 }}
-                    className="text-[15px] font-semibold"
-                  >
-                    Sign In
-                  </motion.span>
-                )}
-              </button>
-            ) : (
-              <button
-                onClick={handleLogout}
-                className="w-full flex items-center gap-4 px-4 py-3 text-[#8E8E93] hover:text-[#FF453A] hover:bg-[#FF453A]/10 rounded-[14px] transition-all duration-200 group"
-              >
-                <LogOut className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-                {isSidebarOpen && (
-                  <motion.span
-                    initial={{ opacity: 0, x: -10 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    exit={{ opacity: 0, x: -10 }}
-                    className="text-[15px] font-medium"
-                  >
-                    Sign Out
-                  </motion.span>
-                )}
-              </button>
-            )}
-            
-            <button
-              onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-              className="w-full flex items-center gap-4 px-4 py-3 text-[#8E8E93] hover:text-white hover:bg-white/10 rounded-[14px] transition-all duration-200 group hidden md:flex"
-            >
-              <Menu className="w-5 h-5 group-hover:rotate-180 transition-transform duration-500" />
-              {isSidebarOpen && (
-                <motion.span
-                  initial={{ opacity: 0, x: -10 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: -10 }}
-                  className="text-[15px] font-medium"
+                </button>
+                <button
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="w-full flex items-center gap-4 px-4 py-3 text-[#8E8E93] hover:text-white hover:bg-white/10 rounded-[14px] transition-all duration-200 group md:hidden"
                 >
-                  Collapse
-                </motion.span>
-              )}
-            </button>
-            <button
-              onClick={() => setIsMobileMenuOpen(false)}
-              className="w-full flex items-center gap-4 px-4 py-3 text-[#8E8E93] hover:text-white hover:bg-white/10 rounded-[14px] transition-all duration-200 group md:hidden"
-            >
-              <X className="w-5 h-5" />
-              <span className="text-[15px] font-medium">Close Menu</span>
-            </button>
-          </div>
-        </div>
-      </aside>
+                  <X className="w-5 h-5" />
+                  <span className="text-[15px] font-medium">Close Menu</span>
+                </button>
+              </div>
+            </div>
+          </motion.aside>
+        )}
+      </AnimatePresence>
 
       {/* Main Content Area */}
       <main className={cn(
         "transition-all duration-500 ease-out h-[100dvh] overflow-y-auto flex-1 flex flex-col relative z-0 bg-black",
-        isSidebarOpen ? "md:pl-72" : "md:pl-24"
+        isFocusMode ? "md:pl-0" : (isSidebarOpen ? "md:pl-72" : "md:pl-24")
       )}>
         {/* Top Navigation Bar */}
-        <header className="h-20 flex items-center justify-between px-6 md:px-10 sticky top-0 z-40 bg-black/80 backdrop-blur-xl border-b border-white/5">
-          <div className="flex items-center gap-4 md:gap-8 flex-1">
-            <button 
-              onClick={() => setIsMobileMenuOpen(true)} 
-              className="p-2 text-[#8E8E93] hover:text-white transition-all hover:bg-white/10 rounded-full md:hidden"
+        <AnimatePresence>
+          {!isFocusMode && (
+            <motion.header 
+              initial={{ y: -100 }}
+              animate={{ y: 0 }}
+              exit={{ y: -100 }}
+              className="h-20 flex items-center justify-between px-6 md:px-10 sticky top-0 z-40 bg-black/80 backdrop-blur-xl border-b border-white/5"
             >
-              <Menu className="w-6 h-6" />
-            </button>
-            <div className="hidden md:flex items-center gap-2">
-              <button onClick={() => navigate(-1)} className="p-2 text-[#8E8E93] hover:text-white transition-all hover:bg-white/10 rounded-full">
-                <ChevronLeft className="w-6 h-6" />
-              </button>
-              <button onClick={() => navigate(1)} className="p-2 text-[#8E8E93] hover:text-white transition-all hover:bg-white/10 rounded-full">
-                <ChevronRight className="w-6 h-6" />
-              </button>
-            </div>
-            
-            <div className="relative hidden lg:block group">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[#8E8E93] group-focus-within:text-white transition-colors" />
-              <input 
-                type="text" 
-                placeholder="Search..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-[400px] bg-[#1C1C1E] border-none py-2.5 pl-11 pr-4 text-[15px] text-white outline-none transition-all focus:bg-[#2C2C2E] placeholder:text-[#8E8E93] rounded-[12px] font-medium"
-              />
-            </div>
-          </div>
-
-          <div className="flex items-center gap-6">
-            {!user ? (
-              <button 
-                onClick={handleLogin}
-                className="flex items-center gap-2 px-5 py-2 bg-brand text-white rounded-full font-semibold text-[15px] hover:opacity-90 transition-all"
-              >
-                <LogIn className="w-4 h-4" />
-                Sign In
-              </button>
-            ) : (
-              <div className="flex items-center gap-2 px-3 py-1.5 bg-[#1C1C1E] rounded-full">
-                <div className="w-2 h-2 bg-brand rounded-full" />
-                <span className="text-[13px] font-medium text-[#8E8E93]">Synced</span>
-              </div>
-            )}
-            
-            {user && (
-              <div className="flex items-center gap-4">
+              <div className="flex items-center gap-4 md:gap-8 flex-1">
                 <button 
-                  onClick={() => setIsNotificationsOpen(true)}
-                  className="relative p-2 text-[#8E8E93] hover:text-white transition-all hover:bg-white/10 rounded-full group"
+                  onClick={() => setIsMobileMenuOpen(true)} 
+                  className="p-2 text-[#8E8E93] hover:text-white transition-all hover:bg-white/10 rounded-full md:hidden"
                 >
-                  <Bell className="w-6 h-6" />
-                  {notifications.some(n => !n.read) && (
-                    <span className="absolute top-2 right-2 w-2.5 h-2.5 bg-[#FF453A] border-2 border-black rounded-full" />
-                  )}
+                  <Menu className="w-6 h-6" />
                 </button>
-
-                <div className="text-right hidden xl:block">
-                  <p className="text-[15px] font-semibold text-white">{user.displayName?.split(' ')[0]}</p>
-                  <p className="text-[13px] text-[#8E8E93] font-medium">Level {userProfile?.level || 1}</p>
+                <div className="hidden md:flex items-center gap-2">
+                  <button onClick={() => navigate(-1)} className="p-2 text-[#8E8E93] hover:text-white transition-all hover:bg-white/10 rounded-full">
+                    <ChevronLeft className="w-6 h-6" />
+                  </button>
+                  <button onClick={() => navigate(1)} className="p-2 text-[#8E8E93] hover:text-white transition-all hover:bg-white/10 rounded-full">
+                    <ChevronRight className="w-6 h-6" />
+                  </button>
                 </div>
-                <div className="w-10 h-10 bg-[#1C1C1E] flex items-center justify-center overflow-hidden rounded-full hover:opacity-80 transition-all duration-200 cursor-pointer shadow-sm" onClick={() => navigate('/settings')}>
-                  {user.photoURL ? (
-                    <img src={user.photoURL} alt="" className="w-full h-full object-cover" referrerPolicy="no-referrer" />
-                  ) : (
-                    <User className="w-5 h-5 text-[#8E8E93]" />
-                  )}
+                
+                <div className="relative hidden lg:block group">
+                  <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[#8E8E93] group-focus-within:text-white transition-colors" />
+                  <input 
+                    type="text" 
+                    placeholder="Search..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="w-[400px] bg-[#1C1C1E] border-none py-2.5 pl-11 pr-4 text-[15px] text-white outline-none transition-all focus:bg-[#2C2C2E] placeholder:text-[#8E8E93] rounded-[12px] font-medium"
+                  />
                 </div>
               </div>
-            )}
-          </div>
-        </header>
+
+              <div className="flex items-center gap-6">
+                {!user ? (
+                  <button 
+                    onClick={handleLogin}
+                    className="flex items-center gap-2 px-5 py-2 bg-brand text-white rounded-full font-semibold text-[15px] hover:opacity-90 transition-all"
+                  >
+                    <LogIn className="w-4 h-4" />
+                    Sign In
+                  </button>
+                ) : (
+                  <div className="flex items-center gap-2 px-3 py-1.5 bg-[#1C1C1E] rounded-full">
+                    <div className="w-2 h-2 bg-brand rounded-full" />
+                    <span className="text-[13px] font-medium text-[#8E8E93]">Synced</span>
+                  </div>
+                )}
+                
+                {user && (
+                  <div className="flex items-center gap-4">
+                    <button 
+                      onClick={() => setIsNotificationsOpen(true)}
+                      className="relative p-2 text-[#8E8E93] hover:text-white transition-all hover:bg-white/10 rounded-full group"
+                    >
+                      <Bell className="w-6 h-6" />
+                      {notifications.some(n => !n.read) && (
+                        <span className="absolute top-2 right-2 w-2.5 h-2.5 bg-[#FF453A] border-2 border-black rounded-full" />
+                      )}
+                    </button>
+
+                    <div className="text-right hidden xl:block">
+                      <p className="text-[15px] font-semibold text-white">{user.displayName?.split(' ')[0]}</p>
+                      <p className="text-[13px] text-[#8E8E93] font-medium">Level {userProfile?.level || 1}</p>
+                    </div>
+                    <div className="w-10 h-10 bg-[#1C1C1E] flex items-center justify-center overflow-hidden rounded-full hover:opacity-80 transition-all duration-200 cursor-pointer shadow-sm" onClick={() => navigate('/settings')}>
+                      {user.photoURL ? (
+                        <img src={user.photoURL} alt="" className="w-full h-full object-cover" referrerPolicy="no-referrer" />
+                      ) : (
+                        <User className="w-5 h-5 text-[#8E8E93]" />
+                      )}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </motion.header>
+          )}
+        </AnimatePresence>
 
         {/* Page Content */}
         <div className="flex-1 relative">

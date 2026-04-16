@@ -7,9 +7,30 @@ export function cn(...inputs: ClassValue[]) {
 }
 
 export function calculateSNR(task: Task, subject?: Subject) {
+  // Automated Categorization Rules
+  const title = task.title.toLowerCase();
+  const desc = (task.description || '').toLowerCase();
+  
+  // High Signal words: "Ultra-Deep Work", "Concept Mastery", "Past Paper Simulation"
+  const isHighSignal = title.includes('ultra-deep work') || 
+                       title.includes('concept mastery') || 
+                       title.includes('past paper simulation') ||
+                       desc.includes('ultra-deep work') || 
+                       desc.includes('concept mastery') || 
+                       desc.includes('past paper simulation');
+
+  // Productive Noise words: "Tuition Prep", "Tuition Conversion"
+  const isProductiveNoise = title.includes('tuition prep') || 
+                            title.includes('tuition conversion') ||
+                            desc.includes('tuition prep') || 
+                            desc.includes('tuition conversion');
+
+  const finalImpact = isHighSignal ? 9.5 : (isProductiveNoise ? 5 : (task.impact || 5));
+  const finalEffort = isHighSignal ? 4 : (isProductiveNoise ? 7 : (task.effort || 5));
+
   // 80/20 ratio: Impact is weighted at 80%, Effort at 20%
-  const signal = (task.impact || 5) * 0.8;
-  const noise = (task.effort || 5) * 0.2;
+  const signal = finalImpact * 0.8;
+  const noise = finalEffort * 0.2;
   const baseSNR = signal / noise;
   
   // Urgency factor (Time decay/pressure)
@@ -60,6 +81,57 @@ export function calculateSNR(task: Task, subject?: Subject) {
   }
 
   return baseSNR * urgencyFactor * subjectFactor * frequencyFactor * recencyFactor * difficultyFactor;
+}
+
+export function calculateUserSNR(tasks: Task[]) {
+  const completedTasks = tasks.filter(t => t.completed);
+  if (completedTasks.length === 0) return { snr: 0, signal: 0, noise: 0, taskCount: 0, taskDetails: [] };
+
+  const processedTasks = completedTasks.map(t => {
+    const title = t.title.toLowerCase();
+    const desc = (t.description || '').toLowerCase();
+    
+    const isHighSignal = title.includes('ultra-deep work') || 
+                         title.includes('concept mastery') || 
+                         title.includes('past paper simulation') ||
+                         desc.includes('ultra-deep work') || 
+                         desc.includes('concept mastery') || 
+                         desc.includes('past paper simulation');
+
+    const isProductiveNoise = title.includes('tuition prep') || 
+                              title.includes('tuition conversion') ||
+                              desc.includes('tuition prep') || 
+                              desc.includes('tuition conversion');
+
+    const finalImpact = isHighSignal ? 9.5 : (isProductiveNoise ? 5 : (t.impact || 5));
+    const finalEffort = isHighSignal ? 4 : (isProductiveNoise ? 7 : (t.effort || 5));
+
+    return {
+      ...t,
+      finalImpact,
+      finalEffort,
+      signal: finalImpact * 0.8,
+      noise: finalEffort * 0.2
+    };
+  });
+
+  const totalSignal = processedTasks.reduce((acc, t) => acc + t.signal, 0);
+  const totalNoise = processedTasks.reduce((acc, t) => acc + t.noise, 0);
+  const snr = totalSignal / (totalNoise || 1);
+
+  return {
+    snr,
+    signal: totalSignal,
+    noise: totalNoise,
+    taskCount: completedTasks.length,
+    taskDetails: processedTasks.map(t => ({
+      id: t.id,
+      title: t.title,
+      signal: t.signal,
+      noise: t.noise,
+      ratio: t.signal / (t.noise || 1)
+    })).sort((a, b) => b.ratio - a.ratio)
+  };
 }
 
 export const classifyEvent = (title: string) => {

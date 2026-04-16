@@ -257,7 +257,7 @@ export default function ScheduleView({ schedule, onManageSchedule }: ScheduleVie
 
     if (user) {
       try {
-        await updateDoc(doc(db, 'users', user.uid, 'tasks', id), { completed: newCompleted });
+        await setDoc(doc(db, 'users', user.uid, 'tasks', id), { completed: newCompleted }, { merge: true });
       } catch (error) {
         handleFirestoreError(error, OperationType.WRITE, `users/${user.uid}/tasks/${id}`);
       }

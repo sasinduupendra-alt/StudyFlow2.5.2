@@ -3,23 +3,34 @@ import {
   LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, 
   RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar, PieChart, Pie, Cell, AreaChart, Area, Legend
 } from 'recharts';
-import { Subject, StudyLog, ExamRecord } from '../types';
-import { TrendingUp, Clock, Star, Target, Zap, CheckCircle2, AlertTriangle, Trophy, BarChart2, Activity } from 'lucide-react';
+import { Subject, StudyLog, ExamRecord, Task } from '../types';
+import { TrendingUp, Clock, Star, Target, Zap, CheckCircle2, AlertTriangle, Trophy, BarChart2, Activity, Radio } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
+import { calculateUserSNR, cn } from '../lib/utils';
+import SNRVisualizer from './SNRVisualizer';
 
 interface AnalyticsProps {
   subjects: Subject[];
   studyLogs: StudyLog[];
   exams: ExamRecord[];
+  tasks: Task[];
 }
 
-export default function Analytics({ subjects, studyLogs, exams }: AnalyticsProps) {
+export default function Analytics({ subjects, studyLogs, exams, tasks }: AnalyticsProps) {
   const [hoveredSubject, setHoveredSubject] = useState<string | null>(null);
 
   const totalStudyTime = studyLogs.reduce((acc, log) => acc + log.duration, 0);
   const avgFocus = studyLogs.length > 0 
     ? (studyLogs.reduce((acc, log) => acc + log.focusLevel, 0) / studyLogs.length).toFixed(1)
     : 0;
+
+  const snrData = calculateUserSNR(tasks);
+  const userSNR = snrData.snr;
+
+  const snrChartData = [
+    { name: 'Signal (Impact)', value: Math.round(snrData.signal), color: '#0A84FF' },
+    { name: 'Noise (Effort)', value: Math.round(snrData.noise), color: '#8E8E93' },
+  ];
 
   const radarData = subjects.map(s => ({
     subject: s.name,
@@ -67,6 +78,25 @@ export default function Analytics({ subjects, studyLogs, exams }: AnalyticsProps
   });
 
   const SUBJECT_COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899'];
+
+  const focusRatioData = React.useMemo(() => {
+    const signalMinutes = studyLogs.filter(l => l.sessionType === 'self-study').reduce((acc, l) => acc + l.duration, 0);
+    const noiseMinutes = studyLogs.filter(l => l.sessionType === 'tuition').reduce((acc, l) => acc + l.duration, 0);
+    const total = signalMinutes + noiseMinutes;
+    if (total === 0) return [
+      { name: 'Signal Hours', value: 1, color: '#0A84FF' },
+      { name: 'Noise Hours', value: 0, color: '#8E8E93' }
+    ];
+    return [
+      { name: 'Signal Hours', value: signalMinutes / 60, color: '#0A84FF' },
+      { name: 'Noise Hours', value: noiseMinutes / 60, color: '#ef4444' }
+    ];
+  }, [studyLogs]);
+
+  const signalRatio = React.useMemo(() => {
+    const total = focusRatioData[0].value + focusRatioData[1].value;
+    return total > 0 ? (focusRatioData[0].value / total) * 100 : 100;
+  }, [focusRatioData]);
 
   // Heatmap Data Preparation
   const heatmapData = subjects.map((subject, index) => {
@@ -147,59 +177,225 @@ export default function Analytics({ subjects, studyLogs, exams }: AnalyticsProps
       variants={containerVariants}
       initial="hidden"
       animate="show"
-      className="space-y-10 p-6 md:p-10 max-w-7xl mx-auto"
+      className="space-y-10 p-6 md:p-10 max-w-7xl mx-auto relative"
     >
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <motion.div variants={itemVariants} whileHover={{ scale: 1.02 }} className="bg-[#1C1C1E] border border-white/5 rounded-[32px] p-8 group transition-all hover:border-brand/30">
-          <div className="flex items-center gap-4 mb-6">
+      <div className="grid-background absolute inset-0 pointer-events-none opacity-[0.03]" />
+
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
+        <motion.div variants={itemVariants} whileHover={{ scale: 1.02 }} className="bg-[#1C1C1E] border border-white/5 rounded-[32px] p-8 group transition-all hover:border-brand/30 relative overflow-hidden">
+          <div className="scan-line opacity-0 group-hover:opacity-100 transition-opacity duration-1000" />
+          <div className="flex items-center gap-4 mb-6 relative z-10">
             <div className="w-10 h-10 bg-white/5 rounded-full flex items-center justify-center text-[#8E8E93] group-hover:text-brand transition-colors">
               <Clock className="w-5 h-5" />
             </div>
             <span className="text-xs font-semibold text-[#8E8E93] uppercase tracking-wider">Total Study Time</span>
           </div>
-          <p className="text-4xl font-bold text-white tracking-tight">{Math.floor(totalStudyTime / 60)}h {totalStudyTime % 60}m</p>
+          <p className="text-4xl font-bold text-white tracking-tight relative z-10">{Math.floor(totalStudyTime / 60)}h {totalStudyTime % 60}m</p>
         </motion.div>
 
-        <motion.div variants={itemVariants} whileHover={{ scale: 1.02 }} className="bg-[#1C1C1E] border border-white/5 rounded-[32px] p-8 group transition-all hover:border-brand/30">
-          <div className="flex items-center gap-4 mb-6">
+        <motion.div variants={itemVariants} whileHover={{ scale: 1.02 }} className="bg-[#1C1C1E] border border-white/5 rounded-[32px] p-8 group transition-all hover:border-brand/30 relative overflow-hidden">
+          <div className="scan-line opacity-0 group-hover:opacity-100 transition-opacity duration-1000" />
+          <div className="flex items-center gap-4 mb-6 relative z-10">
+            <div className="w-10 h-10 bg-white/5 rounded-full flex items-center justify-center text-[#8E8E93] group-hover:text-brand transition-colors">
+              <Activity className="w-5 h-5" />
+            </div>
+            <span className="text-xs font-semibold text-[#8E8E93] uppercase tracking-wider">Focus Ratio</span>
+          </div>
+          <div className="flex items-end gap-3 relative z-10">
+            <p className="text-4xl font-bold text-white tracking-tight">{Math.round(signalRatio)}%</p>
+            <span className={cn(
+              "text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-tighter mb-1",
+              signalRatio >= 80 ? "bg-brand/20 text-brand" : "bg-red-500/20 text-red-500"
+            )}>
+              {signalRatio >= 80 ? "Efficient" : "Noise Heavy"}
+            </span>
+          </div>
+        </motion.div>
+
+        <motion.div variants={itemVariants} whileHover={{ scale: 1.02 }} className="bg-[#1C1C1E] border border-white/5 rounded-[32px] p-8 group transition-all hover:border-brand/30 relative overflow-hidden">
+          <div className="scan-line opacity-0 group-hover:opacity-100 transition-opacity duration-1000" />
+          <div className="flex items-center gap-4 mb-6 relative z-10">
             <div className="w-10 h-10 bg-white/5 rounded-full flex items-center justify-center text-[#8E8E93] group-hover:text-brand transition-colors">
               <Star className="w-5 h-5" />
             </div>
             <span className="text-xs font-semibold text-[#8E8E93] uppercase tracking-wider">Avg Focus Level</span>
           </div>
-          <p className="text-4xl font-bold text-white tracking-tight">{avgFocus}/5.0</p>
+          <p className="text-4xl font-bold text-white tracking-tight relative z-10">{avgFocus}/5.0</p>
         </motion.div>
 
-        <motion.div variants={itemVariants} whileHover={{ scale: 1.02 }} className="bg-[#1C1C1E] border border-white/5 rounded-[32px] p-8 group transition-all hover:border-brand/30">
-          <div className="flex items-center gap-4 mb-6">
+        <motion.div variants={itemVariants} whileHover={{ scale: 1.02 }} className="bg-[#1C1C1E] border border-white/5 rounded-[32px] p-8 group transition-all hover:border-brand/30 relative overflow-hidden">
+          <div className="scan-line opacity-0 group-hover:opacity-100 transition-opacity duration-1000" />
+          <div className="flex items-center gap-4 mb-6 relative z-10">
             <div className="w-10 h-10 bg-white/5 rounded-full flex items-center justify-center text-[#8E8E93] group-hover:text-brand transition-colors">
-              <Target className="w-5 h-5" />
+              <Radio className="w-5 h-5" />
             </div>
-            <span className="text-xs font-semibold text-[#8E8E93] uppercase tracking-wider">Readiness Avg</span>
+            <span className="text-xs font-semibold text-[#8E8E93] uppercase tracking-wider">User SNR Index</span>
           </div>
-          <p className="text-4xl font-bold text-white tracking-tight">
-            {subjects.length > 0 ? Math.round(subjects.reduce((acc, s) => acc + s.readiness, 0) / subjects.length) : 0}%
-          </p>
+          <p className="text-4xl font-bold text-white tracking-tight relative z-10">{userSNR.toFixed(2)}</p>
+          <p className="text-[10px] font-mono text-zinc-500 uppercase tracking-widest mt-2 relative z-10">Signal Efficiency</p>
         </motion.div>
 
-        <motion.div variants={itemVariants} whileHover={{ scale: 1.02 }} className="bg-[#1C1C1E] border border-white/5 rounded-[32px] p-8 group transition-all hover:border-brand/30">
-          <div className="flex items-center gap-4 mb-6">
+        <motion.div variants={itemVariants} whileHover={{ scale: 1.02 }} className="bg-[#1C1C1E] border border-white/5 rounded-[32px] p-8 group transition-all hover:border-brand/30 relative overflow-hidden">
+          <div className="scan-line opacity-0 group-hover:opacity-100 transition-opacity duration-1000" />
+          <div className="flex items-center gap-4 mb-6 relative z-10">
             <div className="w-10 h-10 bg-white/5 rounded-full flex items-center justify-center text-[#8E8E93] group-hover:text-brand transition-colors">
               <Zap className="w-5 h-5" />
             </div>
             <span className="text-xs font-semibold text-[#8E8E93] uppercase tracking-wider">Sessions Logged</span>
           </div>
-          <p className="text-4xl font-bold text-white tracking-tight">{studyLogs.length}</p>
+          <p className="text-4xl font-bold text-white tracking-tight relative z-10">{studyLogs.length}</p>
+        </motion.div>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
+        <motion.div variants={itemVariants} className="lg:col-span-8 bg-[#1C1C1E] border border-white/5 rounded-[32px] p-10 relative overflow-hidden group">
+          <div className="grid-background absolute inset-0 pointer-events-none opacity-[0.02]" />
+          <div className="scan-line opacity-0 group-hover:opacity-100 transition-opacity duration-1000" />
+          
+          <div className="flex flex-col lg:flex-row gap-12 relative z-10">
+            <div className="flex-1">
+              <h3 className="text-lg font-bold text-white tracking-tight mb-8 flex items-center gap-3">
+                <Radio className="w-5 h-5 text-brand" />
+                Signal-to-Noise Ratio Analysis
+              </h3>
+              
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-8 mb-10">
+                <div className="p-6 bg-white/5 rounded-[24px] border border-white/5">
+                  <p className="text-[10px] font-mono text-[#8E8E93] uppercase tracking-[0.2em] mb-2">Total Signal</p>
+                  <p className="text-3xl font-black text-white tracking-tighter">{Math.round(snrData.signal)}</p>
+                  <p className="text-xs text-[#8E8E93] mt-2">Weighted Impact Score</p>
+                </div>
+                <div className="p-6 bg-white/5 rounded-[24px] border border-white/5">
+                  <p className="text-[10px] font-mono text-[#8E8E93] uppercase tracking-[0.2em] mb-2">Total Noise</p>
+                  <p className="text-3xl font-black text-white tracking-tighter">{Math.round(snrData.noise)}</p>
+                  <p className="text-xs text-[#8E8E93] mt-2">Weighted Effort Score</p>
+                </div>
+              </div>
+
+              <div className="h-[200px] mb-8">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={snrChartData} layout="vertical" margin={{ left: 40, right: 40 }}>
+                    <XAxis type="number" hide />
+                    <YAxis dataKey="name" type="category" stroke="#8E8E93" fontSize={12} axisLine={false} tickLine={false} width={100} />
+                    <Tooltip 
+                      cursor={{ fill: 'transparent' }}
+                      content={({ active, payload }) => {
+                        if (active && payload && payload.length) {
+                          return (
+                            <div className="bg-[#1C1C1E] border border-white/10 p-3 rounded-xl shadow-xl">
+                              <p className="text-white font-bold">{payload[0].value} Units</p>
+                            </div>
+                          );
+                        }
+                        return null;
+                      }}
+                    />
+                    <Bar dataKey="value" radius={[0, 10, 10, 0]} barSize={40}>
+                      {snrChartData.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={entry.color} />
+                      ))}
+                    </Bar>
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+              
+              <div className="mt-8">
+                <SNRVisualizer 
+                  signal={snrData.signal} 
+                  noise={snrData.noise} 
+                  className="h-40 shadow-2xl neural-glow"
+                />
+              </div>
+            </div>
+
+            <div className="w-full lg:w-[300px] space-y-6">
+              <h4 className="text-sm font-bold text-white uppercase tracking-wider mb-4">High Signal Objectives</h4>
+              <div className="space-y-3">
+                {snrData.taskDetails.slice(0, 5).map((task, i) => (
+                  <div key={task.id} className="p-4 bg-white/5 rounded-[20px] border border-white/5 flex items-center justify-between group/task hover:bg-white/10 transition-all">
+                    <div className="flex-1 min-w-0 pr-4">
+                      <p className="text-sm font-semibold text-white truncate">{task.title}</p>
+                      <div className="flex items-center gap-3 mt-1">
+                        <span className="text-[10px] font-mono text-[#8E8E93]">Ratio: {task.ratio.toFixed(1)}x</span>
+                        <div className="h-1 w-12 bg-white/10 rounded-full overflow-hidden">
+                          <div 
+                            className="h-full bg-brand" 
+                            style={{ width: `${Math.min(100, task.ratio * 20)}%` }}
+                          />
+                        </div>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-xs font-bold text-brand">+{Math.round(task.signal)}</p>
+                      <p className="text-[10px] text-[#8E8E93]">Signal</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </motion.div>
+
+        <motion.div variants={itemVariants} className="lg:col-span-4 bg-[#1C1C1E] border border-white/5 rounded-[32px] p-10 relative overflow-hidden group flex flex-col">
+          <div className="grid-background absolute inset-0 pointer-events-none opacity-[0.02]" />
+          <h3 className="text-lg font-bold text-white tracking-tight mb-8 flex items-center gap-3 relative z-10">
+            <Zap className="w-5 h-5 text-brand" />
+            Focus Ratio Matrix
+          </h3>
+
+          <div className="flex-1 flex flex-col justify-center items-center relative z-10">
+            <div className="h-[250px] w-full">
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie
+                    data={focusRatioData}
+                    cx="50%"
+                    cy="50%"
+                    innerRadius={60}
+                    outerRadius={90}
+                    paddingAngle={5}
+                    dataKey="value"
+                    stroke="none"
+                    cornerRadius={6}
+                    isAnimationActive={true}
+                  >
+                    {focusRatioData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={entry.color} />
+                    ))}
+                  </Pie>
+                  <Tooltip content={<CustomTooltip />} />
+                </PieChart>
+              </ResponsiveContainer>
+            </div>
+
+            <div className="text-center mt-6">
+              <p className="text-4xl font-black text-white tracking-tighter mb-2">{Math.round(signalRatio)}% Signal</p>
+              <p className={cn(
+                "text-xs font-mono uppercase tracking-[0.2em]",
+                signalRatio < 80 ? "text-red-500 animate-pulse" : "text-brand"
+              )}>
+                {signalRatio < 80 ? "CRITICAL: REDUCE NOISE" : "NESTED STABILITY"}
+              </p>
+              {signalRatio < 80 && (
+                <div className="mt-6 p-4 bg-red-500/10 border border-red-500/20 rounded-2xl flex items-center gap-3 text-red-500 text-[10px] text-left">
+                  <AlertTriangle className="w-5 h-5 shrink-0" />
+                  <p className="leading-relaxed">System Warning: Tuition/Noise levels exceeding capacity. Recalibrate Deep Work blocks to restore flow.</p>
+                </div>
+              )}
+            </div>
+          </div>
         </motion.div>
       </div>
 
       {/* Heatmap Section */}
-      <motion.div variants={itemVariants} className="bg-[#1C1C1E] border border-white/5 rounded-[32px] p-10">
-        <h3 className="text-lg font-bold text-white tracking-tight mb-8 flex items-center gap-3">
+      <motion.div variants={itemVariants} className="bg-[#1C1C1E] border border-white/5 rounded-[32px] p-10 relative overflow-hidden group">
+        <div className="grid-background absolute inset-0 pointer-events-none opacity-[0.02]" />
+        <div className="scan-line opacity-0 group-hover:opacity-100 transition-opacity duration-1000" />
+        <h3 className="text-lg font-bold text-white tracking-tight mb-8 flex items-center gap-3 relative z-10">
           <Activity className="w-5 h-5 text-brand" />
           Study Intensity Heatmap (Last 14 Days)
         </h3>
-        <div className="overflow-x-auto pb-4">
+        <div className="overflow-x-auto pb-4 relative z-10">
           <div className="min-w-[600px]">
             <div className="flex mb-2">
               <div className="w-32 shrink-0"></div>
@@ -246,13 +442,15 @@ export default function Analytics({ subjects, studyLogs, exams }: AnalyticsProps
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
         <motion.div 
           variants={itemVariants}
-          className="bg-[#1C1C1E] border border-white/5 rounded-[32px] p-10"
+          className="bg-[#1C1C1E] border border-white/5 rounded-[32px] p-10 relative overflow-hidden group"
         >
-          <h3 className="text-lg font-bold text-white tracking-tight mb-12 flex items-center gap-3">
+          <div className="grid-background absolute inset-0 pointer-events-none opacity-[0.02]" />
+          <div className="scan-line opacity-0 group-hover:opacity-100 transition-opacity duration-1000" />
+          <h3 className="text-lg font-bold text-white tracking-tight mb-12 flex items-center gap-3 relative z-10">
             <TrendingUp className="w-5 h-5 text-brand" />
             Subject Balance Matrix
           </h3>
-          <div className="h-[450px]">
+          <div className="h-[450px] relative z-10">
             <ResponsiveContainer width="100%" height="100%">
               <RadarChart data={radarData}>
                 <PolarGrid stroke="#2C2C2E" strokeWidth={1} />
@@ -268,13 +466,15 @@ export default function Analytics({ subjects, studyLogs, exams }: AnalyticsProps
 
         <motion.div 
           variants={itemVariants}
-          className="bg-[#1C1C1E] border border-white/5 rounded-[32px] p-10"
+          className="bg-[#1C1C1E] border border-white/5 rounded-[32px] p-10 relative overflow-hidden group"
         >
-          <h3 className="text-lg font-bold text-white tracking-tight mb-12 flex items-center gap-3">
+          <div className="grid-background absolute inset-0 pointer-events-none opacity-[0.02]" />
+          <div className="scan-line opacity-0 group-hover:opacity-100 transition-opacity duration-1000" />
+          <h3 className="text-lg font-bold text-white tracking-tight mb-12 flex items-center gap-3 relative z-10">
             <CheckCircle2 className="w-5 h-5 text-brand" />
             Topic Mastery Distribution
           </h3>
-          <div className="h-[450px] flex flex-col sm:flex-row items-center gap-12">
+          <div className="h-[450px] flex flex-col sm:flex-row items-center gap-12 relative z-10">
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
                 <Pie

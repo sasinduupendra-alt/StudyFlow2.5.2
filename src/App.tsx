@@ -26,7 +26,7 @@ import { db } from './firebase';
 import LandingPage from './pages/LandingPage';
 
 export default function App() {
-  const { user, isAuthReady, setAuth, schedule, tasks, setTasks, resetToDefault } = useAppStore();
+  const { user, isAuthReady, setAuth, schedule, tasks, setTasks, resetToDefault, resetDailyTasks } = useAppStore();
 
   // Auth Listener
   useEffect(() => {
@@ -50,7 +50,7 @@ export default function App() {
 
   // Migration & Daily Reset
   useEffect(() => {
-    if (isAuthReady && user) {
+    if (isAuthReady) {
       // Check for old schedule description
       const firstMondayActivity = schedule.Monday?.[0]?.description;
       const isOldSchedule = firstMondayActivity === 'Deep Work: Pure Maths (core practice)';
@@ -61,48 +61,34 @@ export default function App() {
       }
 
       const todayStr = new Date().toISOString().split('T')[0];
-      let updatedTasks = [...tasks];
-      let hasUpdates = false;
-      let needsFirestoreUpdate = false;
-
-      // Check if new tasks are missing using a stable check
+      
+      // 1. Check for missing tasks
       const existingIds = new Set(tasks.map(t => t.id));
       const missingTasks = (INITIAL_TASKS as Task[]).filter(t => !existingIds.has(t.id));
       
       if (missingTasks.length > 0) {
         console.log('StudyFlow: Missing tasks detected, adding to store...');
-        updatedTasks = [...updatedTasks, ...missingTasks];
-        hasUpdates = true;
+        setTasks([...tasks, ...missingTasks]);
       }
 
-      // Reset daily tasks if it's a new day
-      updatedTasks = updatedTasks.map(task => {
-        if (task.frequency === 'Daily') {
-          if (!task.dueDate || task.dueDate < todayStr) {
-            hasUpdates = true;
-            needsFirestoreUpdate = true;
-            return { ...task, completed: false, dueDate: todayStr };
-          }
-        }
-        return task;
-      });
-
-      if (hasUpdates) {
-        setTasks(updatedTasks);
+      // 2. Reset daily tasks if it's a new day
+      const dailyTasksToReset = tasks.filter(t => t.frequency === 'Daily' && (!t.dueDate || t.dueDate < todayStr));
+      
+      if (dailyTasksToReset.length > 0) {
+        console.log('StudyFlow: New day detected, resetting daily tasks...');
+        resetDailyTasks(todayStr);
         
-        if (user && needsFirestoreUpdate) {
+        if (user) {
           const batch = writeBatch(db);
-          updatedTasks.forEach(task => {
-            if (task.frequency === 'Daily' && task.dueDate === todayStr) {
-              const taskRef = doc(db, 'users', user.uid, 'tasks', task.id);
-              batch.set(taskRef, task, { merge: true });
-            }
+          dailyTasksToReset.forEach(task => {
+            const taskRef = doc(db, 'users', user.uid, 'tasks', task.id);
+            batch.set(taskRef, { completed: false, dueDate: todayStr }, { merge: true });
           });
           batch.commit().catch(err => console.error('Failed to reset daily tasks in cloud:', err));
         }
       }
     }
-  }, [isAuthReady, schedule.Monday?.[0]?.description, tasks.length, setTasks, resetToDefault, user]);
+  }, [isAuthReady, schedule.Monday?.[0]?.description, tasks.length, setTasks, resetToDefault, resetDailyTasks, user]);
 
   if (!isAuthReady) {
     return (

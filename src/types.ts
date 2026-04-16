@@ -29,6 +29,12 @@ export interface WeeklyTask {
 
 export type TaskFrequency = 'Daily' | 'Weekly' | 'Monthly';
 
+export interface NoiseLog {
+  id: string;
+  timestamp: string;
+  source: string;
+}
+
 export interface Task {
   id: string;
   title: string;

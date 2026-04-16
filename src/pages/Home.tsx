@@ -1,8 +1,8 @@
 import React, { useMemo, useCallback } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Zap, Clock, Target, Flame, Coffee, Play, Sparkles, TrendingUp, BookOpen, Brain, ChevronRight, Trophy, LogIn, List, CheckCircle2 } from 'lucide-react';
+import { Zap, Clock, Target, Flame, Coffee, Play, Sparkles, TrendingUp, BookOpen, Brain, ChevronRight, Trophy, LogIn, List, CheckCircle2, Layers, Radio } from 'lucide-react';
 import { useAppStore } from '../store/useAppStore';
-import { cn } from '../lib/utils';
+import { cn, calculateUserSNR } from '../lib/utils';
 import { useNavigate } from 'react-router-dom';
 import { auth, googleProvider, signInWithPopup } from '../firebase';
 import CurrentScheduleBlock from '../components/CurrentScheduleBlock';
@@ -10,6 +10,11 @@ import Planner from '../components/Planner';
 import AIStudyPlanner from '../components/AIStudyPlanner';
 import TopicCard from '../components/TopicCard';
 import SubjectCard from '../components/SubjectCard';
+import VisualStudyAid from '../components/VisualStudyAid';
+import SNRVisualizer from '../components/SNRVisualizer';
+import DailyCommitPrompt from '../components/DailyCommitPrompt';
+import NoiseCaptureButton from '../components/NoiseCaptureButton';
+import NeuralSoundscape from '../components/NeuralSoundscape';
 import { CardSkeleton } from '../components/ui/Skeleton';
 
 export default function Home() {
@@ -29,6 +34,13 @@ export default function Home() {
   const startFocusSession = useAppStore(state => state.startFocusSession);
   const tasks = useAppStore(state => state.tasks);
   const toggleTask = useAppStore(state => state.toggleTask);
+  const dailyCommits = useAppStore(state => state.dailyCommits);
+  const isDailyCommitDone = useAppStore(state => state.isDailyCommitDone);
+  const setDailyCommits = useAppStore(state => state.setDailyCommits);
+  const setDailyCommitDone = useAppStore(state => state.setDailyCommitDone);
+  const addNoiseLog = useAppStore(state => state.addNoiseLog);
+
+  const snrData = useMemo(() => calculateUserSNR(tasks), [tasks]);
 
   const handleToggleTask = async (id: string) => {
     const task = tasks.find(t => t.id === id);
@@ -39,9 +51,9 @@ export default function Home() {
 
     if (user) {
       try {
-        const { doc, updateDoc } = await import('firebase/firestore');
-        const { db, handleFirestoreError, OperationType } = await import('../firebase');
-        await updateDoc(doc(db, 'users', user.uid, 'tasks', id), { completed: newCompleted });
+        const { doc, setDoc } = await import('firebase/firestore');
+        const { db } = await import('../firebase');
+        await setDoc(doc(db, 'users', user.uid, 'tasks', id), { completed: newCompleted }, { merge: true });
       } catch (error) {
         const { handleFirestoreError, OperationType } = await import('../firebase');
         handleFirestoreError(error, OperationType.WRITE, `users/${user.uid}/tasks/${id}`);
@@ -59,7 +71,33 @@ export default function Home() {
     );
   }, [tasks, todayStr]);
 
-  const signalTasks = useMemo(() => executionTasks.filter(t => t.impact >= 7), [executionTasks]);
+  const signalTasks = useMemo(() => tasks.filter(t => t.impact >= 7), [tasks]);
+  
+  const dailyCommitTasks = useMemo(() => {
+    return tasks.filter(t => dailyCommits.includes(t.id));
+  }, [tasks, dailyCommits]);
+
+  const signalCompletionRate = useMemo(() => {
+    if (dailyCommitTasks.length === 0) return 0;
+    const completedCount = dailyCommitTasks.filter(t => t.completed).length;
+    return (completedCount / dailyCommitTasks.length) * 100;
+  }, [dailyCommitTasks]);
+
+  const morningTaskCount = dailyCommitTasks.length;
+  const morningCompletedCount = dailyCommitTasks.filter(t => t.completed).length;
+
+  const handleCommit = (selectedIds: string[]) => {
+    setDailyCommits(selectedIds);
+    setDailyCommitDone(true, todayStr);
+    addToast('Strategic Signals committed for today!', 'success');
+  };
+
+  const handleLogNoise = (source: string) => {
+    addNoiseLog(source);
+    addToast(`Noise logged: ${source}. Focus resumed.`, 'info');
+  };
+
+  const signalFilteredTasks = useMemo(() => executionTasks.filter(t => t.impact >= 7 && !dailyCommits.includes(t.id)), [executionTasks, dailyCommits]);
   const noiseTasks = useMemo(() => executionTasks.filter(t => t.impact < 7), [executionTasks]);
 
   const processedSubjects = useMemo(() => {
@@ -68,10 +106,16 @@ export default function Home() {
       const avgMastery = topics.length > 0 
         ? topics.reduce((acc, t) => acc + t.mastery, 0) / topics.length
         : 0;
-      const readiness = (s.score * 0.4) + (avgMastery * 0.6);
-      const priorityScore = (100 - readiness) * (s.focus / 5) * (s.weakCount + 1);
       
-      return { ...s, readiness, priorityScore };
+      // Advanced Logic: "Imminent Use" & Predictive Performance
+      // If score is < 50, it becomes a Priority Signal automatically
+      const isWeakSubject = s.score < 50;
+      const readiness = (s.score * 0.4) + (avgMastery * 0.6);
+      
+      // Calculate Priority Score: Weak subjects get a massive boost to become "Strategic Signals"
+      const priorityScore = (100 - readiness) * (s.focus / 5) * (s.weakCount + 1) * (isWeakSubject ? 2 : 1);
+      
+      return { ...s, readiness, priorityScore, isWeakSubject };
     }).sort((a, b) => b.priorityScore - a.priorityScore);
   }, [subjects]);
 
@@ -153,25 +197,43 @@ export default function Home() {
       variants={containerVariants}
       initial="hidden"
       animate="show"
-      className="p-6 md:p-10 space-y-10 max-w-7xl mx-auto"
+      className="p-6 md:p-10 space-y-10 max-w-7xl mx-auto relative min-h-screen"
     >
+      <div className="grid-background absolute inset-0 pointer-events-none opacity-[0.03]" />
+
+      <DailyCommitPrompt 
+        tasks={tasks} 
+        isOpen={!isDailyCommitDone && tasks.filter(t => t.impact >= 7).length >= 3} 
+        onCommit={handleCommit} 
+      />
+
+      <NoiseCaptureButton onLogNoise={handleLogNoise} />
+
       {/* Welcome Header */}
-      <motion.header variants={itemVariants} className="flex flex-col md:flex-row md:items-end justify-between gap-8 pb-8 border-b border-white/10 relative overflow-hidden">
-        <div className="absolute inset-0 pointer-events-none opacity-5">
+      <motion.header variants={itemVariants} className="flex flex-col md:flex-row md:items-end justify-between gap-8 pb-12 border-b border-white/10 relative overflow-hidden group">
+        <div className="absolute inset-0 pointer-events-none opacity-10 group-hover:opacity-20 transition-opacity duration-1000">
           <img 
-            src="https://picsum.photos/seed/neural-welcome/1200/400?grayscale&blur=5" 
+            src="https://picsum.photos/seed/neural-welcome/1200/400?grayscale&blur=10" 
             className="w-full h-full object-cover"
             alt=""
             referrerPolicy="no-referrer"
           />
+          <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent" />
         </div>
+        
         <div className="flex-1 relative z-10">
-          <h1 className="text-4xl md:text-5xl font-bold text-white tracking-tight leading-tight">
-            Welcome back, <br className="md:hidden" /><span className="text-brand">{user?.displayName?.split(' ')[0] || 'Scholar'}</span>
+          <div className="flex items-center gap-3 mb-4">
+            <div className="w-8 h-8 bg-brand/10 border border-brand/30 flex items-center justify-center text-brand rounded-lg shadow-[0_0_15px_var(--color-brand-glow)]">
+              <Zap className="w-4 h-4" />
+            </div>
+            <span className="text-[10px] font-mono text-brand uppercase tracking-[0.4em]">System Active</span>
+          </div>
+          <h1 className="text-5xl md:text-7xl font-black text-white tracking-tighter leading-none uppercase">
+            Vector <span className="text-brand glow-text">Flow</span>
           </h1>
-          <p className="text-[#8E8E93] text-sm font-medium mt-3 flex items-center gap-2">
-            <span className="w-2 h-2 bg-brand rounded-full shadow-[0_0_8px_var(--color-brand-glow)]" />
-            {user ? 'Ready to study' : 'Sign in to sync your progress'}
+          <p className="text-[#8E8E93] text-[11px] font-mono uppercase tracking-[0.3em] mt-6 flex items-center gap-3">
+            <span className="w-2 h-2 bg-brand rounded-full animate-pulse shadow-[0_0_8px_var(--color-brand-glow)]" />
+            {user ? `Authenticated: ${user.displayName?.split(' ')[0]}` : 'Awaiting Authentication'}
           </p>
         </div>
 
@@ -180,24 +242,24 @@ export default function Home() {
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
             onClick={handleLogin}
-            className="enterprise-button px-8 py-4 flex items-center gap-3 relative z-10"
+            className="enterprise-button px-12 py-5 flex items-center gap-3 relative z-10 shadow-[0_0_30px_var(--color-brand-glow)]"
           >
             <LogIn className="w-5 h-5" />
-            Sign In
+            Initialize Session
           </motion.button>
         ) : (
-          <div className="flex items-center gap-8 bg-[#1C1C1E] px-6 py-4 rounded-[20px] border border-white/5 relative z-10">
+          <div className="flex items-center gap-8 bg-white/5 backdrop-blur-md px-8 py-6 rounded-[24px] border border-white/10 relative z-10 vector-border">
             <div className="text-center">
-              <p className="text-xs font-semibold text-[#8E8E93] uppercase tracking-wider mb-1">Streak</p>
-              <p className="text-2xl font-bold text-white flex items-center justify-center gap-1.5">
-                {userProfile?.streak || 0} <Flame className="w-5 h-5 text-[#FF9F0A]" />
+              <p className="text-[9px] font-mono text-[#8E8E93] uppercase tracking-[0.2em] mb-2">SNR INDEX</p>
+              <p className="text-3xl font-black text-white flex items-center justify-center gap-2 tracking-tighter">
+                {snrData.snr.toFixed(2)} <TrendingUp className="w-6 h-6 text-brand" />
               </p>
             </div>
-            <div className="w-[1px] h-10 bg-white/10" />
+            <div className="w-[1px] h-12 bg-white/10" />
             <div className="text-center">
-              <p className="text-xs font-semibold text-[#8E8E93] uppercase tracking-wider mb-1">Level</p>
-              <p className="text-2xl font-bold text-white flex items-center justify-center gap-1.5">
-                {userProfile?.level || 1} <Trophy className="w-5 h-5 text-[#FFD60A]" />
+              <p className="text-[9px] font-mono text-[#8E8E93] uppercase tracking-[0.2em] mb-2">SIGNAL RATE</p>
+              <p className="text-3xl font-black text-brand flex items-center justify-center gap-2 tracking-tighter">
+                {Math.round(signalCompletionRate)}% <Sparkles className="w-6 h-6" />
               </p>
             </div>
           </div>
@@ -264,6 +326,38 @@ export default function Home() {
                 <button onClick={() => navigate('/tasks')} className="text-sm font-semibold text-brand hover:opacity-80 transition-opacity">View All</button>
               </div>
               <div className="space-y-4">
+                {/* SNR Index Card */}
+                <div className="bg-brand/5 border border-brand/20 rounded-[20px] p-5 relative overflow-hidden group">
+                  <div className="scan-line opacity-20" />
+                  <div className="flex items-center justify-between mb-3 relative z-10">
+                    <div className="flex items-center gap-2">
+                      <Radio className="w-4 h-4 text-brand" />
+                      <h3 className="text-[10px] font-mono text-brand uppercase tracking-[0.2em]">SNR Index</h3>
+                    </div>
+                    <span className="text-xl font-black text-white tracking-tighter">{snrData.snr.toFixed(2)}</span>
+                  </div>
+                  
+                  {/* Visual Waveform */}
+                  <div className="mb-4 relative z-10">
+                    <SNRVisualizer 
+                      signal={snrData.signal} 
+                      noise={snrData.noise} 
+                      className="h-24 border-none bg-transparent"
+                    />
+                  </div>
+
+                  <div className="h-1.5 w-full bg-white/5 rounded-full overflow-hidden relative z-10">
+                    <motion.div 
+                      initial={{ width: 0 }}
+                      animate={{ width: `${Math.min(100, snrData.snr * 20)}%` }}
+                      className="h-full bg-brand shadow-[0_0_10px_var(--color-brand-glow)]"
+                    />
+                  </div>
+                  <p className="text-[9px] font-mono text-[#8E8E93] uppercase tracking-[0.1em] mt-2 relative z-10">
+                    Efficiency: {snrData.snr > 2 ? 'High Signal' : 'Low Signal'}
+                  </p>
+                </div>
+
                 {/* Signal */}
                 <div className="bg-[#1C1C1E] rounded-[20px] p-5 border border-brand/30 hover:border-brand/50 transition-colors">
                   <div className="flex items-center justify-between mb-4">
@@ -311,6 +405,8 @@ export default function Home() {
                     )}
                   </div>
                 </div>
+
+                <NeuralSoundscape />
               </div>
             </motion.section>
           )}
@@ -329,6 +425,16 @@ export default function Home() {
                     description: `Master ${processedSubjects[0]?.name || 'weak areas'}`,
                     icon: Zap,
                     action: () => startFocusSession(processedSubjects[0]?.id || '', processedSubjects[0]?.topics[0]?.id || ''),
+                  },
+                  {
+                    id: 'mix-5',
+                    title: 'Neural Vision',
+                    description: 'Synthesize study diagrams',
+                    icon: Layers,
+                    action: () => {
+                      const el = document.getElementById('visual-aid');
+                      el?.scrollIntoView({ behavior: 'smooth' });
+                    },
                   },
                   {
                     id: 'mix-2',
@@ -421,6 +527,58 @@ export default function Home() {
               <SubjectCard subject={subject} onStartFocus={(subId) => startFocusSession(subId, subjects.find(s => s.id === subId)?.topics[0]?.id || '')} />
             </motion.div>
           ))}
+        </div>
+      </motion.section>
+
+      {/* Visual Study Aid Section */}
+      <motion.section id="visual-aid" variants={itemVariants}>
+        <VisualStudyAid />
+      </motion.section>
+
+      {/* SNR Neural Spectrum Analysis */}
+      <motion.section variants={itemVariants} className="bg-[#1C1C1E] border border-white/5 rounded-[32px] p-10 relative overflow-hidden group">
+        <div className="grid-background absolute inset-0 pointer-events-none opacity-[0.02]" />
+        <div className="scan-line opacity-0 group-hover:opacity-100 transition-opacity duration-1000" />
+        
+        <div className="flex flex-col lg:flex-row gap-12 relative z-10">
+          <div className="flex-1">
+            <div className="flex items-center gap-3 mb-6">
+              <div className="w-10 h-10 bg-brand/10 rounded-full flex items-center justify-center text-brand">
+                <Radio className="w-5 h-5" />
+              </div>
+              <div>
+                <h2 className="text-2xl font-bold text-white tracking-tight">Neural Spectrum Analysis</h2>
+                <p className="text-xs font-mono text-[#8E8E93] uppercase tracking-widest">Signal-to-Noise Ratio (SNR) Monitoring</p>
+              </div>
+            </div>
+            
+            <p className="text-[#8E8E93] text-sm leading-relaxed mb-8 max-w-2xl">
+              In the Vector Flow system, <span className="text-brand font-bold">Signal</span> represents high-impact study tasks that directly contribute to your mastery. <span className="text-[#8E8E93] font-bold">Noise</span> represents the background effort and low-impact tasks that consume cognitive energy without significant gains. A high SNR indicates peak efficiency.
+            </p>
+
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-8">
+              <div className="p-5 bg-white/5 rounded-2xl border border-white/5">
+                <p className="text-[10px] font-mono text-[#8E8E93] uppercase tracking-wider mb-1">Current SNR</p>
+                <p className="text-2xl font-black text-white">{snrData.snr.toFixed(2)}</p>
+              </div>
+              <div className="p-5 bg-white/5 rounded-2xl border border-white/5">
+                <p className="text-[10px] font-mono text-[#8E8E93] uppercase tracking-wider mb-1">Signal Strength</p>
+                <p className="text-2xl font-black text-brand">{Math.round(snrData.signal)}</p>
+              </div>
+              <div className="p-5 bg-white/5 rounded-2xl border border-white/5">
+                <p className="text-[10px] font-mono text-[#8E8E93] uppercase tracking-wider mb-1">Noise Floor</p>
+                <p className="text-2xl font-black text-[#8E8E93]">{Math.round(snrData.noise)}</p>
+              </div>
+            </div>
+          </div>
+
+          <div className="w-full lg:w-[450px]">
+            <SNRVisualizer 
+              signal={snrData.signal} 
+              noise={snrData.noise} 
+              className="h-[250px] shadow-2xl neural-glow"
+            />
+          </div>
         </div>
       </motion.section>
 

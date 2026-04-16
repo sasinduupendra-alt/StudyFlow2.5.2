@@ -4,7 +4,7 @@ import { useAppStore } from '../store/useAppStore';
 import AnalyticsDashboard from '../components/Analytics';
 
 export default function AnalyticsPage() {
-  const { subjects, studyLogs, exams } = useAppStore();
+  const { subjects, studyLogs, exams, tasks } = useAppStore();
 
   const processedSubjects = useMemo(() => {
     return subjects.map(s => {
@@ -22,7 +22,7 @@ export default function AnalyticsPage() {
       animate={{ opacity: 1, x: 0 }}
       exit={{ opacity: 0, x: -20 }}
     >
-      <AnalyticsDashboard subjects={processedSubjects} studyLogs={studyLogs} exams={exams} />
+      <AnalyticsDashboard subjects={processedSubjects} studyLogs={studyLogs} exams={exams} tasks={tasks} />
     </motion.div>
   );
 }

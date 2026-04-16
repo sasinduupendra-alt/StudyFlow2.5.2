@@ -76,7 +76,7 @@ export default function Tasks() {
 
       if (user) {
         try {
-          await updateDoc(doc(db, 'users', user.uid, 'tasks', editingTask.id), updatedTask);
+          await setDoc(doc(db, 'users', user.uid, 'tasks', editingTask.id), updatedTask, { merge: true });
         } catch (error) {
           handleFirestoreError(error, OperationType.WRITE, `users/${user.uid}/tasks/${editingTask.id}`);
         }
@@ -151,7 +151,7 @@ export default function Tasks() {
 
     if (user) {
       try {
-        await updateDoc(doc(db, 'users', user.uid, 'tasks', id), { completed: newCompleted });
+        await setDoc(doc(db, 'users', user.uid, 'tasks', id), { completed: newCompleted }, { merge: true });
       } catch (error) {
         handleFirestoreError(error, OperationType.WRITE, `users/${user.uid}/tasks/${id}`);
       }
@@ -209,7 +209,7 @@ export default function Tasks() {
       for (const update of result) {
         updateTask(update.id, { impact: update.impact });
         if (user) {
-          updateDoc(doc(db, 'users', user.uid, 'tasks', update.id), { impact: update.impact }).catch(err => console.error(err));
+          setDoc(doc(db, 'users', user.uid, 'tasks', update.id), { impact: update.impact }, { merge: true }).catch(err => console.error(err));
         }
       }
 
@@ -252,28 +252,40 @@ export default function Tasks() {
   };
 
   return (
-    <div className="p-4 md:p-8 space-y-8 max-w-7xl mx-auto">
+    <div className="p-4 md:p-8 space-y-12 max-w-7xl mx-auto relative min-h-screen">
+      <div className="grid-background absolute inset-0 pointer-events-none opacity-[0.03]" />
+
       {/* Header Section */}
       <motion.div 
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="flex flex-col md:flex-row md:items-end justify-between gap-12"
+        className="flex flex-col md:flex-row md:items-end justify-between gap-12 pb-12 border-b border-white/10 relative overflow-hidden group"
       >
-        <div>
+        <div className="absolute inset-0 pointer-events-none opacity-10 group-hover:opacity-20 transition-opacity duration-1000">
+          <img 
+            src="https://picsum.photos/seed/neural-tasks/1200/400?grayscale&blur=10" 
+            className="w-full h-full object-cover"
+            alt=""
+            referrerPolicy="no-referrer"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent" />
+        </div>
+
+        <div className="relative z-10">
           <div className="flex items-center gap-4 mb-6">
             <div className="w-12 h-12 bg-brand/10 border border-brand/30 flex items-center justify-center text-brand shadow-[0_0_20px_var(--color-brand-glow)] rounded-xl">
               <ListTodo className="w-6 h-6" />
             </div>
             <span className="text-[10px] font-mono text-brand uppercase tracking-[0.4em]">Task Management</span>
           </div>
-          <h2 className="text-5xl md:text-7xl font-black text-white uppercase tracking-tighter leading-none">Strategic <span className="text-brand drop-shadow-[0_0_15px_var(--color-brand-glow)]">Objectives</span></h2>
+          <h2 className="text-5xl md:text-7xl font-black text-white uppercase tracking-tighter leading-none">Strategic <span className="text-brand glow-text">Objectives</span></h2>
           <p className="text-zinc-600 text-[10px] font-mono uppercase tracking-[0.3em] mt-8 flex items-center gap-3">
             <span className="w-2 h-2 bg-brand rounded-full animate-pulse shadow-[0_0_8px_var(--color-brand-glow)]" />
             Priority SNR Index: Active // System Ready
           </p>
         </div>
 
-        <div className="flex items-center gap-8">
+        <div className="flex items-center gap-8 relative z-10">
           <div className="text-right hidden sm:block">
             <p className="text-[9px] font-mono text-zinc-500 uppercase tracking-[0.2em] mb-2">Completion Rate</p>
             <p className="text-4xl font-black text-white tabular-nums tracking-tighter leading-none">{Math.round(progress)}%</p>
@@ -281,7 +293,7 @@ export default function Tasks() {
           <div className="flex flex-col gap-2">
             <button 
               onClick={() => setIsAddingTask(true)}
-              className="enterprise-button px-10 py-5"
+              className="enterprise-button px-10 py-5 shadow-[0_0_30px_var(--color-brand-glow)]"
             >
               <Plus className="w-5 h-5" />
               Initialize Objective
@@ -362,7 +374,6 @@ export default function Tasks() {
                 <div className="flex-1">
                   <input 
                     type="text" 
-                    placeholder="Quick Capture: Phenomenal Ideas (Noise for now, save for later)..."
                     className="w-full bg-transparent border-none text-sm text-white placeholder:text-zinc-600 focus:outline-none focus:ring-0"
                     onKeyDown={(e) => {
                       if (e.key === 'Enter' && e.currentTarget.value.trim()) {
@@ -697,7 +708,6 @@ export default function Tasks() {
                     type="text"
                     value={newTaskTitle}
                     onChange={(e) => setNewTaskTitle(e.target.value)}
-                    placeholder="Enter Protocol..."
                     className="enterprise-input py-2 text-xs rounded-lg"
                     required
                   />
@@ -708,7 +718,6 @@ export default function Tasks() {
                   <textarea 
                     value={newTaskDesc}
                     onChange={(e) => setNewTaskDesc(e.target.value)}
-                    placeholder="Optional parameters..."
                     className="enterprise-input py-2 text-xs min-h-[60px] rounded-lg"
                   />
                 </div>
@@ -881,8 +890,17 @@ function TaskItem({ task, subjects, tomorrowStr, onToggle, onDelete, onEdit }: {
                   Tomorrow
                 </span>
               )}
+              {task.impact >= 7 ? (
+                <span className="badge bg-brand/20 text-brand border-brand/30 flex items-center gap-1.5 font-black uppercase tracking-widest text-[8px] animate-pulse">
+                  <Sparkles className="w-3 h-3" /> Signal
+                </span>
+              ) : (
+                <span className="badge bg-white/5 text-zinc-500 border-white/10 font-black uppercase tracking-widest text-[8px]">
+                  Noise
+                </span>
+              )}
               {task.focusMode && (
-                <span className="badge bg-red-500/20 text-red-500 border-red-500/30 animate-pulse">
+                <span className="badge bg-red-500/20 text-red-500 border-red-500/30">
                   Focus Mode
                 </span>
               )}
