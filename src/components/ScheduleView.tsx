@@ -61,7 +61,9 @@ const SortableActivity = ({ activity, day, onEdit, tasks, subjects, onToggleTask
     if (t.completed) return false;
     if (!t.subjectId) return false;
     const subject = subjects.find(s => s.id === t.subjectId);
-    return subject && activity.description.toLowerCase().includes(subject.name.toLowerCase());
+    const activityDesc = (activity.description || '').toLowerCase();
+    const subjectName = (subject?.name || '').toLowerCase();
+    return subject && activityDesc.includes(subjectName);
   }).sort((a, b) => {
     const subjectA = subjects.find(s => s.id === a.subjectId);
     const subjectB = subjects.find(s => s.id === b.subjectId);

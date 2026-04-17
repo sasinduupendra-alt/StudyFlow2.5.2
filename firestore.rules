@@ -3,29 +3,44 @@
 // ===============================================================
 //
 // Collection: /users/{userId}
-// Document ID: userId
+// Document ID: userId (matches auth.uid)
 // Fields:
-//   - points: number (required)
+//   - email: string (required)
+//   - displayName: string (required)
+//   - photoURL: string (optional)
+//   - joinedAt: string (required, ISO date-time)
+//   - targetExam: string (optional)
+//   - dailyGoalMinutes: number (optional)
+//   - level: number (required)
 //   - streak: number (required)
-//   - lastStudyDate: string (optional, ISO date)
+//   - xp: number (required)
+//   - xpToNextLevel: number (optional)
+//   - points: number (required)
 //   - totalSessions: number (required)
 //   - totalStudyTime: number (required)
-//   - badges: list of objects {id: string, unlockedAt: string}
+//   - badges: list of objects (Badge schema)
 //
 // Collection: /users/{userId}/study_logs/{logId}
 // Fields:
+//   - id: string (required)
 //   - subjectId: string (required)
-//   - topicId: string (required)
-//   - duration: number (required)
+//   - topicIds: list of strings (required)
+//   - topicId: string (optional)
+//   - duration: number (required, minutes)
 //   - focusLevel: number (required, 1-5)
-//   - notes: string (optional)
+//   - performance: number (optional)
 //   - timestamp: string (required, ISO date-time)
-//   - resources: list of strings
+//   - notes: string (optional)
+//   - tags: list of strings (optional)
+//   - sessionType: string (optional)
 //
 // Collection: /users/{userId}/exams/{examId}
 // Fields:
+//   - id: string (required)
 //   - title: string (required)
 //   - date: string (required, ISO date)
+//   - subjectId: string (optional)
+//   - score: number (optional)
 //   - marks: list of objects {subjectId: string, score: number}
 //   - totalScore: number (required)
 //   - averageScore: number (required)
@@ -34,26 +49,47 @@
 //
 // Collection: /users/{userId}/subjects/{subjectId}
 // Fields:
+//   - id: string (required)
 //   - name: string (required)
-//   - topics: list of objects {id: string, title: string, mastery: number, image: string, resources: list}
-//   - (other metadata fields like score, focus, status, etc.)
+//   - score: number (optional)
+//   - focus: number (optional)
+//   - weakCount: number (optional)
+//   - status: string (optional)
+//   - priorityScore: number (optional)
+//   - readiness: number (optional)
+//   - gradient: string (optional)
+//   - image: string (optional)
+//   - examDate: string (optional, ISO date)
+//   - notes: string (optional)
+//   - topics: list of objects (Topic schema)
 //
 // Collection: /users/{userId}/config/schedule
 // Fields:
-//   - Monday, Tuesday, ... Sunday: list of objects {id, time, description, type}
+//   - Monday-Sunday: list of Activity objects
+//
+// Collection: /users/{userId}/config/notifications
+// Fields:
+//   - dailyReminders, achievementNotifications, etc.: bool
 //
 // Collection: /users/{userId}/tasks/{taskId}
 // Fields:
 //   - id: string (required)
 //   - title: string (required)
 //   - description: string (optional)
-//   - frequency: string (required, enum: Daily, Weekly, Monthly)
+//   - frequency: string (required)
 //   - completed: bool (required)
 //   - subjectId: string (optional)
-//   - dueDate: string (optional, ISO date)
-//   - createdAt: string (required, ISO date)
+//   - createdAt: string (required, ISO date-time)
 //   - impact: number (required, 1-10)
 //   - effort: number (required, 1-10)
+//   - dueDate: string (optional, ISO date-time)
+//
+// Collection: /users/{userId}/noise_logs/{noiseId}
+// Fields:
+//   - id: string (required)
+//   - timestamp: string (required, ISO date-time)
+//   - source: string (required)
+//   - level: number (required)
 //
 // ===============================================================
 
@@ -83,16 +119,20 @@ service cloud.firestore {
       return email is string && email.matches("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$");
     }
 
-    function isValidDateString(dateStr) {
-      return dateStr is string && dateStr.matches("^\\d{4}-\\d{2}-\\d{2}.*");
+    function isValidDateTime(dateTime) {
+      return dateTime is string && dateTime.matches("^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}.*");
     }
 
-    function hasOnlyAllowedFields(fields) {
-      return request.resource.data.keys().hasOnly(fields);
+    function isValidDate(date) {
+      return date is string && date.matches("^\\d{4}-\\d{2}-\\d{2}.*");
     }
 
     function hasRequiredFields(fields) {
       return request.resource.data.keys().hasAll(fields);
+    }
+    
+    function hasOnlyAllowedFields(fields) {
+      return request.resource.data.keys().hasOnly(fields);
     }
 
     // ===============================================================
@@ -100,54 +140,50 @@ service cloud.firestore {
     // ===============================================================
 
     function isValidUserProfile(data) {
-      return hasRequiredFields(['points', 'streak', 'totalSessions', 'totalStudyTime']) &&
-             data.points is number && data.points >= 0 &&
-             data.streak is number && data.streak >= 0 &&
-             data.totalSessions is number && data.totalSessions >= 0 &&
-             data.totalStudyTime is number && data.totalStudyTime >= 0 &&
-             (!('lastStudyDate' in data) || isValidDateString(data.lastStudyDate));
+      return hasRequiredFields(['email', 'displayName', 'joinedAt', 'level', 'streak', 'xp', 'points', 'totalSessions', 'totalStudyTime']) &&
+             data.email is string && isValidEmail(data.email) &&
+             data.displayName is string && data.displayName.size() > 0 &&
+             isValidDateTime(data.joinedAt) &&
+             data.level is number && data.streak is number &&
+             data.xp is number && data.points is number &&
+             data.totalSessions is number && data.totalStudyTime is number;
     }
 
     function isValidStudyLog(data) {
-      return hasRequiredFields(['subjectId', 'topicId', 'duration', 'focusLevel', 'timestamp']) &&
-             data.subjectId is string && data.subjectId.size() > 0 &&
-             data.topicId is string && data.topicId.size() > 0 &&
+      return hasRequiredFields(['id', 'subjectId', 'duration', 'focusLevel', 'timestamp']) &&
+             data.id is string && data.subjectId is string &&
              data.duration is number && data.duration >= 0 &&
              data.focusLevel is number && data.focusLevel >= 1 && data.focusLevel <= 5 &&
-             isValidDateString(data.timestamp);
+             isValidDateTime(data.timestamp);
     }
 
     function isValidExamRecord(data) {
-      return hasRequiredFields(['title', 'date', 'marks', 'totalScore', 'averageScore']) &&
-             data.title is string && data.title.size() > 0 && data.title.size() < 100 &&
-             isValidDateString(data.date) &&
-             data.marks is list &&
-             data.totalScore is number &&
-             data.averageScore is number;
+      return hasRequiredFields(['id', 'title', 'date', 'totalScore', 'averageScore']) &&
+             data.id is string && data.title is string &&
+             isValidDate(data.date) &&
+             data.totalScore is number && data.averageScore is number;
     }
 
     function isValidSubject(data) {
-      return hasRequiredFields(['name', 'topics']) &&
-             data.name is string && data.name.size() > 0 && data.name.size() < 50 &&
+      return hasRequiredFields(['id', 'name', 'topics']) &&
+             data.id is string && data.name is string &&
              data.topics is list;
-    }
-
-    function isValidSchedule(data) {
-      return data.keys().hasAny(['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']);
     }
 
     function isValidTask(data) {
       return hasRequiredFields(['id', 'title', 'frequency', 'completed', 'createdAt', 'impact', 'effort']) &&
-             data.id is string &&
-             data.title is string && data.title.size() > 0 && data.title.size() < 200 &&
-             data.frequency in ['Daily', 'Weekly', 'Monthly'] &&
+             data.id is string && data.title is string &&
+             data.frequency is string &&
              data.completed is bool &&
-             isValidDateString(data.createdAt) &&
+             isValidDateTime(data.createdAt) &&
              data.impact is number && data.impact >= 1 && data.impact <= 10 &&
-             data.effort is number && data.effort >= 1 && data.effort <= 10 &&
-             (!('description' in data) || (data.description is string && data.description.size() < 1000)) &&
-             (!('subjectId' in data) || data.subjectId is string) &&
-             (!('dueDate' in data) || isValidDateString(data.dueDate));
+             data.effort is number && data.effort >= 1 && data.effort <= 10;
+    }
+
+    function isValidNoiseLog(data) {
+      return hasRequiredFields(['id', 'timestamp', 'source', 'level']) &&
+             data.id is string && isValidDateTime(data.timestamp) &&
+             data.source is string && data.level is number;
     }
 
     // ===============================================================
@@ -159,13 +195,11 @@ service cloud.firestore {
       allow read, write: if false;
     }
 
-    // User Profile
     match /users/{userId} {
       allow read: if isOwner(userId) || isAdmin();
       allow create: if isOwner(userId) && isValidUserProfile(request.resource.data);
       allow update: if (isOwner(userId) && isValidUserProfile(request.resource.data)) || isAdmin();
-      
-      // Study Logs
+
       match /study_logs/{logId} {
         allow read: if isOwner(userId) || isAdmin();
         allow create: if isOwner(userId) && isValidStudyLog(request.resource.data);
@@ -173,7 +207,6 @@ service cloud.firestore {
         allow delete: if isOwner(userId) || isAdmin();
       }
 
-      // Exams
       match /exams/{examId} {
         allow read: if isOwner(userId) || isAdmin();
         allow create: if isOwner(userId) && isValidExamRecord(request.resource.data);
@@ -181,7 +214,6 @@ service cloud.firestore {
         allow delete: if isOwner(userId) || isAdmin();
       }
 
-      // Subjects
       match /subjects/{subjectId} {
         allow read: if isOwner(userId) || isAdmin();
         allow create: if isOwner(userId) && isValidSubject(request.resource.data);
@@ -189,22 +221,30 @@ service cloud.firestore {
         allow delete: if isOwner(userId) || isAdmin();
       }
 
-      // Schedule Config
       match /config/schedule {
         allow read: if isOwner(userId) || isAdmin();
-        allow write: if isOwner(userId) && isValidSchedule(request.resource.data);
+        allow write: if isOwner(userId);
       }
 
-      // Tasks
+      match /config/notifications {
+        allow read: if isOwner(userId) || isAdmin();
+        allow write: if isOwner(userId);
+      }
+
       match /tasks/{taskId} {
         allow read: if isOwner(userId) || isAdmin();
         allow create: if isOwner(userId) && isValidTask(request.resource.data);
         allow update: if isOwner(userId) && isValidTask(request.resource.data);
         allow delete: if isOwner(userId) || isAdmin();
       }
+
+      match /noise_logs/{noiseId} {
+        allow read: if isOwner(userId) || isAdmin();
+        allow create: if isOwner(userId) && isValidNoiseLog(request.resource.data);
+        allow delete: if isOwner(userId) || isAdmin();
+      }
     }
 
-    // Public test connection doc (as requested in system instructions)
     match /test/connection {
       allow read: if true;
     }

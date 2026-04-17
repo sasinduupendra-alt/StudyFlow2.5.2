@@ -13,9 +13,12 @@ import Settings from './pages/Settings';
 import Practice from './pages/Practice';
 import Tasks from './pages/Tasks';
 import Review from './pages/Review';
+import { Toaster } from './components/ui/sonner';
 import ProtectedRoute from './components/ProtectedRoute';
 import ErrorBoundary from './components/ErrorBoundary';
 import { useAppStore } from './store/useAppStore';
+import { FocusProvider } from './lib/focus-context';
+import { DeepWorkEngine } from './components/DeepWorkEngine';
 import { INITIAL_TASKS } from './constants';
 import { Task } from './types';
 import { auth, onAuthStateChanged } from './firebase';
@@ -99,33 +102,37 @@ export default function App() {
   }
 
   return (
-    <ErrorBoundary>
-      <BrowserRouter>
-        <Routes>
-          {!user ? (
-            <>
-              <Route path="/" element={<LandingPage />} />
-              <Route path="*" element={<Navigate to="/" replace />} />
-            </>
-          ) : (
-            <Route path="/" element={<Layout />}>
-              <Route index element={<Home />} />
-              <Route path="syllabus" element={<ProtectedRoute><Syllabus /></ProtectedRoute>} />
-              <Route path="schedule" element={<ProtectedRoute><Schedule /></ProtectedRoute>} />
-              <Route path="analytics" element={<ProtectedRoute><Analytics /></ProtectedRoute>} />
-              <Route path="tasks" element={<ProtectedRoute><Tasks /></ProtectedRoute>} />
-              <Route path="review" element={<ProtectedRoute><Review /></ProtectedRoute>} />
-              <Route path="practice" element={<ProtectedRoute><Practice /></ProtectedRoute>} />
-              <Route path="manage" element={<ProtectedRoute><Manage /></ProtectedRoute>} />
-              <Route path="weak-areas" element={<ProtectedRoute><WeakAreas /></ProtectedRoute>} />
-              <Route path="achievements" element={<ProtectedRoute><Achievements /></ProtectedRoute>} />
-              <Route path="settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
-              <Route path="session/:id" element={<ProtectedRoute><SessionDetail /></ProtectedRoute>} />
-              <Route path="*" element={<Navigate to="/" replace />} />
-            </Route>
-          )}
-        </Routes>
-      </BrowserRouter>
-    </ErrorBoundary>
+    <FocusProvider>
+      <ErrorBoundary>
+        <BrowserRouter>
+          <Routes>
+            {!user ? (
+              <>
+                <Route path="/" element={<LandingPage />} />
+                <Route path="*" element={<Navigate to="/" replace />} />
+              </>
+            ) : (
+              <Route path="/" element={<Layout />}>
+                <Route index element={<Home />} />
+                <Route path="syllabus" element={<ProtectedRoute><Syllabus /></ProtectedRoute>} />
+                <Route path="schedule" element={<ProtectedRoute><Schedule /></ProtectedRoute>} />
+                <Route path="analytics" element={<ProtectedRoute><Analytics /></ProtectedRoute>} />
+                <Route path="tasks" element={<ProtectedRoute><Tasks /></ProtectedRoute>} />
+                <Route path="review" element={<ProtectedRoute><Review /></ProtectedRoute>} />
+                <Route path="practice" element={<ProtectedRoute><Practice /></ProtectedRoute>} />
+                <Route path="manage" element={<ProtectedRoute><Manage /></ProtectedRoute>} />
+                <Route path="weak-areas" element={<ProtectedRoute><WeakAreas /></ProtectedRoute>} />
+                <Route path="achievements" element={<ProtectedRoute><Achievements /></ProtectedRoute>} />
+                <Route path="settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
+                <Route path="session/:id" element={<ProtectedRoute><SessionDetail /></ProtectedRoute>} />
+                <Route path="*" element={<Navigate to="/" replace />} />
+              </Route>
+            )}
+          </Routes>
+        </BrowserRouter>
+        <DeepWorkEngine />
+        <Toaster position="bottom-center" theme="dark" />
+      </ErrorBoundary>
+    </FocusProvider>
   );
 }

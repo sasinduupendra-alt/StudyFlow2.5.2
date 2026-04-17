@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Brain, SkipBack, Play, Pause, SkipForward, Maximize2 } from 'lucide-react';
+import { Brain, SkipBack, Play, Pause, SkipForward, Maximize2, X } from 'lucide-react';
 import { useAppStore } from '../store/useAppStore';
 
 export default function ActiveSessionBar() {
@@ -119,9 +119,10 @@ export default function ActiveSessionBar() {
                 setIsPaused(true);
                 setIsFocusMode(false);
               }}
-              className="px-4 py-2 bg-[#FF453A]/10 text-[#FF453A] border border-[#FF453A]/20 rounded-full text-[10px] font-black uppercase tracking-widest hover:bg-[#FF453A] hover:text-white transition-all"
+              className="p-2.5 text-[#8E8E93] hover:text-[#FF453A] hover:bg-[#FF453A]/10 rounded-full transition-all"
+              title="Terminate Protocol"
             >
-              Terminate Protocol
+              <X className="w-5 h-5" />
             </button>
           </div>
         </div>

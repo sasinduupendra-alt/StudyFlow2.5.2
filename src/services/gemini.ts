@@ -1,102 +1,85 @@
-import { GoogleGenAI, ThinkingLevel } from "@google/genai";
+import { GoogleGenAI } from "@google/genai";
 
-let aiInstance: GoogleGenAI | null = null;
-
-export function getAI() {
-  if (!aiInstance) {
-    const apiKey = process.env.GEMINI_API_KEY;
-    if (!apiKey) {
-      throw new Error('GEMINI_API_KEY is not set');
-    }
-    aiInstance = new GoogleGenAI({ apiKey });
+const getApiKey = () => {
+  const key = process.env.GEMINI_API_KEY;
+  if (!key) {
+    throw new Error('GEMINI_API_KEY is not defined in the environment.');
   }
-  return aiInstance;
-}
+  return key;
+};
 
-export function getImageAI() {
-  // Use process.env.API_KEY if available (user-selected key), otherwise fallback to default
-  const apiKey = process.env.API_KEY || process.env.GEMINI_API_KEY;
-  if (!apiKey) {
-    throw new Error('API key is not set');
+let genAI: GoogleGenAI | null = null;
+
+export const getAI = () => {
+  if (!genAI) {
+    genAI = new GoogleGenAI({ apiKey: getApiKey() });
   }
-  return new GoogleGenAI({ apiKey });
-}
+  return genAI;
+};
 
 export const MODELS = {
   GENERAL: 'gemini-3-flash-preview',
   COMPLEX: 'gemini-3.1-pro-preview',
-  FAST: 'gemini-3.1-flash-lite-preview',
-  IMAGE: 'gemini-3-pro-image-preview',
+  IMAGE: 'gemini-2.5-flash-image',
 };
 
-export async function generateStudyPlan(subject: string, topics: string[]) {
-  const prompt = `Create a detailed study plan for the subject "${subject}" covering these topics: ${topics.join(", ")}. 
-  Provide specific focus areas, estimated time per topic, and a suggested resource type (video, reading, practice).
-  Format the response in Markdown.`;
-
-  const ai = getAI();
-  const result = await ai.models.generateContent({
-    model: MODELS.GENERAL,
-    contents: [{ role: 'user', parts: [{ text: prompt }] }]
-  });
-  return result.text;
-}
-
-export async function analyzeWeakAreas(logs: any[]) {
-  const prompt = `Analyze these study logs and identify weak areas: ${JSON.stringify(logs)}.
-  Provide actionable advice on how to improve in these areas.
-  Format the response in Markdown.`;
-
-  const ai = getAI();
-  const result = await ai.models.generateContent({
-    model: MODELS.COMPLEX,
-    contents: [{ role: 'user', parts: [{ text: prompt }] }],
-    config: {
-      thinkingConfig: { thinkingLevel: ThinkingLevel.HIGH }
-    }
-  });
-  return result.text;
-}
-
-export async function generateStudyImage(prompt: string, aspectRatio: string = "1:1", imageSize: string = "1K") {
-  const ai = getImageAI();
-  const response = await ai.models.generateContent({
-    model: MODELS.IMAGE,
-    contents: {
-      parts: [
-        {
-          text: `Generate a high-quality technical study illustration or diagram: ${prompt}`,
-        },
-      ],
-    },
-    config: {
-      imageConfig: {
-        aspectRatio,
-        imageSize
-      },
-    },
-  });
-
-  for (const part of response.candidates[0].content.parts) {
-    if (part.inlineData) {
-      return `data:image/png;base64,${part.inlineData.data}`;
-    }
+export const generateFeynmanSummary = async (notes: string, taskName: string) => {
+  try {
+    const ai = getAI();
+    const response = await ai.models.generateContent({
+      model: MODELS.GENERAL,
+      contents: `You are a high-SNR Study Assistant. The user just finished a deep work session on "${taskName}".
+      Here are their notes and explanation:
+      ---
+      ${notes}
+      ---
+      Using the Feynman Technique, compress this into:
+      1. Core Concept (1 sentence)
+      2. Crucial Insights (3 bullets)
+      3. Action Steps / Next Milestone (2 bullets)
+      
+      Be concise, technical, and high-performance. Avoid fluff.`
+    });
+    
+    return response.text;
+  } catch (error) {
+    console.error("Feynman Summary Error:", error);
+    return "Error synthesizing neural recap. Manual review recommended.";
   }
-  return null;
-}
+};
 
-// Support for streaming
-export async function* streamStudyAdvice(topic: string) {
-  const prompt = `Provide quick, actionable study advice for the topic: "${topic}". 
-  Keep it concise and encouraging. Format in Markdown.`;
+export async function* streamStudyAdvice(input: string) {
+  try {
+    const ai = getAI();
+    const response = await ai.models.generateContentStream({
+      model: MODELS.GENERAL,
+      contents: `You are a high-SNR Study Assistant. Give concise, actionable advice for: ${input}`
+    });
 
-  const ai = getAI();
-  const result = await ai.models.generateContentStream({
-    model: MODELS.FAST,
-    contents: [{ role: 'user', parts: [{ text: prompt }] }]
-  });
-
-  for await (const chunk of result) {
-    yield chunk.text;
+    for await (const chunk of response) {
+      yield chunk.text;
+    }
+  } catch (error) {
+    yield "Neural link unstable. Focus on core principles.";
   }
 }
+
+export const generateStudyImage = async (prompt: string, aspectRatio?: string, quality?: string) => {
+  // Placeholder for image generation
+  return `https://picsum.photos/seed/${encodeURIComponent(prompt)}/800/450?aspect=${aspectRatio}&q=${quality}`;
+};
+
+export const analyzeFocusMomentum = async (history: any) => {
+  try {
+    const ai = getAI();
+    const response = await ai.models.generateContent({
+      model: MODELS.GENERAL,
+      contents: `Analyze this study history and provide a short, 1-sentence high-performance motivation for the next session.
+      History: ${JSON.stringify(history)}`
+    });
+
+    return response.text;
+  } catch (error) {
+    return "Neural momentum detected. Proceed to protocol.";
+  }
+};

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Target, CheckCircle2, AlertCircle, Sparkles } from 'lucide-react';
+import { Target, CheckCircle2, AlertCircle, Sparkles, Radio } from 'lucide-react';
 import { Task } from '../types';
 import { cn } from '../lib/utils';
 
@@ -17,13 +17,13 @@ export default function DailyCommitPrompt({ tasks, onCommit, isOpen }: DailyComm
   const toggleSelect = (id: string) => {
     if (selectedIds.includes(id)) {
       setSelectedIds(prev => prev.filter(i => i !== id));
-    } else if (selectedIds.length < 5) {
+    } else {
       setSelectedIds(prev => [...prev, id]);
     }
   };
 
   const handleConfirm = () => {
-    if (selectedIds.length >= 3) {
+    if (selectedIds.length >= 1) {
       onCommit(selectedIds);
     }
   };
@@ -45,11 +45,11 @@ export default function DailyCommitPrompt({ tasks, onCommit, isOpen }: DailyComm
         <div className="relative z-10">
           <div className="flex items-center gap-3 mb-6">
             <div className="w-10 h-10 bg-brand/10 rounded-full flex items-center justify-center text-brand">
-              <Sparkles className="w-5 h-5" />
+              <Radio className="w-5 h-5" />
             </div>
             <div>
-              <h2 className="text-2xl font-bold text-white tracking-tight">Daily Commit</h2>
-              <p className="text-sm text-[#8E8E93]">Select 3–5 non-negotiable Signals for today.</p>
+              <h2 className="text-2xl font-bold text-white tracking-tight">Signal Identification</h2>
+              <p className="text-sm text-[#8E8E93]">Commit to 3-5 critical mission goals for today.</p>
             </div>
           </div>
 
@@ -91,17 +91,22 @@ export default function DailyCommitPrompt({ tasks, onCommit, isOpen }: DailyComm
           </div>
 
           <div className="flex items-center justify-between gap-6">
-            <p className="text-xs font-mono text-[#8E8E93] uppercase tracking-widest">
-              Selected: <span className={cn(selectedIds.length >= 3 ? "text-brand" : "text-red-500")}>
-                {selectedIds.length}/5
-              </span>
-            </p>
+            <div className="flex flex-col">
+              <p className="text-xs font-mono text-[#8E8E93] uppercase tracking-widest">
+                Selected: <span className={cn(selectedIds.length >= 1 ? "text-brand" : "text-red-500")}>
+                  {selectedIds.length}
+                </span>
+              </p>
+              {selectedIds.length > 5 && (
+                <p className="text-[10px] text-zinc-600 mt-1 uppercase font-bold tracking-tight">Warning: Exceeding Signal Capacity (Rec: 3-5)</p>
+              )}
+            </div>
             <button
               onClick={handleConfirm}
-              disabled={selectedIds.length < 3}
+              disabled={selectedIds.length < 1}
               className={cn(
                 "px-8 py-3.5 rounded-full text-sm font-black uppercase tracking-widest transition-all",
-                selectedIds.length >= 3 
+                selectedIds.length >= 1 
                   ? "bg-white text-black hover:bg-zinc-200 shadow-[0_0_20px_rgba(255,255,255,0.2)]" 
                   : "bg-white/5 text-white/30 cursor-not-allowed"
               )}

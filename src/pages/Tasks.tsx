@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { 
   Plus, CheckCircle2, Circle, Trash2, Calendar, 
   Clock, AlertCircle, Filter, ChevronRight, ListTodo,
-  LayoutGrid, List, MoreVertical, Edit2, Target, Sparkles, RefreshCw
+  LayoutGrid, List, MoreVertical, Edit2, Target, Sparkles, RefreshCw, Download
 } from 'lucide-react';
 import { useAppStore } from '../store/useAppStore';
 import { Task, TaskFrequency, Subject } from '../types';
@@ -15,7 +15,7 @@ import { Type } from '@google/genai';
 import WeeklyTaskChecklist from '../components/WeeklyTaskChecklist';
 
 export default function Tasks() {
-  const { tasks, addTask, toggleTask, deleteTask, subjects, user, addToast, updateTask } = useAppStore();
+  const { tasks, addTask, toggleTask, deleteTask, subjects, user, addToast, updateTask, dailyCommits } = useAppStore();
   const [activeTab, setActiveTab] = useState<TaskFrequency>('Daily');
   const [viewMode, setViewMode] = useState<'Cycle' | 'Subject' | 'Optimization' | 'Execution'>('Execution');
   const [isAddingTask, setIsAddingTask] = useState(false);
@@ -48,8 +48,7 @@ export default function Tasks() {
 
   const executionTasks = tasks.filter(t => 
     !t.completed && 
-    t.frequency === 'Daily' && 
-    (!t.dueDate || t.dueDate <= todayStr)
+    (dailyCommits.includes(t.id) || (t.frequency === 'Daily' && (!t.dueDate || t.dueDate <= todayStr)))
   );
 
   const completedCount = filteredTasks.filter(t => t.completed).length;
@@ -138,7 +137,7 @@ export default function Tasks() {
     setNewTaskDifficulty(task.difficulty || 5);
     setNewTaskLastReviewed(task.lastReviewed || '');
     setIsForTomorrow(task.dueDate === tomorrowStr);
-    setActiveTab(task.frequency);
+    setActiveTab(task.frequency as TaskFrequency);
     setIsAddingTask(true);
   };
 
@@ -220,6 +219,66 @@ export default function Tasks() {
     } finally {
       setIsAuditing(false);
     }
+  };
+
+  const handleExportTasks = () => {
+    if (tasks.length === 0) {
+      addToast('No tasks to export.', 'info');
+      return;
+    }
+
+    const headers = [
+      'ID',
+      'Title',
+      'Description',
+      'Frequency',
+      'Completed',
+      'Subject',
+      'Created At',
+      'Impact',
+      'Effort',
+      'Due Date',
+      'Difficulty',
+      'Last Reviewed',
+      'SNR Index'
+    ];
+
+    const rows = tasks.map(t => {
+      const subject = subjects.find(s => s.id === t.subjectId);
+      const snr = calculateSNR(t, subject);
+      return [
+        t.id,
+        `"${t.title.replace(/"/g, '""')}"`,
+        `"${(t.description || '').replace(/"/g, '""')}"`,
+        t.frequency,
+        t.completed ? 'TRUE' : 'FALSE',
+        subject ? subject.name : 'Uncategorized',
+        t.createdAt,
+        t.impact,
+        t.effort,
+        t.dueDate || '',
+        t.difficulty || '',
+        t.lastReviewed || '',
+        snr.toFixed(2)
+      ];
+    });
+
+    const csvContent = [
+      headers.join(','),
+      ...rows.map(row => row.join(','))
+    ].join('\n');
+
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.setAttribute('href', url);
+    link.setAttribute('download', `strategic_objectives_${new Date().toISOString().split('T')[0]}.csv`);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    
+    addToast('Strategic Objectives exported successfully.', 'success');
   };
 
   const handleDeleteTask = async (id: string) => {
@@ -308,6 +367,13 @@ export default function Tasks() {
                 Audit Tasks (AI)
               </button>
             )}
+            <button 
+              onClick={handleExportTasks}
+              className="px-4 py-2 bg-white/5 text-zinc-400 border border-white/10 hover:bg-white/10 hover:text-white transition-all rounded-lg flex items-center justify-center gap-2 text-xs font-bold uppercase tracking-widest"
+            >
+              <Download className="w-3 h-3" />
+              Export Data (CSV)
+            </button>
           </div>
         </div>
       </motion.div>
@@ -852,110 +918,180 @@ function TaskItem({ task, subjects, tomorrowStr, onToggle, onDelete, onEdit }: {
   onDelete: (id: string) => void,
   onEdit: (task: Task) => void
 }) {
+  const subject = subjects.find(s => s.id === task.subjectId);
+  const snr = calculateSNR(task, subject);
+  const todayStr = new Date().toISOString().split('T')[0];
+
+  const getPriorityColor = (impact: number) => {
+    if (impact >= 8) return "bg-red-500/20 text-red-500 border-red-500/30";
+    if (impact >= 6) return "bg-orange-500/20 text-orange-500 border-orange-500/30";
+    if (impact >= 4) return "bg-yellow-500/20 text-yellow-500 border-yellow-500/30";
+    return "bg-zinc-500/10 text-zinc-500 border-white/5";
+  };
+
+  const getPriorityLabel = (impact: number) => {
+    if (impact >= 8) return "Critical";
+    if (impact >= 6) return "High";
+    if (impact >= 4) return "Medium";
+    return "Low";
+  };
+
+  const isOverdue = task.dueDate && task.dueDate < todayStr && !task.completed;
+  const isDueToday = task.dueDate === todayStr;
+
   return (
     <motion.div
       layout
-      initial={{ opacity: 0, y: 15 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, scale: 0.98 }}
+      initial={{ opacity: 0, scale: 0.98 }}
+      animate={{ opacity: 1, scale: 1 }}
+      exit={{ opacity: 0, scale: 0.95 }}
+      whileHover={{ scale: 1.002 }}
       className={cn(
-        "enterprise-card group transition-all duration-500 relative overflow-hidden",
-        task.completed ? "opacity-40 border-zinc-900" : "hover:border-white/40"
+        "enterprise-card group transition-all duration-300 relative overflow-hidden backdrop-blur-sm",
+        task.completed 
+          ? "opacity-60 bg-white/[0.02] border-white/5 grayscale-[0.5]" 
+          : "hover:border-white/20 bg-white/[0.05]"
       )}
     >
-      <div className="scan-line opacity-0 group-hover:opacity-100 transition-opacity duration-1000" />
+      <div className={cn(
+        "absolute inset-y-0 left-0 w-1",
+        task.completed ? "bg-zinc-800" : (task.impact >= 7 ? "bg-brand" : "bg-zinc-600")
+      )} />
       
-      <div className="p-8 flex items-start gap-8 relative z-10">
-        <button 
-          onClick={() => onToggle(task.id)}
-          className={cn(
-            "mt-1 p-1 transition-all transform hover:scale-125",
-            task.completed ? "text-white" : "text-zinc-800 hover:text-white"
-          )}
-        >
-          {task.completed ? <CheckCircle2 className="w-8 h-8" /> : <Circle className="w-8 h-8" />}
-        </button>
-
-        <div className="flex-1 min-w-0">
-          <div className="flex flex-wrap items-center gap-4 mb-4">
-            <h4 className={cn(
-              "text-xl font-black uppercase tracking-tighter truncate leading-none",
-              task.completed ? "line-through text-zinc-600" : "text-white"
-            )}>
-              {task.title}
-            </h4>
-            <div className="flex items-center gap-3">
-              {task.dueDate === tomorrowStr && (
-                <span className="badge bg-white/10 text-white border-white/20">
-                  Tomorrow
-                </span>
-              )}
-              {task.impact >= 7 ? (
-                <span className="badge bg-brand/20 text-brand border-brand/30 flex items-center gap-1.5 font-black uppercase tracking-widest text-[8px] animate-pulse">
-                  <Sparkles className="w-3 h-3" /> Signal
-                </span>
-              ) : (
-                <span className="badge bg-white/5 text-zinc-500 border-white/10 font-black uppercase tracking-widest text-[8px]">
-                  Noise
-                </span>
-              )}
-              {task.focusMode && (
-                <span className="badge bg-red-500/20 text-red-500 border-red-500/30">
-                  Focus Mode
-                </span>
-              )}
-              {task.subjectId && (
-                <span className="badge badge-zinc">
-                  {subjects.find(s => s.id === task.subjectId)?.name}
-                </span>
-              )}
-              <span className={cn(
-                "badge",
-                calculateSNR(task, subjects.find(s => s.id === task.subjectId)) >= 2 
-                  ? "badge-brand" 
-                  : "badge-zinc"
-              )}>
-                SNR: {calculateSNR(task, subjects.find(s => s.id === task.subjectId)).toFixed(1)}
-              </span>
-            </div>
-          </div>
-          <div className="flex items-center gap-12">
-            {task.description && (
-              <p className="text-[10px] text-zinc-500 font-mono uppercase tracking-[0.2em] line-clamp-1 flex-1">
-                {task.description}
-              </p>
+      <div className="p-6 md:p-8 flex flex-col md:flex-row items-center md:items-start gap-6 relative z-10">
+        <div className="flex items-start gap-6 w-full md:w-auto">
+          <button 
+            onClick={() => onToggle(task.id)}
+            className={cn(
+              "p-1 transition-all transform hover:scale-110 shrink-0",
+              task.completed ? "text-brand" : "text-zinc-700 hover:text-white"
             )}
-            <div className="flex items-center gap-8 shrink-0">
-              <div className="flex items-center gap-3">
-                <span className="text-[9px] font-mono text-zinc-700 uppercase tracking-widest">Impact</span>
-                <div className="flex gap-1.5">
-                  {[...Array(5)].map((_, i) => (
-                    <div key={i} className={cn("w-2 h-4 transition-all duration-500", i < (task.impact / 2) ? "bg-white" : "bg-zinc-900")} />
-                  ))}
+          >
+            {task.completed ? (
+              <CheckCircle2 className="w-8 h-8 fill-brand/10" />
+            ) : (
+              <Circle className="w-8 h-8" />
+            )}
+          </button>
+
+          <div className="flex-1 min-w-0">
+            <div className="flex flex-col gap-2 mb-4">
+              <div className="flex flex-wrap items-center gap-3">
+                <h4 className={cn(
+                  "text-xl md:text-2xl font-black uppercase tracking-tighter transition-all",
+                  task.completed ? "line-through text-zinc-600" : "text-white"
+                )}>
+                  {task.title}
+                </h4>
+                
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className={cn(
+                    "px-2 py-0.5 rounded-full text-[8px] font-black uppercase tracking-widest border",
+                    getPriorityColor(task.impact)
+                  )}>
+                    {getPriorityLabel(task.impact)} Priority
+                  </span>
+                  
+                  {task.completed && (
+                    <span className="px-2 py-0.5 rounded-full text-[8px] font-black uppercase tracking-widest border bg-emerald-500/20 text-emerald-500 border-emerald-500/30">
+                      Completed
+                    </span>
+                  )}
                 </div>
               </div>
-              <div className="flex items-center gap-3">
-                <span className="text-[9px] font-mono text-zinc-700 uppercase tracking-widest">Effort</span>
-                <div className="flex gap-1.5">
-                  {[...Array(5)].map((_, i) => (
-                    <div key={i} className={cn("w-2 h-4 transition-all duration-500", i < (task.effort / 2) ? "bg-zinc-500" : "bg-zinc-900")} />
-                  ))}
+
+              <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+                {task.dueDate && (
+                  <div className={cn(
+                    "flex items-center gap-1.5 text-[9px] font-mono font-bold uppercase tracking-widest px-2 py-1 rounded-md border",
+                    isOverdue ? "text-red-500 border-red-500/20 bg-red-500/5" : 
+                    isDueToday ? "text-yellow-500 border-yellow-500/20 bg-yellow-500/5" :
+                    task.dueDate === tomorrowStr ? "text-blue-400 border-blue-400/20 bg-blue-400/5" :
+                    "text-zinc-500 border-white/5 bg-white/5"
+                  )}>
+                    <Calendar className="w-3 h-3" />
+                    {isOverdue ? "Overdue: " : isDueToday ? "Today: " : ""}
+                    {new Date(task.dueDate).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
+                  </div>
+                )}
+                
+                {subject && (
+                  <div className="flex items-center gap-1.5 text-[9px] font-mono font-bold uppercase tracking-widest text-zinc-500 bg-white/5 px-2 py-1 rounded-md border border-white/5">
+                    <div className="w-1.5 h-1.5 rounded-full bg-zinc-600" style={{ backgroundColor: subject.gradient.includes('from-') ? subject.gradient.split('from-')[1].split(' ')[0] : undefined }} />
+                    {subject.name}
+                  </div>
+                )}
+
+                <div className={cn(
+                  "flex items-center gap-1.5 text-[9px] font-mono font-bold uppercase tracking-widest px-2 py-1 rounded-md border",
+                  snr >= 2 ? "text-brand border-brand/20 bg-brand/5" : "text-zinc-500 border-white/5 bg-white/5"
+                )}>
+                  SNR {snr.toFixed(1)}
+                </div>
+              </div>
+            </div>
+
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+              {task.description && (
+                <p className={cn(
+                  "text-[10px] font-mono uppercase tracking-[0.2em] leading-relaxed max-w-2xl",
+                  task.completed ? "text-zinc-700" : "text-zinc-500"
+                )}>
+                  {task.description}
+                </p>
+              )}
+              
+              <div className="flex items-center gap-8 shrink-0 py-2">
+                <div className="flex flex-col gap-1.5">
+                  <span className="text-[7px] font-mono text-zinc-700 uppercase tracking-[0.3em] font-black">Signal Strength</span>
+                  <div className="flex gap-1">
+                    {[...Array(5)].map((_, i) => (
+                      <div 
+                        key={i} 
+                        className={cn(
+                          "w-2.5 h-3.5 rounded-sm transition-all duration-700", 
+                          i < (task.impact / 2) 
+                            ? (task.completed ? "bg-zinc-800" : "bg-white shadow-[0_0_8px_rgba(255,255,255,0.2)]") 
+                            : "bg-zinc-900"
+                        )} 
+                      />
+                    ))}
+                  </div>
+                </div>
+
+                <div className="flex flex-col gap-1.5">
+                  <span className="text-[7px] font-mono text-zinc-700 uppercase tracking-[0.3em] font-black">Entropy Floor</span>
+                  <div className="flex gap-1">
+                    {[...Array(5)].map((_, i) => (
+                      <div 
+                        key={i} 
+                        className={cn(
+                          "w-2.5 h-3.5 rounded-sm transition-all duration-700", 
+                          i < (task.effort / 2) 
+                            ? (task.completed ? "bg-zinc-800" : "bg-zinc-500") 
+                            : "bg-zinc-900"
+                        )} 
+                      />
+                    ))}
+                  </div>
                 </div>
               </div>
             </div>
           </div>
         </div>
 
-        <div className="flex items-center gap-4 opacity-0 group-hover:opacity-100 transition-all duration-500">
+        <div className="flex md:flex-col gap-2 ml-auto opacity-0 group-hover:opacity-100 transition-all duration-300">
           <button 
             onClick={() => onEdit(task)}
-            className="p-3 text-zinc-800 hover:text-white hover:bg-white/5 transition-all"
+            className="p-3 text-zinc-700 hover:text-white hover:bg-white/5 rounded-xl transition-all"
+            title="Edit Task"
           >
             <Edit2 className="w-5 h-5" />
           </button>
           <button 
             onClick={() => onDelete(task.id)}
-            className="p-3 text-zinc-800 hover:text-white hover:bg-white/5 transition-all"
+            className="p-3 text-zinc-700 hover:text-red-500 hover:bg-red-500/10 rounded-xl transition-all"
+            title="Delete Task"
           >
             <Trash2 className="w-5 h-5" />
           </button>

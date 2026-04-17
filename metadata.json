@@ -1,5 +1,7 @@
 {
   "name": "NeuralStudy",
-  "description": "A high-performance neural study interface with AI-driven insights, real-time focus tracking, and advanced syllabus management.",
-  "requestFramePermissions": []
+  "description": "High-SNR Deep Work Environment with a 3-phase flow engine: Enter, Protect, and Extract.",
+  "requestFramePermissions": [
+    "microphone"
+  ]
 }

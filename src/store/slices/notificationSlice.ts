@@ -36,6 +36,9 @@ export const createNotificationSlice: StateCreator<NotificationSlice> = (set) =>
     aiRecommendations: true,
     reviewReminders: true,
     emailNotifications: false,
+    dailyReminders: true,
+    achievementNotifications: true,
+    studyTips: true
   },
   addNotification: (notification) => set((state) => ({
     notifications: [

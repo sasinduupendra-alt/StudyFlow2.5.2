@@ -37,7 +37,8 @@ export const INITIAL_SUBJECTS: Subject[] = [
       { id: 'm12', title: '12. Statics (Forces)', mastery: 40, image: 'https://images.unsplash.com/photo-1532094349884-543bc11b234d?auto=format&fit=crop&q=80&w=400' },
       { id: 'm13', title: '13. Dynamics (Motion)', mastery: 35, image: 'https://images.unsplash.com/photo-1551698618-1dfe5d97d256?auto=format&fit=crop&q=80&w=400' },
       { id: 'm14', title: '14. Probability & Stats', mastery: 55, image: 'https://images.unsplash.com/photo-1635070041078-e363dbe005cb?auto=format&fit=crop&q=80&w=400' },
-    ]
+    ],
+    totalStudyTime: 0
   },
   {
     id: 'physics',
@@ -71,7 +72,8 @@ export const INITIAL_SUBJECTS: Subject[] = [
       { id: 'p9', title: '09. Electronics', mastery: 30, image: 'https://images.unsplash.com/photo-1581093458791-9f3c3900df4b?auto=format&fit=crop&q=80&w=400' },
       { id: 'p10', title: '10. Radiation & Matter', mastery: 65, image: 'https://images.unsplash.com/photo-1581093458791-9f3c3900df4b?auto=format&fit=crop&q=80&w=400' },
       { id: 'p11', title: '11. Properties of Matter', mastery: 50, image: 'https://images.unsplash.com/photo-1535813543269-7328ec13954e?auto=format&fit=crop&q=80&w=400' },
-    ]
+    ],
+    totalStudyTime: 0
   },
   {
     id: 'chemistry',
@@ -104,7 +106,8 @@ export const INITIAL_SUBJECTS: Subject[] = [
       { id: 'c9', title: '09. Inorganic Chemistry', mastery: 55, image: 'https://images.unsplash.com/photo-1532187875605-2fe358711e24?auto=format&fit=crop&q=80&w=400' },
       { id: 'c10', title: '10. Industrial Chemistry', mastery: 65, image: 'https://images.unsplash.com/photo-1532187875605-2fe358711e24?auto=format&fit=crop&q=80&w=400' },
       { id: 'c11', title: '11. Environmental Chem', mastery: 70, image: 'https://images.unsplash.com/photo-1532187875605-2fe358711e24?auto=format&fit=crop&q=80&w=400' },
-    ]
+    ],
+    totalStudyTime: 0
   }
 ];
 

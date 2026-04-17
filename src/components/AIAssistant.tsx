@@ -150,16 +150,16 @@ Format your responses with Markdown. Be the ultimate performance coach for an Ad
       <motion.button
         initial={{ scale: 0 }}
         animate={{ scale: 1 }}
-        whileHover={{ scale: 1.05 }}
+        whileHover={{ scale: 1.05, backgroundColor: 'rgba(10, 132, 255, 1)', color: '#ffffff' }}
         whileTap={{ scale: 0.95 }}
         onClick={() => setIsOpen(true)}
         className={cn(
-          "fixed bottom-6 right-6 z-50 w-14 h-14 rounded-none flex items-center justify-center shadow-lg transition-all border border-brand/30",
-          isOpen ? "opacity-0 pointer-events-none" : "opacity-100 bg-black text-brand hover:bg-brand hover:text-white"
+          "fixed bottom-32 md:bottom-20 right-6 z-50 w-10 h-10 flex items-center justify-center shadow-lg transition-all border border-brand/20 backdrop-blur-md rounded-lg",
+          isOpen ? "opacity-0 pointer-events-none" : "opacity-100 bg-brand/5 text-brand/60 hover:border-brand/50"
         )}
       >
-        <div className="absolute inset-0 border border-brand/10 scale-110" />
-        <Cpu className="w-6 h-6" />
+        <div className="absolute inset-0 border border-brand/5 rounded-lg scale-110 pointer-events-none" />
+        <Cpu className="w-5 h-5" />
       </motion.button>
 
       <AnimatePresence>

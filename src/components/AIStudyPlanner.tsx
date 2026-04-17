@@ -189,7 +189,7 @@ export default function AIStudyPlanner() {
           return {
             ...t,
             id: Math.random().toString(36).substr(2, 9),
-            subjectId: subjects.find(s => s.name.toLowerCase().includes(t.subjectId?.toLowerCase() || ''))?.id || subjects[0].id,
+            subjectId: subjects.find(s => (s.name || '').toLowerCase().includes(t.subjectId?.toLowerCase() || ''))?.id || subjects[0].id,
             topicId: t.topicId || '',
             startTime,
             endTime

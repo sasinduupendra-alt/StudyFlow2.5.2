@@ -41,12 +41,12 @@ export const SubjectCard = React.memo(({ subject, onStartFocus }: SubjectCardPro
       {/* Background Image & Gradient */}
       <div className="absolute inset-0 z-0">
         <ImageWithFallback
-          src={`https://picsum.photos/seed/tech-${subject.name.replace(/\s+/g, '-').toLowerCase()}/800/600?grayscale`}
+          src={`https://picsum.photos/seed/tech-${(subject.name || '').replace(/\s+/g, '-').toLowerCase()}/800/600?grayscale`}
           alt={subject.name}
           containerClassName="w-full h-full"
           className="opacity-10 group-hover:opacity-20 transition-opacity duration-500"
           fallbackGradient={subject.gradient}
-          fallbackText={subject.name[0]}
+          fallbackText={subject.name?.charAt(0) || '?'}
         />
         <div className="absolute inset-0 bg-gradient-to-t from-[#1C1C1E] via-[#1C1C1E]/90 to-transparent" />
       </div>

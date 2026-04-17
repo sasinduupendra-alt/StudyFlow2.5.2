@@ -12,6 +12,7 @@ export interface UISlice {
     id: string;
     subjectId: string;
     topicId: string;
+    task?: string;
     elapsedSeconds: number;
     totalSeconds: number;
   } | null;

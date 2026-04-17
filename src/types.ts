@@ -1,54 +1,19 @@
-export type SubjectStatus = 'Critical' | 'Weak' | 'Strong';
-
-export interface Resource {
+export interface UserProfile {
   id: string;
-  title: string;
-  url: string;
-  type: 'link' | 'video' | 'pdf' | 'other';
-}
-
-export interface Topic {
-  id: string;
-  title: string;
-  mastery: number;
-  image?: string;
-  resources?: Resource[];
-  // SRS Fields
-  lastReviewed?: string; // ISO Date
-  nextReview?: string;   // ISO Date
-  interval?: number;     // Days
-  easeFactor?: number;   // Default 2.5
-  reviewCount?: number;
-}
-
-export interface WeeklyTask {
-  id: string;
-  title: string;
-  completed: boolean;
-}
-
-export type TaskFrequency = 'Daily' | 'Weekly' | 'Monthly';
-
-export interface NoiseLog {
-  id: string;
-  timestamp: string;
-  source: string;
-}
-
-export interface Task {
-  id: string;
-  title: string;
-  description?: string;
-  frequency: TaskFrequency;
-  completed: boolean;
-  subjectId?: string;
-  dueDate?: string;
-  createdAt: string;
-  impact: number; // 1-10 (Signal)
-  effort: number; // 1-10 (Noise)
-  lastReviewed?: string; // ISO Date for spaced repetition
-  difficulty?: number; // 1-10 for practice tasks
-  focusMode?: boolean;
+  email: string;
+  displayName: string;
+  photoURL?: string;
+  joinedAt: string;
+  targetExam?: string;
+  dailyGoalMinutes?: number;
+  level: number;
+  streak: number;
+  xp: number;
+  xpToNextLevel: number;
+  points: number;
+  badges: Badge[];
+  totalSessions: number;
+  totalStudyTime: number;
 }
 
 export interface Subject {
@@ -57,49 +22,36 @@ export interface Subject {
   score: number;
   focus: number;
   weakCount: number;
-  status: SubjectStatus;
+  status: string;
   priorityScore: number;
   readiness: number;
   gradient: string;
-  image?: string;
-  topics: Topic[];
-  examDate?: string;
-  notes?: string;
-  weeklyTasks?: WeeklyTask[];
-  totalStudyTime?: number; // Total time spent studying this subject in minutes
-}
-
-export interface AIPlanTask {
-  id: string;
-  subjectId: string;
-  topicId: string;
-  title: string;
-  duration: number; // minutes
-  startTime?: string; // HH:mm
-  endTime?: string; // HH:mm
-  priority: 'High' | 'Medium' | 'Low';
-  reason: string;
-}
-
-export interface AIStudyPlan {
-  id: string;
-  date: string;
-  tasks: AIPlanTask[];
-  summary: string;
-}
-
-export interface StudyLog {
-  id: string;
-  subjectId: string;
-  topicId?: string; // Optional for backward compatibility
-  topicIds?: string[]; // Array of topics covered (useful for tuition)
-  duration: number;
-  focusLevel: number;
-  performance?: number; // 1-5 rating for SRS
+  image: string;
+  examDate: string;
   notes: string;
-  timestamp: string;
-  resources?: string[];
-  sessionType?: 'self-study' | 'tuition' | 'exam'; // Type of session
+  weeklyTasks: { id: string; title: string; completed: boolean }[];
+  topics: Topic[];
+  totalStudyTime: number;
+}
+
+export interface Topic {
+  id: string;
+  title: string;
+  mastery: number;
+  image: string;
+  lastReviewed?: string;
+  nextReview?: string;
+  interval?: number;
+  easeFactor?: number;
+  reviewCount?: number;
+  resources?: Resource[];
+}
+
+export interface Resource {
+  id: string;
+  title: string;
+  url: string;
+  type: 'video' | 'pdf' | 'link';
 }
 
 export interface Activity {
@@ -114,14 +66,105 @@ export type WeeklySchedule = {
   [key in 'Monday' | 'Tuesday' | 'Wednesday' | 'Thursday' | 'Friday' | 'Saturday' | 'Sunday']: Activity[];
 };
 
+export interface StudyLog {
+  id: string;
+  subjectId: string;
+  topicIds: string[];
+  duration: number;
+  focusLevel: number;
+  performance: number;
+  timestamp: string;
+  notes?: string;
+  tags?: string[];
+  sessionType?: string;
+  topicId?: string;
+  resources?: string[];
+}
+
+export interface ExamRecord {
+  id: string;
+  subjectId?: string;
+  score?: number;
+  date: string;
+  type?: string;
+  title: string;
+  averageScore: number;
+  totalScore: number;
+  marks: { subjectId: string; score: number }[];
+  rank?: number;
+  notes?: string;
+}
+
 export interface AIRecommendation {
   id: string;
   title: string;
   description: string;
-  priority: 'High' | 'Medium' | 'Low';
-  reason: string;
-  liked?: boolean;
+  type: 'optimization' | 'focus' | 'rest';
+  impact: 'High' | 'Medium' | 'Low';
   dismissed?: boolean;
+  liked?: boolean;
+  priority?: 'High' | 'Medium' | 'Low';
+  reason?: string;
+}
+
+export interface AIStudyPlan {
+  id: string;
+  date: string;
+  tasks: AIPlanTask[];
+  summary?: string;
+}
+
+export interface AIPlanTask {
+  id: string;
+  title: string;
+  duration: number;
+  startTime: string;
+  endTime: string;
+  completed: boolean;
+  subjectId?: string;
+  reason?: string;
+  priority?: 'High' | 'Medium' | 'Low';
+  topicId?: string;
+}
+
+export type TaskFrequency = 'Daily' | 'Weekly' | 'Monthly' | 'One-time';
+
+export interface Task {
+  id: string;
+  title: string;
+  description?: string;
+  frequency: TaskFrequency | string;
+  completed: boolean;
+  subjectId?: string;
+  createdAt: string;
+  impact: number;
+  effort: number;
+  dueDate?: string;
+  difficulty?: number;
+  lastReviewed?: string;
+  focusMode?: boolean;
+}
+
+export interface WeeklyTask {
+  id: string;
+  title: string;
+  completed: boolean;
+}
+
+export type FocusMode = 'IDLE' | 'RITUAL' | 'FOCUS' | 'RECAP' | 'EXTRACT';
+
+export interface UserNote {
+  id: string;
+  text: string;
+  timestamp: string;
+  sessionId?: string;
+}
+
+export interface NoiseLog {
+  id: string;
+  timestamp: string;
+  level: number;
+  source: string;
 }
 
 export interface Badge {
@@ -129,56 +172,54 @@ export interface Badge {
   title: string;
   description: string;
   icon: string;
-  unlockedAt?: string;
-  type: 'mastery' | 'streak' | 'sessions' | 'time';
+  type: string;
   requirement: number;
+  unlockedAt?: string;
 }
 
-export interface ExamRecord {
+export interface Notification {
   id: string;
+  timestamp: string;
   title: string;
-  date: string;
-  marks: {
-    subjectId: string;
-    score: number;
-  }[];
-  totalScore: number;
-  averageScore: number;
-  rank?: number;
-  notes?: string;
+  message: string;
+  read: boolean;
+  type: 'info' | 'success' | 'warning' | 'error' | 'reminder' | 'ai' | 'system';
+  link?: string;
 }
 
-export interface UserProfile {
-  points: number;
-  streak: number;
-  level: number;
-  xp: number;
-  xpToNextLevel: number;
-  lastStudyDate?: string;
-  badges: Badge[];
-  totalSessions: number;
-  totalStudyTime: number;
+export interface NotificationPreferences {
+  dailyReminders: boolean;
+  achievementNotifications: boolean;
+  studyTips: boolean;
+  systemAlerts: boolean;
+  aiRecommendations: boolean;
+  reviewReminders: boolean;
+  emailNotifications: boolean;
 }
 
 export interface Toast {
   id: string;
   message: string;
-  type: 'success' | 'error' | 'info';
+  type: 'success' | 'info' | 'error' | 'warning';
 }
 
-export interface Notification {
+// Deep Work Engine Types
+export type FocusModeType = 'IDLE' | 'RITUAL' | 'FOCUS' | 'RECAP' | 'EXTRACT';
+
+export interface FocusSession {
   id: string;
-  title: string;
-  message: string;
-  type: 'system' | 'ai' | 'reminder';
-  timestamp: string;
-  read: boolean;
-  link?: string;
+  task: string;
+  startTime: number;
+  duration: number; // In seconds
+  elapsedSeconds: number;
+  notes: string;
+  interruptions: number;
+  feynmanRecap?: string;
+  focusScore?: number;
+  recap?: string;
 }
 
-export interface NotificationPreferences {
-  systemAlerts: boolean;
-  aiRecommendations: boolean;
-  reviewReminders: boolean;
-  emailNotifications: boolean;
+export interface FocusHistory {
+  date: string;
+  sessions: FocusSession[];
 }

@@ -24,15 +24,17 @@ export default function NoiseCaptureButton({ onLogNoise }: NoiseCaptureButtonPro
 
   return (
     <>
-      <div className="fixed bottom-10 right-10 z-50">
+      <div className="fixed bottom-48 md:bottom-36 right-6 z-50">
         <motion.button
-          whileHover={{ scale: 1.1 }}
-          whileTap={{ scale: 0.9 }}
+          whileHover={{ scale: 1.05, backgroundColor: 'rgba(220, 38, 38, 1)' }}
+          whileTap={{ scale: 0.95 }}
           onClick={() => setIsOpen(true)}
-          className="w-16 h-16 bg-red-600 rounded-full flex items-center justify-center shadow-[0_0_30px_rgba(220,38,38,0.4)] border-2 border-red-500/50 group"
+          className="w-12 h-12 bg-red-600/20 hover:bg-red-600 backdrop-blur-md rounded-full flex items-center justify-center shadow-lg border border-red-500/30 group transition-all duration-300"
         >
-          <AlertTriangle className="w-8 h-8 text-white group-hover:scale-110 transition-transform" />
-          <div className="absolute inset-0 rounded-full animate-ping bg-red-600/20" />
+          <AlertTriangle className="w-5 h-5 text-red-500 group-hover:text-white transition-colors" />
+          <div className="absolute inset-x-0 -bottom-1 text-[8px] font-mono text-red-500/0 group-hover:text-red-500/100 text-center uppercase tracking-tighter pointer-events-none transition-all">
+            Log
+          </div>
         </motion.button>
       </div>
 

@@ -76,7 +76,7 @@ export const CurrentScheduleBlock = React.memo(({ schedule, onViewFullSchedule, 
         animate={{ opacity: 1, scale: 1 }}
         className={cn(
           "lg:col-span-2 bg-[#1C1C1E] border border-white/5 p-8 md:p-10 group relative overflow-hidden rounded-[32px]",
-          activeActivity?.description.toLowerCase().includes('deep work') && "border-brand/30 bg-brand/5"
+          (activeActivity?.description || '').toLowerCase().includes('deep work') && "border-brand/30 bg-brand/5"
         )}
       >
         <div className="absolute top-0 right-0 p-10 opacity-[0.03] group-hover:opacity-[0.05] transition-all duration-1000 group-hover:scale-110">

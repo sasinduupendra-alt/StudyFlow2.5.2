@@ -58,6 +58,18 @@ export default function Analytics({ subjects, studyLogs, exams, tasks }: Analyti
     return d.toISOString().split('T')[0];
   });
 
+  const snrWaveformData = React.useMemo(() => {
+    return last14Days.map((date) => {
+      const tasksUpToDate = tasks.filter(t => t.createdAt.split('T')[0] <= date);
+      const snrMetrics = calculateUserSNR(tasksUpToDate);
+      return {
+        date: new Date(date).toLocaleDateString(undefined, { month: 'short', day: 'numeric' }),
+        snr: snrMetrics.snr,
+        rawDate: date
+      };
+    });
+  }, [tasks, last14Days]);
+
   const masteryTrendData = last14Days.map(date => {
     const data: any = { 
       name: new Date(date).toLocaleDateString(undefined, { month: 'short', day: 'numeric' }),
@@ -386,6 +398,61 @@ export default function Analytics({ subjects, studyLogs, exams, tasks }: Analyti
           </div>
         </motion.div>
       </div>
+
+      {/* SNR Waveform Section */}
+      <motion.div variants={itemVariants} className="bg-[#1C1C1E] border border-white/5 rounded-[32px] p-10 relative overflow-hidden group">
+        <div className="grid-background absolute inset-0 pointer-events-none opacity-[0.02]" />
+        <div className="scan-line opacity-0 group-hover:opacity-100 transition-opacity duration-1000" />
+        <h3 className="text-lg font-bold text-white tracking-tight mb-8 flex items-center gap-3 relative z-10">
+          <Activity className="w-5 h-5 text-brand" />
+          Dynamic SNR Waveform
+        </h3>
+        <div className="h-[300px] relative z-10">
+          <ResponsiveContainer width="100%" height="100%">
+            <AreaChart data={snrWaveformData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+              <defs>
+                <linearGradient id="colorSnr" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor="#1DB954" stopOpacity={0.6}/>
+                  <stop offset="50%" stopColor="#f59e0b" stopOpacity={0.3}/>
+                  <stop offset="95%" stopColor="#ef4444" stopOpacity={0.05}/>
+                </linearGradient>
+              </defs>
+              <CartesianGrid strokeDasharray="3 3" stroke="#2C2C2E" vertical={false} />
+              <XAxis dataKey="date" stroke="#8E8E93" fontSize={10} axisLine={false} tickLine={false} dy={10} />
+              <YAxis stroke="#8E8E93" fontSize={10} axisLine={false} tickLine={false} dx={-10} />
+              <Tooltip 
+                content={({ active, payload, label }) => {
+                  if (active && payload && payload.length) {
+                    const value = Number(payload[0].value);
+                    const color = value > 2 ? '#1DB954' : value > 1 ? '#f59e0b' : '#ef4444';
+                    return (
+                      <div className="bg-[#1C1C1E]/95 backdrop-blur-md border border-white/10 p-4 rounded-2xl shadow-2xl">
+                        <p className="text-white font-bold mb-2">{label}</p>
+                        <div className="flex items-center gap-2 mb-1">
+                          <div className="w-2 h-2 rounded-full" style={{ backgroundColor: color }} />
+                          <span className="text-[#8E8E93] text-sm">SNR:</span>
+                          <span className="text-white font-mono font-bold" style={{ color }}>{value.toFixed(2)}</span>
+                        </div>
+                      </div>
+                    );
+                  }
+                  return null;
+                }}
+              />
+              <Area 
+                type="monotone" 
+                dataKey="snr" 
+                name="SNR Value"
+                stroke="#1DB954" 
+                strokeWidth={3}
+                fillOpacity={1} 
+                fill="url(#colorSnr)" 
+                animationDuration={2000}
+              />
+            </AreaChart>
+          </ResponsiveContainer>
+        </div>
+      </motion.div>
 
       {/* Heatmap Section */}
       <motion.div variants={itemVariants} className="bg-[#1C1C1E] border border-white/5 rounded-[32px] p-10 relative overflow-hidden group">

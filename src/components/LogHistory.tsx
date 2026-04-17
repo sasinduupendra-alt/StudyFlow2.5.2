@@ -57,8 +57,8 @@ export default function LogHistory({
         {studyLogs.filter(log => {
           const subject = subjects.find(s => s.id === log.subjectId);
           const topic = subject?.topics.find(t => t.id === log.topicId);
-          const searchLower = logsSearch.toLowerCase();
-          return subject?.name.toLowerCase().includes(searchLower) || topic?.title.toLowerCase().includes(searchLower) || log.notes.toLowerCase().includes(searchLower);
+          const searchLower = (logsSearch || '').toLowerCase();
+          return (subject?.name || '').toLowerCase().includes(searchLower) || (topic?.title || '').toLowerCase().includes(searchLower) || (log.notes || '').toLowerCase().includes(searchLower);
         }).slice().reverse().map(log => {
           const subject = subjects.find(s => s.id === log.subjectId);
           const topic = subject?.topics.find(t => t.id === log.topicId);
@@ -66,7 +66,7 @@ export default function LogHistory({
             <div key={log.id} className="bg-[#1C1C1E] border border-white/5 p-6 flex items-center justify-between group rounded-[24px] hover:bg-white/5 transition-colors shadow-sm">
               <div className="flex items-center gap-5">
                 <div className="w-12 h-12 bg-black border border-white/5 flex items-center justify-center text-lg font-bold text-[#8E8E93] rounded-[16px]">
-                  {subject?.name[0] || '?'}
+                  {subject?.name?.charAt(0) || '?'}
                 </div>
                 <div>
                   <h4 className="text-base font-semibold text-white">{subject?.name} <span className="text-[#8E8E93] mx-1.5">•</span> <span className="text-[#8E8E93] font-medium">{topic?.title || 'General'}</span></h4>

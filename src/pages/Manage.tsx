@@ -145,10 +145,12 @@ export default function Manage() {
       priorityScore: 0,
       readiness: 0,
       gradient: 'from-gray-500/20 to-gray-900/40',
-      ...(image !== undefined && { image }),
+      ...(image !== undefined && { image: image || 'https://images.unsplash.com/photo-1635070041078-e363dbe005cb?auto=format&fit=crop&q=80&w=400' }),
       ...(examDate !== undefined && { examDate }),
       ...(notes !== undefined && { notes }),
-      topics: []
+      topics: [],
+      weeklyTasks: [],
+      totalStudyTime: 0
     };
 
     setSubjects([...subjects, newSubject]);
@@ -356,6 +358,17 @@ export default function Manage() {
 
   const handleResetProfile = async () => {
     const initialProfile = {
+      ...(user ? {
+        id: user.uid,
+        email: user.email || '',
+        displayName: user.displayName || '',
+        joinedAt: user.metadata.creationTime || new Date().toISOString(),
+      } : {
+        id: '',
+        email: '',
+        displayName: '',
+        joinedAt: new Date().toISOString(),
+      }),
       points: 0,
       streak: 0,
       badges: INITIAL_BADGES,

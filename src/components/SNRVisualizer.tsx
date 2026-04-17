@@ -145,11 +145,11 @@ export default function SNRVisualizer({ signal, noise, className }: SNRVisualize
         <div className="flex items-center gap-4 mt-1">
           <div className="flex items-center gap-1.5">
             <div className="w-1.5 h-1.5 rounded-full bg-brand shadow-[0_0_8px_var(--color-brand-glow)]" />
-            <span className="text-[9px] font-mono text-white/70 uppercase">Combined: {noise > 0 ? (signal/noise).toFixed(2) : signal.toFixed(2)}x</span>
+            <span className="text-[9px] font-mono text-white/70 uppercase">Signal: High-Impact</span>
           </div>
           <div className="flex items-center gap-1.5">
             <div className="w-1.5 h-1.5 rounded-full bg-white/20" />
-            <span className="text-[9px] font-mono text-white/40 uppercase">Ref: Clean Sine</span>
+            <span className="text-[9px] font-mono text-white/40 uppercase">Noise: Cognitive Overhead</span>
           </div>
         </div>
       </div>

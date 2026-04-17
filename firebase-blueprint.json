@@ -5,46 +5,68 @@
       "description": "User's gamification stats and profile info",
       "type": "object",
       "properties": {
-        "points": { "type": "number", "description": "Total experience points" },
-        "streak": { "type": "number", "description": "Current daily study streak" },
-        "lastStudyDate": { "type": "string", "format": "date", "description": "Last date the user studied" },
-        "totalSessions": { "type": "number", "description": "Total number of study sessions completed" },
-        "totalStudyTime": { "type": "number", "description": "Total study time in minutes" },
+        "email": { "type": "string" },
+        "displayName": { "type": "string" },
+        "photoURL": { "type": "string" },
+        "joinedAt": { "type": "string", "format": "date-time" },
+        "targetExam": { "type": "string" },
+        "dailyGoalMinutes": { "type": "number" },
+        "level": { "type": "number" },
+        "streak": { "type": "number" },
+        "xp": { "type": "number" },
+        "xpToNextLevel": { "type": "number" },
+        "points": { "type": "number" },
+        "totalSessions": { "type": "number" },
+        "totalStudyTime": { "type": "number" },
         "badges": {
           "type": "array",
-          "items": {
-            "type": "object",
-            "properties": {
-              "id": { "type": "string" },
-              "unlockedAt": { "type": "string", "format": "date-time" }
-            }
-          }
+          "items": { "schema": "Badge" }
         }
       },
-      "required": ["points", "streak", "totalSessions", "totalStudyTime"]
+      "required": ["email", "displayName", "joinedAt", "level", "streak", "xp", "points"]
+    },
+    "Badge": {
+      "title": "Badge",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "title": { "type": "string" },
+        "description": { "type": "string" },
+        "icon": { "type": "string" },
+        "type": { "type": "string" },
+        "requirement": { "type": "number" },
+        "unlockedAt": { "type": "string", "format": "date-time" }
+      }
     },
     "StudyLog": {
       "title": "StudyLog",
       "description": "A record of a single study session",
       "type": "object",
       "properties": {
+        "id": { "type": "string" },
         "subjectId": { "type": "string" },
+        "topicIds": { "type": "array", "items": { "type": "string" } },
         "topicId": { "type": "string" },
-        "duration": { "type": "number", "description": "Duration in minutes" },
-        "focusLevel": { "type": "number", "description": "Self-reported focus level 1-5" },
-        "notes": { "type": "string" },
+        "duration": { "type": "number" },
+        "focusLevel": { "type": "number" },
+        "performance": { "type": "number" },
         "timestamp": { "type": "string", "format": "date-time" },
-        "resources": { "type": "array", "items": { "type": "string" } }
+        "notes": { "type": "string" },
+        "tags": { "type": "array", "items": { "type": "string" } },
+        "sessionType": { "type": "string" }
       },
-      "required": ["subjectId", "topicId", "duration", "focusLevel", "timestamp"]
+      "required": ["id", "subjectId", "duration", "focusLevel", "timestamp"]
     },
     "ExamRecord": {
       "title": "ExamRecord",
       "description": "A record of an exam result",
       "type": "object",
       "properties": {
+        "id": { "type": "string" },
         "title": { "type": "string" },
         "date": { "type": "string", "format": "date" },
+        "subjectId": { "type": "string" },
+        "score": { "type": "number" },
         "marks": {
           "type": "array",
           "items": {
@@ -60,78 +82,67 @@
         "rank": { "type": "number" },
         "notes": { "type": "string" }
       },
-      "required": ["title", "date", "marks", "totalScore", "averageScore"]
+      "required": ["id", "title", "date", "totalScore", "averageScore"]
     },
     "Subject": {
       "title": "Subject",
       "description": "A subject in the user's syllabus",
       "type": "object",
       "properties": {
+        "id": { "type": "string" },
         "name": { "type": "string" },
         "score": { "type": "number" },
         "focus": { "type": "number" },
         "weakCount": { "type": "number" },
-        "status": { "type": "string", "enum": ["Critical", "Weak", "Strong"] },
+        "status": { "type": "string" },
         "priorityScore": { "type": "number" },
         "readiness": { "type": "number" },
         "gradient": { "type": "string" },
         "image": { "type": "string" },
+        "examDate": { "type": "string", "format": "date" },
+        "notes": { "type": "string" },
         "topics": {
           "type": "array",
-          "items": {
-            "type": "object",
-            "properties": {
-              "id": { "type": "string" },
-              "title": { "type": "string" },
-              "mastery": { "type": "number" },
-              "image": { "type": "string" },
-              "lastReviewed": { "type": "string", "format": "date-time" },
-              "nextReview": { "type": "string", "format": "date-time" },
-              "interval": { "type": "number" },
-              "easeFactor": { "type": "number" },
-              "reviewCount": { "type": "number" },
-              "resources": {
-                "type": "array",
-                "items": {
-                  "type": "object",
-                  "properties": {
-                    "id": { "type": "string" },
-                    "title": { "type": "string" },
-                    "url": { "type": "string" },
-                    "type": { "type": "string", "enum": ["link", "video", "pdf", "other"] }
-                  }
-                }
-              }
-            }
-          }
+          "items": { "schema": "Topic" }
         }
       },
-      "required": ["name", "topics"]
+      "required": ["id", "name", "topics"]
+    },
+    "Topic": {
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "title": { "type": "string" },
+        "mastery": { "type": "number" },
+        "image": { "type": "string" },
+        "lastReviewed": { "type": "string", "format": "date-time" },
+        "nextReview": { "type": "string", "format": "date-time" },
+        "interval": { "type": "number" },
+        "easeFactor": { "type": "number" },
+        "reviewCount": { "type": "number" }
+      }
     },
     "WeeklySchedule": {
       "title": "WeeklySchedule",
       "description": "User's weekly study schedule",
       "type": "object",
       "properties": {
-        "Monday": { "$ref": "ActivityList" },
-        "Tuesday": { "$ref": "ActivityList" },
-        "Wednesday": { "$ref": "ActivityList" },
-        "Thursday": { "$ref": "ActivityList" },
-        "Friday": { "$ref": "ActivityList" },
-        "Saturday": { "$ref": "ActivityList" },
-        "Sunday": { "$ref": "ActivityList" }
+        "Monday": { "type": "array", "items": { "schema": "Activity" } },
+        "Tuesday": { "type": "array", "items": { "schema": "Activity" } },
+        "Wednesday": { "type": "array", "items": { "schema": "Activity" } },
+        "Thursday": { "type": "array", "items": { "schema": "Activity" } },
+        "Friday": { "type": "array", "items": { "schema": "Activity" } },
+        "Saturday": { "type": "array", "items": { "schema": "Activity" } },
+        "Sunday": { "type": "array", "items": { "schema": "Activity" } }
       }
     },
-    "ActivityList": {
-      "type": "array",
-      "items": {
-        "type": "object",
-        "properties": {
-          "id": { "type": "string" },
-          "time": { "type": "string" },
-          "description": { "type": "string" },
-          "type": { "type": "string", "enum": ["study", "tuition", "break", "rest"] }
-        }
+    "Activity": {
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "time": { "type": "string" },
+        "description": { "type": "string" },
+        "type": { "type": "string", "enum": ["study", "tuition", "break", "rest"] }
       }
     },
     "Task": {
@@ -142,15 +153,39 @@
         "id": { "type": "string" },
         "title": { "type": "string" },
         "description": { "type": "string" },
-        "frequency": { "type": "string", "enum": ["Daily", "Weekly", "Monthly"] },
+        "frequency": { "type": "string" },
         "completed": { "type": "boolean" },
         "subjectId": { "type": "string" },
-        "dueDate": { "type": "string", "format": "date-time" },
         "createdAt": { "type": "string", "format": "date-time" },
-        "impact": { "type": "number", "description": "1-10 (Signal)" },
-        "effort": { "type": "number", "description": "1-10 (Noise)" }
+        "impact": { "type": "number" },
+        "effort": { "type": "number" },
+        "dueDate": { "type": "string", "format": "date-time" }
       },
       "required": ["id", "title", "frequency", "completed", "createdAt", "impact", "effort"]
+    },
+    "NoiseLog": {
+      "title": "NoiseLog",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "timestamp": { "type": "string", "format": "date-time" },
+        "source": { "type": "string" },
+        "level": { "type": "number" }
+      },
+      "required": ["id", "timestamp", "source", "level"]
+    },
+    "NotificationPreferences": {
+      "title": "NotificationPreferences",
+      "type": "object",
+      "properties": {
+        "dailyReminders": { "type": "boolean" },
+        "achievementNotifications": { "type": "boolean" },
+        "studyTips": { "type": "boolean" },
+        "systemAlerts": { "type": "boolean" },
+        "aiRecommendations": { "type": "boolean" },
+        "reviewReminders": { "type": "boolean" },
+        "emailNotifications": { "type": "boolean" }
+      }
     }
   },
   "firestore": {
@@ -174,9 +209,17 @@
       "schema": "WeeklySchedule",
       "description": "User's weekly study schedule"
     },
+    "/users/{userId}/config/notifications": {
+      "schema": "NotificationPreferences",
+      "description": "User's notification settings"
+    },
     "/users/{userId}/tasks/{taskId}": {
       "schema": "Task",
       "description": "User's study tasks"
+    },
+    "/users/{userId}/noise_logs/{noiseId}": {
+      "schema": "NoiseLog",
+      "description": "History of detected noise/distractions"
     }
   }
 }

@@ -257,7 +257,7 @@ export default function SyllabusManager({
   }, [editingTopic, subjects, editTopicForm]);
 
   const onAddSubjectSubmit = (data: SubjectFormData) => {
-    if (subjects.some(s => s.name.toLowerCase() === data.name.toLowerCase())) {
+    if (subjects.some(s => (s.name || '').toLowerCase() === (data.name || '').toLowerCase())) {
       setError(`Subject "${data.name}" already exists.`);
       return;
     }
@@ -373,8 +373,8 @@ export default function SyllabusManager({
       <div className="grid grid-cols-1 gap-6">
         {subjects
           .filter(s => {
-            const searchLower = syllabusSearch.toLowerCase();
-            return s.name.toLowerCase().includes(searchLower) || s.topics.some(t => t.title.toLowerCase().includes(searchLower));
+            const searchLower = (syllabusSearch || '').toLowerCase();
+            return (s.name || '').toLowerCase().includes(searchLower) || (s.topics || []).some(t => (t.title || '').toLowerCase().includes(searchLower));
           })
           .map(s => (
           <div key={s.id} className="bg-[#1C1C1E] overflow-hidden rounded-[32px] border border-white/5 shadow-sm">

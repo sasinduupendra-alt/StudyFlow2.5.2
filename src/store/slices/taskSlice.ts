@@ -51,7 +51,8 @@ export const createTaskSlice: StateCreator<TaskSlice> = (set) => ({
     noiseLogs: [...state.noiseLogs, {
       id: Math.random().toString(36).substring(2, 9),
       timestamp: new Date().toISOString(),
-      source
+      source,
+      level: 5
     }]
   })),
   setDailyCommitDone: (done, date) => set({ isDailyCommitDone: done, lastCommitDate: date }),

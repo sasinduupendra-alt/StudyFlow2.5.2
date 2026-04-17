@@ -17,6 +17,10 @@ export const createAuthSlice: StateCreator<AuthSlice> = (set) => ({
   user: null,
   setUser: (user) => set({ user }),
   userProfile: {
+    id: '',
+    email: '',
+    displayName: '',
+    joinedAt: new Date().toISOString(),
     points: 0,
     streak: 0,
     badges: INITIAL_BADGES,

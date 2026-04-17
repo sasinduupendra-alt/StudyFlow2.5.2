@@ -2,7 +2,7 @@ import React from 'react';
 import { AnimatePresence } from 'motion/react';
 import { useAppStore } from '../store/useAppStore';
 import StudyLogForm from './StudyLogForm';
-import FocusMode from './FocusMode';
+import { FocusMode } from './FocusMode';
 
 import { Subject } from '../types';
 
@@ -12,46 +12,14 @@ interface OverlayManagerProps {
 }
 
 export default function OverlayManager({ handleSaveLog, finishSession }: OverlayManagerProps) {
-  const isFocusMode = useAppStore(state => state.isFocusMode);
-  const setIsFocusMode = useAppStore(state => state.setIsFocusMode);
   const activeSession = useAppStore(state => state.activeSession);
   const setActiveSession = useAppStore(state => state.setActiveSession);
   const subjects = useAppStore(state => state.subjects);
-  const isPaused = useAppStore(state => state.isPaused);
-  const setIsPaused = useAppStore(state => state.setIsPaused);
 
-  const activeSubject = subjects.find(s => s.id === activeSession?.subjectId) || {
-    id: activeSession?.subjectId || 'unknown',
-    name: 'Unknown Subject',
-    topics: [],
-    readiness: 0,
-    focus: 0,
-    weakCount: 0,
-    status: 'Strong',
-    priorityScore: 0,
-    gradient: 'from-zinc-500/20 to-zinc-900/40',
-    image: '',
-    score: 0
-  } as Subject;
   const isSessionComplete = activeSession ? activeSession.elapsedSeconds >= activeSession.totalSeconds : false;
 
   return (
     <>
-      {/* Focus Mode Overlay */}
-      <AnimatePresence>
-        {isFocusMode && activeSession && (
-          <FocusMode 
-            key={`focus-mode-${activeSession.id}`}
-            subject={activeSubject}
-            session={activeSession}
-            isPaused={isPaused}
-            onTogglePause={() => setIsPaused(!isPaused)}
-            onExit={() => setIsFocusMode(false)}
-            onFinish={finishSession}
-          />
-        )}
-      </AnimatePresence>
-
       {/* Study Log Form Overlay */}
       <AnimatePresence>
         {isSessionComplete && activeSession && (
